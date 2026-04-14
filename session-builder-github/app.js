@@ -32,7 +32,7 @@ var S = {
   name: "",
   date: new Date().toISOString().split("T")[0],
   num: "",
-  sel: ["pa","visual","auditory","blend","wordread","wordspell","sentspell","connected"],
+  sel: [],
   data: {},
   showSug: null,
   expanded: null,
