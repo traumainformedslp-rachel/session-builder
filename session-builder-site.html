@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Session Builder — RTN Communication &amp; Literacy</title>
+  <meta name="description" content="A free, open-source structured literacy session planner with built-in data collection. Plan sessions across sound, word, and text levels in decoding and encoding formats." />
+  <meta name="author" content="Rachel Terra Norton, MS, CCC-SLP — RTN Communication & Literacy" />
+  <meta name="keywords" content="structured literacy, session planner, SLP, reading intervention, Orton-Gillingham, data collection, decoding, encoding, phonics, dyslexia" />
+  <meta property="og:title" content="Session Builder — Structured Literacy Planner" />
+  <meta property="og:description" content="Free structured literacy session planner with live data collection. Built for clinicians, by a clinician." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#A8C4E0" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: #F9F8F5; color: #28283A; min-height: 100vh; }
+    :focus-visible { outline: 3px solid #6FA0C8 !important; outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    @media print { .no-print { display: none !important; } body { background: #fff !important; } }
+
+    /* Loading state */
+    #loading-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; font-family: 'DM Sans', sans-serif; color: #7A7A8E; gap: 16px;
+    }
+    #loading-screen .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid #E8E4DF; border-top-color: #6FA0C8;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div id="loading-screen">
+      <div class="spinner"></div>
+      <div style="font-size:14px;">Loading Session Builder...</div>
+    </div>
+  </div>
+
+  <!-- React 18 via CDN (production builds) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel standalone for in-browser JSX -->
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    /* ═══════════════════════════════════════════════════════════════
+       SESSION BUILDER v2 — RTN Communication & Literacy
+       Universal Structured Literacy Session Planner + Data Collection
+       ═══════════════════════════════════════════════════════════════ */
+
+    const SESSION_COMPONENTS = [
+      { id:"pa", label:"Phonemic Awareness", desc:"Blending & segmenting warm-up", icon:"🔊", defaultMin:2, category:"sound", defaultMode:"decoding", color:"#E8D5F5", suggestedTargets:["Phoneme blending (3-4 phonemes)","Phoneme segmentation","Phoneme deletion (initial)","Phoneme deletion (final)","Phoneme substitution","Syllable segmentation","Onset-rime blending"] },
+      { id:"visual", label:"Phonogram Review: Reading", desc:"Visual drill / deck work (see grapheme, say sound)", icon:"👁️", defaultMin:3, category:"sound", defaultMode:"decoding", color:"#D5E8F5", suggestedTargets:["Short vowels","Consonant digraphs (sh, ch, th, wh)","Blends","Long vowel teams","R-controlled vowels","VCe patterns","Diphthongs","Vowel teams review","Level 1 phonograms","Level 2 phonograms","Level 3 phonograms","Level 4 phonograms"] },
+      { id:"auditory", label:"Phonogram Review: Spelling", desc:"Auditory drill / what says (hear sound, write grapheme)", icon:"✍️", defaultMin:3, category:"sound", defaultMode:"encoding", color:"#D5F5E8", suggestedTargets:["Short vowels","Consonant digraphs","Long vowel spellings","R-controlled spellings","Spelling alternatives review"] },
+      { id:"blend", label:"Blending & Word Building", desc:"Blending board, word chains, letter tiles", icon:"🧱", defaultMin:5, category:"word", defaultMode:"decoding", color:"#F5F0D5", suggestedTargets:["CVC blending","CCVC / CVCC blending","CVCe word building","Multisyllabic word building","Word chains (swap one sound)","Syllable-by-syllable blending"] },
+      { id:"wordread", label:"Word-Level Reading", desc:"Word cards, lists, sorts, flash", icon:"🔤", defaultMin:5, category:"word", defaultMode:"decoding", color:"#F5E0D5", suggestedTargets:["CVC words","CVCe words","Vowel team words","R-controlled words","Multisyllabic: VC/CV","Multisyllabic: V/CV","Multisyllabic: C-le","Mixed review","Word sorts by pattern"] },
+      { id:"sentread", label:"Sentence-Level Reading", desc:"Read controlled sentences with target patterns", icon:"📝", defaultMin:3, category:"text", defaultMode:"decoding", color:"#F5D5D8", suggestedTargets:["Sentences with target pattern","Phrase-scoop reading","Controlled text sentences","Mixed decodable sentences"] },
+      { id:"fluency", label:"Reading Fluency", desc:"Timed reads, repeated reading, prosody", icon:"⚡", defaultMin:5, category:"text", defaultMode:"decoding", color:"#E0E8F5", suggestedTargets:["Word-level fluency (flash)","Phrase-level fluency","Passage: cold read + hot read","Repeated reading (timed)","Prosody practice","WCPM progress monitoring"] },
+      { id:"newconcept", label:"New Concept / Skill Introduction", desc:"Explicitly teach a new pattern, rule, or concept", icon:"💡", defaultMin:10, category:"word", defaultMode:"both", color:"#F5F5D5", suggestedTargets:["New phonogram introduction","New syllable type","Spelling rule (doubling, e-drop, y-change)","New vowel team","New prefix/suffix","New Latin root","Syllable division pattern","Soft c / soft g"] },
+      { id:"wordspell", label:"Word-Level Spelling", desc:"SOS, dictation, encoding with tiles or writing", icon:"✏️", defaultMin:5, category:"word", defaultMode:"encoding", color:"#D5F5F0", suggestedTargets:["CVC dictation","CVCe dictation","Vowel team dictation","SOS (simultaneous oral spelling)","Spelling with letter tiles","Syllable-by-syllable encoding","Spelling rule application","Arm-tap spelling"] },
+      { id:"sentspell", label:"Sentence-Level Spelling", desc:"Sentence dictation with proofreading", icon:"📋", defaultMin:5, category:"text", defaultMode:"encoding", color:"#E8F5D5", suggestedTargets:["Sentence dictation (1-2 sentences)","Proofreading practice","Capitals & punctuation check","Dictation with target words","Paragraph dictation"] },
+      { id:"irregular", label:"Irregular / Heart Words", desc:"High-frequency words with irregular spellings", icon:"❤️", defaultMin:5, category:"word", defaultMode:"both", color:"#F5D5E8", suggestedTargets:["Heart word introduction (new)","Heart word review (previously taught)","Heart word reading flash","Heart word spelling practice","Mapping regular vs. irregular parts"] },
+      { id:"connected", label:"Connected Text / Decodable", desc:"Apply skills in decodable passages or books", icon:"📚", defaultMin:10, category:"text", defaultMode:"decoding", color:"#D5D8F5", suggestedTargets:["Decodable passage (new)","Decodable passage (reread for fluency)","Decodable book","Controlled text with target pattern","Comprehension check after reading"] },
+      { id:"morphology", label:"Morphology & Word Study", desc:"Prefixes, suffixes, roots, word analysis", icon:"🧩", defaultMin:5, category:"word", defaultMode:"both", color:"#F0D5F5", suggestedTargets:["Prefix meaning & identification","Suffix meaning & identification","Base word + suffix practice","Latin root analysis","Greek combining forms","Affix peel-off reading","Word building with morphemes","Spelling rule with suffixes"] },
+      { id:"vocab", label:"Vocabulary", desc:"Word meaning, context clues, semantic mapping", icon:"🗂️", defaultMin:5, category:"word", defaultMode:"both", color:"#D5F0E8", suggestedTargets:["Morpheme-based word meaning","Context clue strategy","Semantic mapping","Multiple meaning words","Tier 2 vocabulary","Synonyms & antonyms"] },
+      { id:"comp", label:"Comprehension", desc:"Sentence or passage-level understanding", icon:"🧠", defaultMin:5, category:"text", defaultMode:"decoding", color:"#F5E8D5", suggestedTargets:["Visualize & verbalize","Who-what-where sentence check","Main idea identification","Retell / summarize","Inferencing","Text structure ID","Question generation"] },
+    ];
+
+    const CUE_LEVELS = ["Independent","Monitoring","Verbal Cue","Visual Cue","Model","Physical Prompt"];
+    const MODES = { decoding:"Decoding", encoding:"Encoding", both:"Both" };
+
+    function SessionBuilder() {
+      const [view, setView] = useState("plan");
+      const [darkMode, setDarkMode] = useState(false);
+      const [studentName, setStudentName] = useState("");
+      const [sessionDate, setSessionDate] = useState(new Date().toISOString().split("T")[0]);
+      const [sessionNum, setSessionNum] = useState("");
+      const [selected, setSelected] = useState(["pa","visual","auditory","blend","wordread","wordspell","sentspell","connected"]);
+      const [componentData, setComponentData] = useState({});
+      const [showSuggestions, setShowSuggestions] = useState(null);
+      const [expandedInCollect, setExpandedInCollect] = useState(null);
+      const [copyFb, setCopyFb] = useState(false);
+      const liveRef = useRef(null);
+
+      const announce = useCallback((msg) => { if (liveRef.current) liveRef.current.textContent = msg; }, []);
+
+      useEffect(() => {
+        setComponentData(prev => {
+          const next = { ...prev };
+          selected.forEach(id => {
+            if (!next[id]) {
+              const comp = SESSION_COMPONENTS.find(c => c.id === id);
+              next[id] = { target: "", materials: "", minutes: comp?.defaultMin || 5, mode: comp?.defaultMode || "both", correct: 0, incorrect: 0, cueLevel: "", notes: "" };
+            }
+          });
+          return next;
+        });
+      }, [selected]);
+
+      const updateComp = useCallback((id, field, value) => {
+        setComponentData(prev => ({ ...prev, [id]: { ...(prev[id] || {}), [field]: value } }));
+      }, []);
+
+      const toggleSelected = useCallback((id) => {
+        setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+      }, []);
+
+      const moveComponent = useCallback((id, dir) => {
+        setSelected(prev => {
+          const idx = prev.indexOf(id);
+          const newIdx = idx + dir;
+          if (idx < 0 || newIdx < 0 || newIdx >= prev.length) return prev;
+          const arr = [...prev];
+          [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+          return arr;
+        });
+      }, []);
+
+      const totalMinutes = selected.reduce((s, id) => s + (componentData[id]?.minutes || 0), 0);
+
+      // Theme
+      const bg = darkMode ? "#111120" : "#F9F8F5";
+      const cardBg = darkMode ? "#1b1b30" : "#FFFFFF";
+      const tx = darkMode ? "#E0E0EE" : "#28283A";
+      const mu = darkMode ? "#7878A0" : "#7A7A8E";
+      const bd = darkMode ? "#2a2a44" : "#E8E4DF";
+      const ac = "#6FA0C8";
+      const ag = "linear-gradient(135deg, #C4A8E0, #A8C4E0, #A8E0C4)";
+      const gn = "#4CAF7D";
+      const rd = "#D4695A";
+
+      const inp = { width: "100%", padding: "9px 12px", borderRadius: 10, border: `1px solid ${bd}`, background: darkMode ? "#111120" : "#FAFAFA", color: tx, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none" };
+      const bb = { border: "none", borderRadius: 10, padding: "10px 20px", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer", outline: "none" };
+      const pb = { ...bb, background: ag, color: "#28283A", boxShadow: "0 2px 10px rgba(0,0,0,0.08)" };
+      const sbtn = { ...bb, background: darkMode ? "#2a2a44" : "#F0EDE8", color: tx };
+      const cs = { background: cardBg, borderRadius: 16, border: `1px solid ${bd}` };
+
+      // PDF / Print
+      const generatePDF = useCallback(() => {
+        const comps = selected.map(id => ({ ...SESSION_COMPONENTS.find(c => c.id === id), d: componentData[id] || {} })).filter(Boolean);
+        const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Session Plan${studentName ? " - " + studentName : ""}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Helvetica,Arial,sans-serif;font-size:11px;color:#222;padding:18px 22px;line-height:1.45}
+h1{font-size:15px;margin-bottom:1px}.meta{color:#555;font-size:10px;margin-bottom:10px;border-bottom:1.5px solid #ccc;padding-bottom:7px}
+.comp{border:1.5px solid #bbb;border-radius:5px;margin-bottom:6px;page-break-inside:avoid}
+.ch{background:#f0f0f0;padding:5px 9px;display:flex;justify-content:space-between;align-items:center;border-radius:5px 5px 0 0}
+.ch h3{font-size:11.5px;display:flex;align-items:center;gap:4px}
+.bdg{display:inline-block;padding:1px 6px;border-radius:8px;font-size:8.5px;font-weight:600;background:#e2e2e2;margin-left:3px}
+.cb{padding:6px 9px}.tgt{font-weight:600;margin-bottom:1px;font-size:11px}
+.gr{display:flex;flex-wrap:wrap;gap:2px;margin-top:5px}.gc{width:15px;height:15px;border:1px solid #aaa;border-radius:2px}
+.nl{border-bottom:1px solid #ccc;height:16px;margin-top:3px}
+.ft{margin-top:10px;font-size:8px;color:#aaa;text-align:center;border-top:1px solid #ddd;padding-top:5px}
+@media print{body{padding:12px}}
+</style></head><body>
+<h1>Structured Literacy Session Plan</h1>
+<div class="meta">
+${studentName ? `<strong>Student:</strong> ${studentName} | ` : ""}<strong>Date:</strong> ${sessionDate}${sessionNum ? ` | <strong>#</strong>${sessionNum}` : ""} | <strong>${comps.length} components</strong> | <strong>~${totalMinutes} min</strong>
+</div>
+${comps.map((c, i) => {
+          const total = (c.d.correct || 0) + (c.d.incorrect || 0);
+          const pct = total > 0 ? Math.round((c.d.correct / total) * 100) : null;
+          const hasData = total > 0;
+          return `<div class="comp"><div class="ch"><h3>${i + 1}. ${c.icon} ${c.label}</h3><div><span class="bdg">${MODES[c.d.mode] || "Both"}</span><span class="bdg">~${c.d.minutes} min</span>${pct !== null ? `<span class="bdg" style="background:${pct >= 80 ? "#d4edda" : pct >= 50 ? "#fff3cd" : "#f8d7da"};font-weight:700">${pct}% (${c.d.correct}/${total})</span>` : ""}</div></div><div class="cb">${c.d.target ? `<div class="tgt">Target: ${c.d.target}</div>` : '<div class="tgt">Target: ___________________________</div>'}${c.d.materials ? `<div style="font-size:10px">Materials: ${c.d.materials}</div>` : ""}${c.d.cueLevel ? `<div style="font-size:10px">Cue: ${c.d.cueLevel}</div>` : ""}${c.d.notes ? `<div style="font-size:10px;font-style:italic">Notes: ${c.d.notes}</div>` : ""}${!hasData ? `<div class="gr">${Array(20).fill('<div class="gc"></div>').join("")}</div><div class="nl"></div><div class="nl"></div>` : ""}</div></div>`;
+        }).join("")}
+<div class="ft">&copy; 2026 RTN Communication &amp; Literacy | CC BY-NC 4.0 | Session Builder</div>
+</body></html>`;
+        const blob = new Blob([html], { type: "text/html" });
+        const w = window.open(URL.createObjectURL(blob), "_blank");
+        if (w) setTimeout(() => w.print(), 500);
+      }, [selected, componentData, studentName, sessionDate, sessionNum, totalMinutes]);
+
+      const copyText = useCallback(() => {
+        const comps = selected.map(id => ({ ...SESSION_COMPONENTS.find(c => c.id === id), d: componentData[id] || {} })).filter(Boolean);
+        const l = [`SESSION PLAN — STRUCTURED LITERACY`, `${studentName ? "Student: " + studentName + " | " : ""}Date: ${sessionDate}${sessionNum ? " | #" + sessionNum : ""} | ~${totalMinutes} min`, "═".repeat(48), ""];
+        comps.forEach((c, i) => {
+          const total = (c.d.correct || 0) + (c.d.incorrect || 0);
+          const pct = total > 0 ? Math.round((c.d.correct / total) * 100) + "%" : "—";
+          l.push(`${i + 1}. ${c.label} [${MODES[c.d.mode] || "Both"}] ~${c.d.minutes} min`);
+          if (c.d.target) l.push(`   Target: ${c.d.target}`);
+          if (c.d.materials) l.push(`   Materials: ${c.d.materials}`);
+          l.push(`   Data: ${c.d.correct || 0}/${total} (${pct}) | Cue: ${c.d.cueLevel || "—"}`);
+          if (c.d.notes) l.push(`   Notes: ${c.d.notes}`);
+          l.push("");
+        });
+        l.push("© 2026 RTN Communication & Literacy | CC BY-NC 4.0");
+        navigator.clipboard.writeText(l.join("\n"));
+        setCopyFb(true);
+        setTimeout(() => setCopyFb(false), 2000);
+      }, [selected, componentData, studentName, sessionDate, sessionNum, totalMinutes]);
+
+      // ── Apply theme to body ──
+      useEffect(() => {
+        document.body.style.background = bg;
+        document.body.style.color = tx;
+      }, [bg, tx]);
+
+      return (
+        <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh" }}>
+          <div ref={liveRef} role="status" aria-live="polite" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }} />
+
+          {/* HEADER */}
+          <header className="no-print" style={{ position: "sticky", top: 0, zIndex: 100, background: darkMode ? "rgba(17,17,32,0.96)" : "rgba(249,248,245,0.96)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderBottom: `1px solid ${bd}`, padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 9, background: ag, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#28283A" }}>SB</div>
+              <div>
+                <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 700, fontSize: 15, lineHeight: 1.1 }}>Session Builder</div>
+                <div style={{ fontSize: 9, color: mu, letterSpacing: 0.4 }}>RTN Communication & Literacy</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
+              {[{ id: "plan", label: "📝 Plan" }, { id: "collect", label: "📊 Collect" }, { id: "summary", label: "📄 Summary" }].map(t => (
+                <button key={t.id} onClick={() => { setView(t.id); announce(t.label + " view"); if (t.id === "collect" && !expandedInCollect) setExpandedInCollect(selected[0] || null); }}
+                  aria-current={view === t.id ? "page" : undefined}
+                  style={{ ...bb, padding: "7px 14px", fontSize: 12, background: view === t.id ? ag : "transparent", color: view === t.id ? "#28283A" : mu, fontWeight: view === t.id ? 700 : 500 }}
+                >{t.label}</button>
+              ))}
+              <div style={{ width: 1, height: 18, background: bd, margin: "0 2px" }} />
+              <button onClick={() => setDarkMode(!darkMode)} style={{ ...sbtn, padding: "5px 9px", fontSize: 14 }} aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>{darkMode ? "☀️" : "🌙"}</button>
+            </div>
+          </header>
+
+          <main style={{ maxWidth: 840, margin: "0 auto", padding: "14px 14px 80px" }}>
+
+            {/* ═══ PLAN VIEW ═══ */}
+            {view === "plan" && (<React.Fragment>
+              <section style={{ ...cs, padding: 18, marginBottom: 14 }}>
+                <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, margin: "0 0 12px" }}>Session Info</h2>
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 3 }}>STUDENT NAME / INITIALS</label>
+                    <input value={studentName} onChange={e => setStudentName(e.target.value)} placeholder="Optional" style={inp} aria-label="Student name or initials" />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 3 }}>DATE</label>
+                    <input type="date" value={sessionDate} onChange={e => setSessionDate(e.target.value)} style={inp} aria-label="Session date" />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 3 }}>SESSION #</label>
+                    <input value={sessionNum} onChange={e => setSessionNum(e.target.value)} placeholder="e.g. 12" style={inp} aria-label="Session number" />
+                  </div>
+                </div>
+              </section>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+                <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, margin: 0 }}>Session Components</h2>
+                <span style={{ fontSize: 12, color: mu, fontWeight: 600 }}>{selected.length} selected &middot; ~{totalMinutes} min</span>
+              </div>
+              <p style={{ fontSize: 12, color: mu, margin: "0 0 12px" }}>Check components to include. Set targets and reorder with arrows. Tap a suggested target or type your own.</p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {SESSION_COMPONENTS.map(comp => {
+                  const isSel = selected.includes(comp.id);
+                  const d = componentData[comp.id] || {};
+                  const oi = selected.indexOf(comp.id);
+                  return (
+                    <div key={comp.id} style={{ ...cs, borderColor: isSel ? ac : bd, borderWidth: isSel ? 2 : 1, opacity: isSel ? 1 : 0.55, transition: "all 0.15s" }}>
+                      <div style={{ padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        <input type="checkbox" checked={isSel} onChange={() => toggleSelected(comp.id)} aria-label={`Include ${comp.label}`} style={{ width: 19, height: 19, accentColor: ac, marginTop: 2, flexShrink: 0, cursor: "pointer" }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                            {isSel && <span style={{ fontSize: 11, fontWeight: 700, color: ac, fontFamily: "'Fraunces', serif", background: darkMode ? "rgba(111,160,200,0.15)" : "rgba(111,160,200,0.1)", width: 22, height: 22, borderRadius: 6, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{oi + 1}</span>}
+                            <span style={{ fontSize: 17 }}>{comp.icon}</span>
+                            <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 14 }}>{comp.label}</span>
+                            <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 7, fontWeight: 600, background: darkMode ? "rgba(120,120,160,0.15)" : comp.color, color: darkMode ? "#bbb" : "#4a4a5a" }}>{comp.category}</span>
+                          </div>
+                          <div style={{ fontSize: 11, color: mu, marginTop: 1 }}>{comp.desc}</div>
+                        </div>
+                        {isSel && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
+                            <button onClick={() => moveComponent(comp.id, -1)} disabled={oi === 0} aria-label={`Move ${comp.label} up`} style={{ ...bb, padding: "1px 7px", fontSize: 11, opacity: oi === 0 ? .25 : 1, background: "transparent", color: mu }}>&#9650;</button>
+                            <button onClick={() => moveComponent(comp.id, 1)} disabled={oi === selected.length - 1} aria-label={`Move ${comp.label} down`} style={{ ...bb, padding: "1px 7px", fontSize: 11, opacity: oi === selected.length - 1 ? .25 : 1, background: "transparent", color: mu }}>&#9660;</button>
+                          </div>
+                        )}
+                      </div>
+                      {isSel && (
+                        <div style={{ padding: "0 14px 12px", borderTop: `1px solid ${bd}`, paddingTop: 10 }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 8, marginBottom: 6 }}>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>TARGET / CONCEPT</label>
+                              <input value={d.target || ""} onChange={e => updateComp(comp.id, "target", e.target.value)} placeholder="What are you targeting?" style={inp} aria-label={`Target for ${comp.label}`} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>MODE</label>
+                              <select value={d.mode || comp.defaultMode} onChange={e => updateComp(comp.id, "mode", e.target.value)} style={{ ...inp, width: 105, appearance: "auto" }} aria-label={`Mode for ${comp.label}`}>
+                                <option value="decoding">Decoding</option><option value="encoding">Encoding</option><option value="both">Both</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>MIN</label>
+                              <input type="number" min={1} max={30} value={d.minutes || comp.defaultMin} onChange={e => updateComp(comp.id, "minutes", Number(e.target.value))} style={{ ...inp, width: 55, textAlign: "center" }} aria-label={`Minutes for ${comp.label}`} />
+                            </div>
+                          </div>
+                          <button onClick={() => setShowSuggestions(showSuggestions === comp.id ? null : comp.id)} style={{ background: "none", border: "none", fontSize: 11, color: ac, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, padding: 0 }} aria-expanded={showSuggestions === comp.id}>{showSuggestions === comp.id ? "▾ Hide suggestions" : "▸ Suggested targets"}</button>
+                          {showSuggestions === comp.id && (
+                            <div style={{ marginTop: 5, display: "flex", flexWrap: "wrap" }}>
+                              {comp.suggestedTargets.map(t => (
+                                <button key={t} onClick={() => { updateComp(comp.id, "target", t); setShowSuggestions(null); }}
+                                  style={{ display: "inline-block", padding: "4px 12px", borderRadius: 20, fontSize: 12, cursor: "pointer", margin: 3, border: `1px solid ${bd}`, background: "transparent", color: tx, fontFamily: "'DM Sans', sans-serif", outline: "none", transition: "all 0.12s" }}
+                                  onMouseOver={e => { e.currentTarget.style.background = "#E8D5F5"; e.currentTarget.style.borderColor = "#C4A8E0"; }}
+                                  onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = bd; }}
+                                >{t}</button>
+                              ))}
+                            </div>
+                          )}
+                          <div style={{ marginTop: 6 }}>
+                            <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>MATERIALS / TOOLS (optional)</label>
+                            <input value={d.materials || ""} onChange={e => updateComp(comp.id, "materials", e.target.value)} placeholder="e.g., phonogram cards, whiteboard, letter tiles..." style={inp} aria-label={`Materials for ${comp.label}`} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 18, justifyContent: "center" }}>
+                <button onClick={generatePDF} style={{ ...sbtn, fontSize: 13 }}>🖨️ Print Blank</button>
+                <button onClick={() => { setView("collect"); announce("Collect view"); setExpandedInCollect(selected[0] || null); }} style={{ ...pb, fontSize: 15, padding: "13px 30px" }}>Start Session →</button>
+              </div>
+            </React.Fragment>)}
+
+            {/* ═══ COLLECT VIEW ═══ */}
+            {view === "collect" && (<React.Fragment>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+                <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, margin: 0 }}>
+                  Live Session {studentName && <span style={{ fontWeight: 400, fontSize: 15 }}>&mdash; {studentName}</span>}
+                </h2>
+                <span style={{ fontSize: 11, color: mu }}>{sessionDate}</span>
+              </div>
+              <p style={{ fontSize: 11, color: mu, margin: "0 0 14px" }}>Tap ✓ for correct, ✗ for incorrect. Percentage updates live.</p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {selected.map((id, i) => {
+                  const comp = SESSION_COMPONENTS.find(c => c.id === id);
+                  if (!comp) return null;
+                  const d = componentData[id] || {};
+                  const total = (d.correct || 0) + (d.incorrect || 0);
+                  const pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
+                  const isExp = expandedInCollect === id;
+
+                  return (
+                    <div key={id} style={{ ...cs, overflow: "hidden" }}>
+                      <button onClick={() => setExpandedInCollect(isExp ? null : id)} aria-expanded={isExp} aria-label={`${comp.label} - tap to ${isExp ? "collapse" : "expand"}`}
+                        style={{ width: "100%", background: "none", border: "none", cursor: "pointer", color: tx, padding: "12px 14px", display: "flex", alignItems: "center", gap: 8, textAlign: "left", fontFamily: "'DM Sans', sans-serif", outline: "none" }}>
+                        <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 700, fontSize: 11, background: ag, color: "#28283A", width: 24, height: 24, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                        <span style={{ fontSize: 15 }}>{comp.icon}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 13 }}>{comp.label}</div>
+                          {d.target && <div style={{ fontSize: 10, color: mu, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.target}</div>}
+                        </div>
+                        {pct !== null && (
+                          <span style={{ padding: "3px 10px", borderRadius: 16, fontSize: 14, fontWeight: 700, background: pct >= 80 ? "#c8edcf" : pct >= 50 ? "#f5eecc" : "#f5d0d0", color: pct >= 80 ? "#1a5a2a" : pct >= 50 ? "#5a4a1a" : "#5a1a1a" }}>
+                            {pct}%<span style={{ fontSize: 10, fontWeight: 500, opacity: 0.7, marginLeft: 3 }}>({d.correct || 0}/{total})</span>
+                          </span>
+                        )}
+                        <span style={{ fontSize: 11, color: mu, marginLeft: 2 }}>{isExp ? "▾" : "▸"}</span>
+                      </button>
+
+                      {isExp && (
+                        <div style={{ padding: "0 14px 16px", borderTop: `1px solid ${bd}`, paddingTop: 14 }}>
+                          {/* TAPPER */}
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginBottom: 14 }}>
+                            <button aria-label="Mark incorrect" onClick={() => { updateComp(id, "incorrect", (d.incorrect || 0) + 1); announce(`Incorrect. ${d.correct || 0} of ${total + 1}`); }}
+                              style={{ width: 56, height: 56, borderRadius: 16, border: "none", fontSize: 26, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: rd, boxShadow: "0 3px 10px rgba(0,0,0,0.12)", outline: "none", fontFamily: "'DM Sans', sans-serif" }}>✗</button>
+                            <div style={{ textAlign: "center", minWidth: 80 }}>
+                              <div style={{ fontSize: 36, fontWeight: 700, fontFamily: "'Fraunces', serif", lineHeight: 1, color: pct === null ? mu : pct >= 80 ? gn : pct >= 50 ? "#C4A020" : rd }}>
+                                {pct !== null ? pct : 0}%
+                              </div>
+                              <div style={{ fontSize: 11, color: mu, marginTop: 2 }}>{d.correct || 0} / {total} trials</div>
+                            </div>
+                            <button aria-label="Mark correct" onClick={() => { updateComp(id, "correct", (d.correct || 0) + 1); announce(`Correct. ${(d.correct || 0) + 1} of ${total + 1}`); }}
+                              style={{ width: 56, height: 56, borderRadius: 16, border: "none", fontSize: 26, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: gn, boxShadow: "0 3px 10px rgba(0,0,0,0.12)", outline: "none", fontFamily: "'DM Sans', sans-serif" }}>✓</button>
+                          </div>
+
+                          {/* Trial dots */}
+                          {total > 0 && total <= 50 && (
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 3, justifyContent: "center", marginBottom: 12 }} aria-hidden="true">
+                              {Array.from({ length: d.correct || 0 }).map((_, j) => <div key={"c" + j} style={{ width: 10, height: 10, borderRadius: "50%", background: gn }} />)}
+                              {Array.from({ length: d.incorrect || 0 }).map((_, j) => <div key={"i" + j} style={{ width: 10, height: 10, borderRadius: "50%", background: rd }} />)}
+                            </div>
+                          )}
+
+                          {total > 0 && (
+                            <div style={{ textAlign: "center", marginBottom: 12 }}>
+                              <button onClick={() => { updateComp(id, "correct", 0); updateComp(id, "incorrect", 0); }}
+                                style={{ ...bb, padding: "3px 12px", fontSize: 10, background: "transparent", color: mu, textDecoration: "underline" }} aria-label="Reset data for this component">Reset</button>
+                            </div>
+                          )}
+
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>CUE LEVEL</label>
+                              <select value={d.cueLevel || ""} onChange={e => updateComp(id, "cueLevel", e.target.value)} style={{ ...inp, appearance: "auto" }} aria-label={`Cue level for ${comp.label}`}>
+                                <option value="">Select...</option>
+                                {CUE_LEVELS.map(c => <option key={c} value={c}>{c}</option>)}
+                              </select>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "flex-end", fontSize: 12, color: mu, paddingBottom: 10 }}>
+                              {MODES[d.mode] || "Both"} &middot; ~{d.minutes} min
+                            </div>
+                          </div>
+                          <div style={{ marginTop: 8 }}>
+                            <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>SESSION NOTES</label>
+                            <textarea value={d.notes || ""} onChange={e => updateComp(id, "notes", e.target.value)} placeholder="Error patterns, observations, next steps..." rows={2} style={{ ...inp, resize: "vertical" }} aria-label={`Notes for ${comp.label}`} />
+                          </div>
+                          {i < selected.length - 1 && (
+                            <div style={{ textAlign: "center", marginTop: 12 }}>
+                              <button onClick={() => setExpandedInCollect(selected[i + 1])} style={{ ...pb, fontSize: 12, padding: "8px 20px" }}>Next: {SESSION_COMPONENTS.find(c => c.id === selected[i + 1])?.label} →</button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 18, justifyContent: "center" }}>
+                <button onClick={() => setView("plan")} style={sbtn}>← Edit Plan</button>
+                <button onClick={() => { setView("summary"); announce("Summary view"); }} style={{ ...pb, padding: "13px 28px" }}>View Summary →</button>
+              </div>
+            </React.Fragment>)}
+
+            {/* ═══ SUMMARY VIEW ═══ */}
+            {view === "summary" && (<React.Fragment>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
+                <div>
+                  <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, margin: "0 0 2px" }}>Session Summary</h2>
+                  <p style={{ fontSize: 11, color: mu, margin: 0 }}>{studentName && `${studentName} \u00B7 `}{sessionDate}{sessionNum ? ` \u00B7 #${sessionNum}` : ""} &middot; ~{totalMinutes} min</p>
+                </div>
+                <div className="no-print" style={{ display: "flex", gap: 6 }}>
+                  <button onClick={copyText} style={sbtn}>{copyFb ? "✓ Copied" : "📋 Copy"}</button>
+                  <button onClick={generatePDF} style={pb}>🖨️ Print / PDF</button>
+                </div>
+              </div>
+
+              {(() => {
+                const ac2 = selected.reduce((s, id) => s + (componentData[id]?.correct || 0), 0);
+                const ai = selected.reduce((s, id) => s + (componentData[id]?.incorrect || 0), 0);
+                const at = ac2 + ai;
+                if (!at) return null;
+                return (
+                  <div style={{ ...cs, padding: 18, marginBottom: 14, background: darkMode ? "#1b1b30" : "linear-gradient(135deg, #f8f6ff, #f0f8f6)" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, flexWrap: "wrap" }}>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 34, fontWeight: 700, lineHeight: 1 }}>{Math.round((ac2 / at) * 100)}%</div>
+                        <div style={{ fontSize: 10, color: mu, marginTop: 1 }}>Overall</div>
+                      </div>
+                      <div style={{ width: 1, height: 36, background: bd }} />
+                      <div style={{ textAlign: "center" }}><div style={{ fontSize: 18, fontWeight: 700, color: gn }}>{ac2}</div><div style={{ fontSize: 10, color: mu }}>Correct</div></div>
+                      <div style={{ textAlign: "center" }}><div style={{ fontSize: 18, fontWeight: 700, color: rd }}>{ai}</div><div style={{ fontSize: 10, color: mu }}>Incorrect</div></div>
+                      <div style={{ textAlign: "center" }}><div style={{ fontSize: 18, fontWeight: 700 }}>{at}</div><div style={{ fontSize: 10, color: mu }}>Total</div></div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {selected.map((id, i) => {
+                  const comp = SESSION_COMPONENTS.find(c => c.id === id);
+                  if (!comp) return null;
+                  const d = componentData[id] || {};
+                  const total = (d.correct || 0) + (d.incorrect || 0);
+                  const pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
+                  return (
+                    <div key={id} style={{ ...cs, padding: "12px 16px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                            <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 700, fontSize: 11, background: ag, color: "#28283A", width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                            <span style={{ fontSize: 14 }}>{comp.icon}</span>
+                            <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 13 }}>{comp.label}</span>
+                            <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 6, background: darkMode ? "rgba(120,120,160,0.12)" : "#F0EDE8", color: mu, fontWeight: 600 }}>{MODES[d.mode] || "Both"} &middot; ~{d.minutes}m</span>
+                          </div>
+                          {d.target && <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 1 }}>Target: {d.target}</div>}
+                          {d.materials && <div style={{ fontSize: 11, color: mu }}>Materials: {d.materials}</div>}
+                          {d.cueLevel && <div style={{ fontSize: 11, color: mu }}>Cue: {d.cueLevel}</div>}
+                          {d.notes && <div style={{ fontSize: 11, color: mu, fontStyle: "italic", marginTop: 2 }}>Notes: {d.notes}</div>}
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          {pct !== null ? (<React.Fragment>
+                            <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'Fraunces', serif", color: pct >= 80 ? gn : pct >= 50 ? "#C4A020" : rd }}>{pct}%</div>
+                            <div style={{ fontSize: 10, color: mu }}>{d.correct}/{total}</div>
+                          </React.Fragment>) : <div style={{ fontSize: 10, color: mu }}>No data</div>}
+                        </div>
+                      </div>
+                      {total > 0 && (
+                        <div style={{ marginTop: 6, height: 5, borderRadius: 3, background: darkMode ? "#2a2a44" : "#EDEAE6", overflow: "hidden" }} aria-hidden="true">
+                          <div style={{ height: "100%", borderRadius: 3, width: `${pct}%`, background: pct >= 80 ? gn : pct >= 50 ? "#E8C840" : rd, transition: "width 0.3s" }} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="no-print" style={{ display: "flex", gap: 8, marginTop: 18, justifyContent: "center" }}>
+                <button onClick={() => setView("collect")} style={sbtn}>← Collect</button>
+                <button onClick={copyText} style={sbtn}>{copyFb ? "✓ Copied" : "📋 Copy"}</button>
+                <button onClick={generatePDF} style={pb}>🖨️ Print / PDF</button>
+              </div>
+            </React.Fragment>)}
+          </main>
+
+          <footer className="no-print" style={{ textAlign: "center", padding: "14px 16px", fontSize: 9, color: mu, borderTop: `1px solid ${bd}` }}>
+            &copy; 2026 RTN Communication &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician.
+          </footer>
+        </div>
+      );
+    }
+
+    // Mount
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<SessionBuilder />);
+  </script>
+</body>
+</html>
