@@ -114,7 +114,7 @@ When contributing, please:
 
 ## About
 
-Session Builder is part of a suite of free literacy tools created by RTN Communication & Literacy, founded by Rachel Terra Norton, MS, CCC-SLP. All tools are designed to be accessible regardless of family income.
+Session Builder is part of a suite of free literacy tools created by RTN Communication & Literacy, founded by Rachel Terra Norton, MS, CCC-SLP. 
 
 - [rachelslp.org](https://rachelslp.org)
 
