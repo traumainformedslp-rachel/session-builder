@@ -165,35 +165,65 @@ function doCopy() {
 }
 
 function doPrint() {
-  var h = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Session Plan</title><style>';
-  h += '*{margin:0;padding:0;box-sizing:border-box}body{font-family:Helvetica,Arial,sans-serif;font-size:11px;color:#222;padding:18px 22px;line-height:1.45}';
-  h += 'h1{font-size:15px;margin-bottom:1px}.meta{color:#555;font-size:10px;margin-bottom:10px;border-bottom:1.5px solid #ccc;padding-bottom:7px}';
-  h += '.cmp{border:1.5px solid #bbb;border-radius:5px;margin-bottom:6px;page-break-inside:avoid}';
-  h += '.ch{background:#f0f0f0;padding:5px 9px;display:flex;justify-content:space-between;align-items:center;border-radius:5px 5px 0 0}';
-  h += '.ch h3{font-size:11.5px}.bdg{display:inline-block;padding:1px 6px;border-radius:8px;font-size:8.5px;font-weight:600;background:#e2e2e2;margin-left:3px}';
-  h += '.cb{padding:6px 9px}.tgt{font-weight:600;font-size:11px}';
-  h += '.gr{display:flex;flex-wrap:wrap;gap:2px;margin-top:5px}.gc{width:15px;height:15px;border:1px solid #aaa;border-radius:2px}';
-  h += '.nl{border-bottom:1px solid #ccc;height:16px;margin-top:3px}';
-  h += '.ft{margin-top:10px;font-size:8px;color:#aaa;text-align:center;border-top:1px solid #ddd;padding-top:5px}@media print{body{padding:12px}}</style></head><body>';
-  h += '<h1>Structured Literacy Session Plan</h1><div class="meta">';
-  if (S.name) h += '<strong>Student:</strong> ' + esc(S.name) + ' | ';
-  h += '<strong>Date:</strong> ' + S.date;
-  if (S.num) h += ' | <strong>#</strong>' + esc(S.num);
-  h += ' | <strong>' + S.sel.length + ' components</strong> | <strong>~' + totalMin() + ' min</strong></div>';
+  var h = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Session Plan</title>';
+  h += '<link rel="preconnect" href="https://fonts.googleapis.com">';
+  h += '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
+  h += '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">';
+  h += '<style>';
+  h += '*{margin:0;padding:0;box-sizing:border-box}';
+  h += 'body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#28283A;padding:22px 24px;line-height:1.5;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}';
+  h += '.title{font-family:"Fraunces",Georgia,serif;font-size:23px;font-weight:700;letter-spacing:-.01em;color:#28283A;line-height:1.1}';
+  h += '.sub{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:12px;color:#7A7A8E;margin-top:2px}';
+  h += '.meta{font-size:10.5px;margin:12px 0 14px;padding:9px 14px;background:linear-gradient(135deg,#F3ECFC,#ECF5F2);border-radius:10px;display:flex;flex-wrap:wrap;gap:4px 18px}';
+  h += '.meta strong{color:#28283A;font-weight:600;margin-right:3px}.meta span{color:#555}';
+  h += '.cmp{border:1px solid #E8E4DF;border-radius:10px;margin-bottom:8px;page-break-inside:avoid;overflow:hidden;position:relative;padding-left:6px}';
+  h += '.cmp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}';
+  h += '.cmp.s::before{background:#8B6FBF}';
+  h += '.cmp.w::before{background:#C28460}';
+  h += '.cmp.t::before{background:#4E7FB8}';
+  h += '.ch{padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}';
+  h += '.ch h3{font-family:"Fraunces",Georgia,serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}';
+  h += '.ch .n{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:10.5px;background:#fff;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}';
+  h += '.bdg{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8.5px;font-weight:600;background:rgba(255,255,255,.8);color:#28283A;margin-left:3px;letter-spacing:.2px}';
+  h += '.bdg-h{background:#C8EDCF;color:#1A5A2A}.bdg-m{background:#F5EECC;color:#5A4A1A}.bdg-l{background:#F5D0D0;color:#5A1A1A}';
+  h += '.cb{padding:9px 12px 10px;background:#fff}';
+  h += '.tgt{font-weight:600;font-size:11px;color:#28283A;margin-bottom:2px}';
+  h += '.tgt .k{color:#7A7A8E;font-weight:600;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;margin-right:6px}';
+  h += '.info{font-size:9.5px;color:#444;margin-top:3px}';
+  h += '.info .k{color:#7A7A8E;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-right:5px;font-size:8.5px}';
+  h += '.info em{font-style:italic;color:#28283A}';
+  h += '.gr{display:flex;flex-wrap:wrap;gap:2px;margin-top:6px}.gc{width:15px;height:15px;border:1px solid #C4BFB8;border-radius:3px;background:#FAFAF8}';
+  h += '.nl{border-bottom:1px solid #DDD;height:15px;margin-top:3px}';
+  h += '.ft{margin-top:14px;font-size:8.5px;color:#A0A0B0;text-align:center;border-top:1px solid #E8E4DF;padding-top:7px;font-family:"Fraunces",Georgia,serif;font-style:italic}';
+  h += '@media print{body{padding:14px 16px}}';
+  h += '</style></head><body>';
+  h += '<div class="title">Structured Literacy Session Plan</div>';
+  h += '<div class="sub">Session Builder &middot; RTN Communication &amp; Literacy</div>';
+  h += '<div class="meta">';
+  if (S.name) h += '<span><strong>Student:</strong>' + esc(S.name) + '</span>';
+  h += '<span><strong>Date:</strong>' + S.date + '</span>';
+  if (S.num) h += '<span><strong>Session #</strong>' + esc(S.num) + '</span>';
+  h += '<span><strong>' + S.sel.length + '</strong> components</span>';
+  h += '<span><strong>~' + totalMin() + '</strong> min</span>';
+  h += '</div>';
   S.sel.forEach(function(id, i) {
     var c = findComp(id);
     if (!c) return;
     var d = S.data[id] || {};
     var total = (d.correct || 0) + (d.incorrect || 0);
     var pct = total > 0 ? Math.round((d.correct / total) * 100) : null;
-    h += '<div class="cmp"><div class="ch"><h3>' + (i + 1) + '. ' + c.icon + ' ' + esc(c.label) + '</h3><div>';
-    h += '<span class="bdg">' + (MNAMES[d.mode] || "Both") + '</span><span class="bdg">~' + d.minutes + ' min</span>';
-    if (pct !== null) h += '<span class="bdg" style="background:' + (pct >= 80 ? "#d4edda" : pct >= 50 ? "#fff3cd" : "#f8d7da") + ';font-weight:700">' + pct + '% (' + d.correct + '/' + total + ')</span>';
+    h += '<div class="cmp ' + c.cat.charAt(0) + '">';
+    h += '<div class="ch" style="background:' + c.color + '">';
+    h += '<h3><span class="n">' + (i + 1) + '</span>' + c.icon + ' ' + esc(c.label) + '</h3>';
+    h += '<div><span class="bdg">' + (MNAMES[d.mode] || "Both") + '</span><span class="bdg">~' + d.minutes + ' min</span>';
+    if (pct !== null) h += '<span class="bdg ' + (pct >= 80 ? 'bdg-h' : pct >= 50 ? 'bdg-m' : 'bdg-l') + '">' + pct + '% (' + d.correct + '/' + total + ')</span>';
     h += '</div></div><div class="cb">';
-    h += d.target ? '<div class="tgt">Target: ' + esc(d.target) + '</div>' : '<div class="tgt">Target: ___________________________</div>';
-    if (d.materials) h += '<div style="font-size:10px">Materials: ' + esc(d.materials) + '</div>';
-    if (d.cue) h += '<div style="font-size:10px">Cue: ' + esc(d.cue) + '</div>';
-    if (d.notes) h += '<div style="font-size:10px;font-style:italic">Notes: ' + esc(d.notes) + '</div>';
+    h += d.target
+      ? '<div class="tgt"><span class="k">Target</span>' + esc(d.target) + '</div>'
+      : '<div class="tgt"><span class="k">Target</span>___________________________________</div>';
+    if (d.materials) h += '<div class="info"><span class="k">Materials</span>' + esc(d.materials) + '</div>';
+    if (d.cue) h += '<div class="info"><span class="k">Cue</span>' + esc(d.cue) + '</div>';
+    if (d.notes) h += '<div class="info"><span class="k">Notes</span><em>' + esc(d.notes) + '</em></div>';
     if (total === 0) {
       h += '<div class="gr">';
       for (var g = 0; g < 20; g++) h += '<div class="gc"></div>';
@@ -201,7 +231,7 @@ function doPrint() {
     }
     h += '</div></div>';
   });
-  h += '<div class="ft">&copy; 2026 RTN Communication &amp; Literacy | CC BY-NC 4.0</div></body></html>';
+  h += '<div class="ft">&copy; 2026 RTN Communication &amp; Literacy &middot; CC BY-NC 4.0</div></body></html>';
   var w = window.open(URL.createObjectURL(new Blob([h], {type: "text/html"})), "_blank");
   if (w) setTimeout(function() { w.print(); }, 500);
 }
