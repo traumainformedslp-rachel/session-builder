@@ -459,10 +459,10 @@ function render() {
 
     h += '<h3><span class="h3-ic">✨</span>About this resource</h3>';
     h += '<p>Session Builder is a free, open-source tool for planning structured literacy sessions and collecting trial-by-trial data during instruction. It was built by a speech-language pathologist to support SLPs, reading specialists, and literacy interventionists in evidence-based practice.</p>';
-    h += '<p>The tool runs entirely in your browser — no account, login, or internet connection required after initial load. No data is sent to any server, stored in any database, or shared with any third party. Session data exists only in browser memory during use.</p>';
+    h += '<p>The tool runs entirely in your browser. No account, login, or internet connection is required after the initial load. No data is sent to any server, stored in any database, or shared with any third party. Session data exists only in browser memory during use.</p>';
 
     h += '<h3><span class="h3-ic">🔬</span>Evidence basis</h3>';
-    h += '<p>The 15 session components reflect the universal structure of evidence-based structured literacy instruction across the linguistic hierarchy — sound, word, and text levels. The framework draws on converging research from the science of reading, including:</p>';
+    h += '<p>The 15 session components reflect the universal structure of evidence-based structured literacy instruction across the linguistic hierarchy (sound, word, and text levels). The framework draws on converging research from the science of reading, including:</p>';
     h += '<ul>';
     h += '<li>National Reading Panel (2000) on the five pillars of reading instruction</li>';
     h += '<li>Ehri\'s phases of word reading and orthographic mapping</li>';
