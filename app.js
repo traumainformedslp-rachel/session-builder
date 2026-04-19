@@ -446,19 +446,22 @@ function render() {
   }
 
   h += '</main>';
-  h += '<footer class="foot no-print">&copy; 2026 RTN Communication &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician. · <button class="foot-lnk" onclick="toggleAbout()">About this tool</button></footer>';
+  h += '<footer class="foot no-print">';
+  h += '<button class="about-solid" onclick="toggleAbout()" aria-label="About this resource">📖 <span class="about-solid-tx">About this resource</span></button>';
+  h += '<div class="foot-meta">&copy; 2026 RTN Communication &amp; Literacy · CC BY-NC 4.0 · Built for clinicians, by a clinician.</div>';
+  h += '</footer>';
 
   if (S.showAbout) {
     h += '<div class="mdl-bd no-print" onclick="if(event.target===this)toggleAbout()" role="dialog" aria-modal="true" aria-labelledby="mdl-title">';
     h += '<div class="mdl">';
-    h += '<div class="mdl-h"><h2 id="mdl-title">About Session Builder</h2><button class="mdl-x" onclick="toggleAbout()" aria-label="Close">×</button></div>';
+    h += '<div class="mdl-h"><div class="mdl-h-l"><div class="mdl-h-ic">📖</div><div><h2 id="mdl-title">About Session Builder</h2><div class="mdl-h-sub">RTN Communication &amp; Literacy</div></div></div><button class="mdl-x" onclick="toggleAbout()" aria-label="Close">×</button></div>';
     h += '<div class="mdl-b">';
 
-    h += '<h3>About this resource</h3>';
+    h += '<h3><span class="h3-ic">✨</span>About this resource</h3>';
     h += '<p>Session Builder is a free, open-source tool for planning structured literacy sessions and collecting trial-by-trial data during instruction. It was built by a speech-language pathologist to support SLPs, reading specialists, and literacy interventionists in evidence-based practice.</p>';
     h += '<p>The tool runs entirely in your browser — no account, login, or internet connection required after initial load. No data is sent to any server, stored in any database, or shared with any third party. Session data exists only in browser memory during use.</p>';
 
-    h += '<h3>Evidence basis</h3>';
+    h += '<h3><span class="h3-ic">🔬</span>Evidence basis</h3>';
     h += '<p>The 15 session components reflect the universal structure of evidence-based structured literacy instruction across the linguistic hierarchy — sound, word, and text levels. The framework draws on converging research from the science of reading, including:</p>';
     h += '<ul>';
     h += '<li>National Reading Panel (2000) on the five pillars of reading instruction</li>';
@@ -469,14 +472,15 @@ function render() {
     h += '</ul>';
     h += '<p>This tool is curriculum-agnostic. References to instructional approaches describe general evidence-based practices documented in peer-reviewed research and are not intended to represent or replace any proprietary curriculum or methodology.</p>';
 
-    h += '<h3>Disclaimer</h3>';
+    h += '<h3><span class="h3-ic">⚖️</span>Disclaimer</h3>';
     h += '<p>This tool is designed to support session planning and data collection for qualified professionals. It is not a substitute for clinical judgment, formal assessment, or individualized treatment planning. Users are responsible for ensuring that their clinical practices comply with applicable professional standards, scope of practice guidelines, and institutional policies.</p>';
     h += '<p>Session Builder is an independent project and is not affiliated with, endorsed by, or sponsored by any commercial literacy program, publisher, or organization. All program names, product names, and trademarks referenced belong to their respective owners.</p>';
 
-    h += '<h3>Citation</h3>';
+    h += '<h3><span class="h3-ic">📎</span>Citation</h3>';
     h += '<div class="cite">Norton, R. T. (2026). Session Builder: A structured literacy session planner with data collection [Web application]. RTN Communication &amp; Literacy.</div>';
 
     h += '<div class="lic">Code licensed under MIT. Educational content licensed under CC BY-NC 4.0.</div>';
+    h += '<div class="rainbow"></div>';
 
     h += '</div></div></div>';
   }
