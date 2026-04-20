@@ -180,7 +180,8 @@ function resetData(id) {
 }
 
 function doCopy() {
-  var lines = ["SESSION PLAN \u2014 STRUCTURED LITERACY"];
+  var isAct = S.mode === "activity";
+  var lines = [isAct ? "ACTIVITY PLAN \u2014 STRUCTURED LITERACY" : "SESSION PLAN \u2014 STRUCTURED LITERACY"];
   lines.push((S.name ? "Student: " + S.name + " | " : "") + "Date: " + S.date + (S.num ? " | #" + S.num : "") + " | ~" + totalMin() + " min");
   lines.push("");
   S.sel.forEach(function(id, i) {
@@ -189,13 +190,20 @@ function doCopy() {
     var d = S.data[id] || {};
     var total = (d.correct || 0) + (d.incorrect || 0);
     var pct = total > 0 ? Math.round((d.correct / total) * 100) + "%" : "\u2014";
-    lines.push((i + 1) + ". " + c.label + " [" + (MNAMES[d.mode] || "Both") + "] ~" + d.minutes + " min");
+    var heading = isAct ? c.label : (i + 1) + ". " + c.label;
+    lines.push(heading + " [" + (MNAMES[d.mode] || "Both") + "] ~" + d.minutes + " min");
     if (d.target) lines.push("   Target: " + d.target);
     if (d.materials) lines.push("   Materials: " + d.materials);
+    if (isAct) {
+      if ((d.iDo || '').trim()) lines.push("   I DO: " + d.iDo);
+      if ((d.weDo || '').trim()) lines.push("   WE DO: " + d.weDo);
+      if ((d.youDo || '').trim()) lines.push("   YOU DO: " + d.youDo);
+    }
     lines.push("   Data: " + (d.correct || 0) + "/" + total + " (" + pct + ") | Cue: " + (d.cue || "\u2014"));
     if (d.notes) lines.push("   Notes: " + d.notes);
     lines.push("");
   });
+  if (isAct) lines.push("Framework: Gradual Release of Responsibility (Pearson & Gallagher, 1983; Fisher & Frey, 2013)");
   lines.push("\u00A9 2026 RTN Communication & Literacy | CC BY-NC 4.0");
   navigator.clipboard.writeText(lines.join("\n"));
   S.copyFb = true;
@@ -241,8 +249,9 @@ function doPrint() {
   h += '.ft{margin-top:14px;font-size:8.5px;color:#A0A0B0;text-align:center;border-top:1px solid #E8E4DF;padding-top:7px;font-family:"Fraunces",Georgia,serif;font-style:italic}';
   h += '@media print{body{padding:14px 16px}}';
   h += '</style></head><body>';
-  h += '<div class="title">Structured Literacy Session Plan</div>';
-  h += '<div class="sub">Session Builder &middot; RTN Communication &amp; Literacy</div>';
+  var printIsAct = S.mode === "activity";
+  h += '<div class="title">' + (printIsAct ? 'Structured Literacy Activity Plan' : 'Structured Literacy Session Plan') + '</div>';
+  h += '<div class="sub">' + (printIsAct ? 'Activity Builder' : 'Session Builder') + ' &middot; RTN Communication &amp; Literacy</div>';
   h += '<div class="meta">';
   if (S.name) h += '<span><strong>Student:</strong>' + esc(S.name) + '</span>';
   h += '<span><strong>Date:</strong>' + S.date + '</span>';
@@ -266,6 +275,11 @@ function doPrint() {
       ? '<div class="tgt"><span class="k">Target</span>' + esc(d.target) + '</div>'
       : '<div class="tgt"><span class="k">Target</span>___________________________________</div>';
     if (d.materials) h += '<div class="info"><span class="k">Materials</span>' + esc(d.materials) + '</div>';
+    if (printIsAct) {
+      if ((d.iDo || '').trim()) h += '<div class="info" style="margin-top:6px;padding:5px 8px;background:#F3EEFA;border-left:3px solid #8a6cb8;border-radius:0 6px 6px 0"><span class="k" style="color:#5d3b8c">🧑\u200D🏫 I Do</span>' + esc(d.iDo) + '</div>';
+      if ((d.weDo || '').trim()) h += '<div class="info" style="margin-top:4px;padding:5px 8px;background:#EEF3FA;border-left:3px solid #4e7fb8;border-radius:0 6px 6px 0"><span class="k" style="color:#2e5a94">🤝 We Do</span>' + esc(d.weDo) + '</div>';
+      if ((d.youDo || '').trim()) h += '<div class="info" style="margin-top:4px;padding:5px 8px;background:#ECF5EE;border-left:3px solid #27ae60;border-radius:0 6px 6px 0"><span class="k" style="color:#1a7a43">🎓 You Do</span>' + esc(d.youDo) + '</div>';
+    }
     if (d.cue) h += '<div class="info"><span class="k">Cue</span>' + esc(d.cue) + '</div>';
     if (d.notes) h += '<div class="info"><span class="k">Notes</span><em>' + esc(d.notes) + '</em></div>';
     if (total === 0) {
@@ -505,7 +519,8 @@ function render() {
       var d = S.data[id] || {};
       var total = (d.correct || 0) + (d.incorrect || 0);
       var pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
-      var isExp = S.expanded === id;
+      // In activity mode, auto-expand the single component
+      var isExp = isActivity ? true : (S.expanded === id);
 
       h += '<div class="card" style="overflow:hidden">';
       h += '<button onclick="togExp(\'' + id + '\')" aria-expanded="' + isExp + '" style="width:100%;background:none;border:none;cursor:pointer;color:var(--tx);padding:12px 14px;display:flex;align-items:center;gap:8px;text-align:left;font-family:var(--ff);outline:none">';
@@ -562,8 +577,9 @@ function render() {
 
   // ═══ SUMMARY ═══
   if (S.view === "summary") {
+    var sumTitle = isActivity ? "Activity Summary" : "Session Summary";
     h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:14px">';
-    h += '<div><h2>Session Summary</h2><p style="font-size:11px;color:var(--mu);margin:0">' + (S.name ? esc(S.name) + ' · ' : '') + S.date + (S.num ? ' · #' + esc(S.num) : '') + ' · ~' + totalMin() + ' min</p></div>';
+    h += '<div><h2>' + sumTitle + '</h2><p style="font-size:11px;color:var(--mu);margin:0">' + (S.name ? esc(S.name) + ' · ' : '') + S.date + (S.num ? ' · #' + esc(S.num) : '') + ' · ~' + totalMin() + ' min</p></div>';
     h += '<div class="no-print" style="display:flex;gap:6px"><button class="btn btn-s" onclick="doCopy()">' + (S.copyFb ? '✓ Copied' : '📋 Copy') + '</button><button class="btn btn-p" onclick="doPrint()">🖨️ Print / PDF</button></div></div>';
 
     // Overall stats
@@ -581,6 +597,37 @@ function render() {
       h += '</div></div>';
     }
 
+    // Activity-mode GRR summary block (before the component card)
+    if (isActivity && S.sel.length > 0) {
+      var sumId = S.sel[0];
+      var sumD = S.data[sumId] || {};
+      var hasGRR = (sumD.iDo || '').trim() || (sumD.weDo || '').trim() || (sumD.youDo || '').trim();
+      if (hasGRR) {
+        h += '<section class="card" style="padding:16px;margin-bottom:14px">';
+        h += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
+        h += '<div class="fh" style="font-weight:700;font-size:13px">Activity Structure</div>';
+        h += '<span style="font-size:9px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase">Gradual Release of Responsibility</span>';
+        h += '</div>';
+        h += '<div style="display:flex;flex-direction:column;gap:8px">';
+        if ((sumD.iDo || '').trim()) {
+          h += '<div style="border-left:4px solid #8a6cb8;padding:6px 12px;background:rgba(138,108,184,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#5d3b8c;font-size:10px;letter-spacing:1.5px;margin-bottom:2px">🧑‍🏫 I DO</div>';
+          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sumD.iDo) + '</div></div>';
+        }
+        if ((sumD.weDo || '').trim()) {
+          h += '<div style="border-left:4px solid #4e7fb8;padding:6px 12px;background:rgba(78,127,184,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#2e5a94;font-size:10px;letter-spacing:1.5px;margin-bottom:2px">🤝 WE DO</div>';
+          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sumD.weDo) + '</div></div>';
+        }
+        if ((sumD.youDo || '').trim()) {
+          h += '<div style="border-left:4px solid #27ae60;padding:6px 12px;background:rgba(39,174,96,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#1a7a43;font-size:10px;letter-spacing:1.5px;margin-bottom:2px">🎓 YOU DO</div>';
+          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sumD.youDo) + '</div></div>';
+        }
+        h += '</div></section>';
+      }
+    }
+
     // Per-component
     h += '<div style="display:flex;flex-direction:column;gap:8px">';
     S.sel.forEach(function(id, i) {
@@ -592,7 +639,8 @@ function render() {
 
       h += '<div class="card" style="padding:12px 16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="flex:1">';
       h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">';
-      h += '<span class="num">' + (i + 1) + '</span><span style="font-size:14px">' + comp.icon + '</span>';
+      if (!isActivity) h += '<span class="num">' + (i + 1) + '</span>';
+      h += '<span style="font-size:14px">' + comp.icon + '</span>';
       h += '<span class="fh" style="font-weight:600;font-size:13px">' + comp.label + '</span>';
       h += '<span style="font-size:9px;padding:2px 6px;border-radius:6px;background:var(--bd);color:var(--mu);font-weight:600">' + (MNAMES[d.mode] || "Both") + ' · ~' + d.minutes + 'm</span></div>';
       if (d.target) h += '<div style="font-size:12px;font-weight:600;margin-bottom:1px">Target: ' + esc(d.target) + '</div>';
@@ -631,17 +679,22 @@ function render() {
     h += '<div class="mdl-b">';
 
     h += '<h3><span class="h3-ic">✨</span>About this resource</h3>';
-    h += '<p>Session Builder is a free, open-source tool for planning structured literacy sessions and collecting trial-by-trial data during instruction. It was built by a speech-language pathologist to support SLPs, reading specialists, and literacy interventionists in evidence-based practice.</p>';
+    h += '<p>Session Builder is a free, open-source tool for planning structured literacy instruction and collecting trial-by-trial data. It was built by a speech-language pathologist to support SLPs, reading specialists, and literacy interventionists in evidence-based practice. Two workflows are included:</p>';
+    h += '<ul>';
+    h += '<li><strong>Plan an Activity</strong> — focus on a single skill using the Gradual Release of Responsibility framework (I Do → We Do → You Do) with single-target data collection.</li>';
+    h += '<li><strong>Plan a Full Session</strong> — sequence multiple components into a structured literacy session with multi-skill data collection.</li>';
+    h += '</ul>';
     h += '<p>The tool runs entirely in your browser. No account, login, or internet connection is required after the initial load. No data is sent to any server, stored in any database, or shared with any third party. Session data exists only in browser memory during use.</p>';
 
     h += '<h3><span class="h3-ic">🔬</span>Evidence basis</h3>';
-    h += '<p>The 15 session components reflect the universal structure of evidence-based structured literacy instruction across the linguistic hierarchy (sound, word, and text levels). The framework draws on converging research from the science of reading, including:</p>';
+    h += '<p>The 15 components reflect the universal structure of evidence-based structured literacy instruction across the linguistic hierarchy (sound, word, and text levels). The framework draws on converging research from the science of reading, including:</p>';
     h += '<ul>';
     h += '<li>National Reading Panel (2000) on the five pillars of reading instruction</li>';
     h += '<li>Ehri\'s phases of word reading and orthographic mapping</li>';
     h += '<li>Scarborough\'s Reading Rope</li>';
     h += '<li>Seidenberg &amp; McClelland\'s four-part processing model</li>';
     h += '<li>The International Dyslexia Association\'s Structured Literacy framework (Moats, Spear-Swerling, and colleagues)</li>';
+    h += '<li>Gradual Release of Responsibility — Pearson &amp; Gallagher (1983); Fisher &amp; Frey (2013)</li>';
     h += '</ul>';
     h += '<p>This tool is curriculum-agnostic. References to instructional approaches describe general evidence-based practices documented in peer-reviewed research and are not intended to represent or replace any proprietary curriculum or methodology.</p>';
 
