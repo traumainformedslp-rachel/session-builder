@@ -38,8 +38,66 @@ var S = {
   showSug: null,
   expanded: null,
   copyFb: false,
-  showAbout: false
+  showAbout: false,
+  // Activity-mode state (separate from session mode)
+  activity: {
+    modeSel: null,   // "decoding" | "encoding"
+    level: null,     // "sound" | "word" | "text"
+    target: "",
+    materials: "",
+    minutes: 10,
+    iDo: "",
+    weDo: "",
+    youDo: "",
+    correct: 0,
+    incorrect: 0,
+    cue: "",
+    notes: ""
+  }
 };
+
+// ─── Activity-mode helpers ───
+var LEVELS = [
+  { id: "sound", label: "Sound Level", icon: "🔤", desc: "Phonemes, phonograms, syllable awareness" },
+  { id: "word",  label: "Word Level",  icon: "📚", desc: "Decoding, spelling, morphology, heart words" },
+  { id: "text",  label: "Text Level",  icon: "📖", desc: "Sentences, passages, fluency, comprehension" }
+];
+var ACT_MODES = [
+  { id: "decoding", label: "Decoding", icon: "🔊", desc: "Read / say / blend", color: "#8a6cb8", soft: "rgba(138,108,184,0.10)" },
+  { id: "encoding", label: "Encoding", icon: "✍️", desc: "Spell / write / segment", color: "#c28460", soft: "rgba(194,132,96,0.10)" }
+];
+
+function freshActivity() {
+  return {
+    modeSel: null, level: null, target: "",
+    materials: "", minutes: 10,
+    iDo: "", weDo: "", youDo: "",
+    correct: 0, incorrect: 0, cue: "", notes: ""
+  };
+}
+
+function actUpd(f, v) { S.activity[f] = v; }
+function actUpdR(f, v) { S.activity[f] = v; render(); }
+function actTap(correct) {
+  if (correct) S.activity.correct = (S.activity.correct || 0) + 1;
+  else S.activity.incorrect = (S.activity.incorrect || 0) + 1;
+  render();
+}
+function actReset() { S.activity.correct = 0; S.activity.incorrect = 0; render(); }
+
+function getSuggestedTargets(levelId, modeId) {
+  var suggestions = [];
+  COMPONENTS.forEach(function(c) {
+    var modeMatch = !modeId || c.mode === modeId || c.mode === "both";
+    var levelMatch = !levelId || c.cat === levelId;
+    if (modeMatch && levelMatch) {
+      c.targets.forEach(function(t) {
+        if (suggestions.indexOf(t) < 0) suggestions.push(t);
+      });
+    }
+  });
+  return suggestions;
+}
 
 // ─── Helpers ───
 function findComp(id) {
@@ -64,6 +122,7 @@ function ensureData() {
 }
 
 function totalMin() {
+  if (S.mode === "activity") return S.activity.minutes || 0;
   var t = 0;
   S.sel.forEach(function(id) { t += (S.data[id] && S.data[id].minutes) || 0; });
   return t;
@@ -108,6 +167,7 @@ function setMode(m) {
   S.data = {};
   S.expanded = null;
   S.showSug = null;
+  S.activity = freshActivity();
   render();
   window.scrollTo(0, 0);
 }
@@ -122,6 +182,7 @@ function startOver() {
     S.num = "";
     S.expanded = null;
     S.showSug = null;
+    S.activity = freshActivity();
     render();
     window.scrollTo(0, 0);
   }
@@ -184,26 +245,44 @@ function doCopy() {
   var lines = [isAct ? "ACTIVITY PLAN \u2014 STRUCTURED LITERACY" : "SESSION PLAN \u2014 STRUCTURED LITERACY"];
   lines.push((S.name ? "Student: " + S.name + " | " : "") + "Date: " + S.date + (S.num ? " | #" + S.num : "") + " | ~" + totalMin() + " min");
   lines.push("");
-  S.sel.forEach(function(id, i) {
-    var c = findComp(id);
-    if (!c) return;
-    var d = S.data[id] || {};
-    var total = (d.correct || 0) + (d.incorrect || 0);
-    var pct = total > 0 ? Math.round((d.correct / total) * 100) + "%" : "\u2014";
-    var heading = isAct ? c.label : (i + 1) + ". " + c.label;
-    lines.push(heading + " [" + (MNAMES[d.mode] || "Both") + "] ~" + d.minutes + " min");
-    if (d.target) lines.push("   Target: " + d.target);
-    if (d.materials) lines.push("   Materials: " + d.materials);
-    if (isAct) {
-      if ((d.iDo || '').trim()) lines.push("   I DO: " + d.iDo);
-      if ((d.weDo || '').trim()) lines.push("   WE DO: " + d.weDo);
-      if ((d.youDo || '').trim()) lines.push("   YOU DO: " + d.youDo);
-    }
-    lines.push("   Data: " + (d.correct || 0) + "/" + total + " (" + pct + ") | Cue: " + (d.cue || "\u2014"));
-    if (d.notes) lines.push("   Notes: " + d.notes);
+
+  if (isAct) {
+    var A = S.activity;
+    var aTotal = (A.correct || 0) + (A.incorrect || 0);
+    var aPct = aTotal > 0 ? Math.round((A.correct / aTotal) * 100) + "%" : "\u2014";
+    var modeLabel = A.modeSel ? (A.modeSel.charAt(0).toUpperCase() + A.modeSel.slice(1)) : "\u2014";
+    var levelLabel = A.level ? (A.level.charAt(0).toUpperCase() + A.level.slice(1) + " Level") : "\u2014";
+    lines.push("Activity: " + (A.target || "(untitled)"));
+    lines.push("Mode: " + modeLabel + " | Level: " + levelLabel + " | ~" + (A.minutes || 0) + " min");
+    if (A.materials) lines.push("Materials: " + A.materials);
     lines.push("");
-  });
-  if (isAct) lines.push("Framework: Gradual Release of Responsibility (Pearson & Gallagher, 1983; Fisher & Frey, 2013)");
+    lines.push("— Activity Structure (Gradual Release of Responsibility) —");
+    if ((A.iDo || '').trim())   lines.push("I DO:  " + A.iDo);
+    if ((A.weDo || '').trim())  lines.push("WE DO: " + A.weDo);
+    if ((A.youDo || '').trim()) lines.push("YOU DO: " + A.youDo);
+    lines.push("");
+    lines.push("— Data —");
+    lines.push("Correct: " + (A.correct || 0) + " | Incorrect: " + (A.incorrect || 0) + " | Total: " + aTotal + " | Accuracy: " + aPct);
+    lines.push("Cue Level: " + (A.cue || "\u2014"));
+    if (A.notes) lines.push("Notes: " + A.notes);
+    lines.push("");
+    lines.push("Framework: Gradual Release of Responsibility (Pearson & Gallagher, 1983; Fisher & Frey, 2013)");
+  } else {
+    S.sel.forEach(function(id, i) {
+      var c = findComp(id);
+      if (!c) return;
+      var d = S.data[id] || {};
+      var total = (d.correct || 0) + (d.incorrect || 0);
+      var pct = total > 0 ? Math.round((d.correct / total) * 100) + "%" : "\u2014";
+      lines.push((i + 1) + ". " + c.label + " [" + (MNAMES[d.mode] || "Both") + "] ~" + d.minutes + " min");
+      if (d.target) lines.push("   Target: " + d.target);
+      if (d.materials) lines.push("   Materials: " + d.materials);
+      lines.push("   Data: " + (d.correct || 0) + "/" + total + " (" + pct + ") | Cue: " + (d.cue || "\u2014"));
+      if (d.notes) lines.push("   Notes: " + d.notes);
+      lines.push("");
+    });
+  }
+
   lines.push("\u00A9 2026 RTN Communication & Literacy | CC BY-NC 4.0");
   navigator.clipboard.writeText(lines.join("\n"));
   S.copyFb = true;
@@ -255,40 +334,78 @@ function doPrint() {
   h += '<div class="meta">';
   if (S.name) h += '<span><strong>Student:</strong>' + esc(S.name) + '</span>';
   h += '<span><strong>Date:</strong>' + S.date + '</span>';
-  if (S.num) h += '<span><strong>Session #</strong>' + esc(S.num) + '</span>';
-  h += '<span><strong>' + S.sel.length + '</strong> components</span>';
-  h += '<span><strong>~' + totalMin() + '</strong> min</span>';
+  if (S.num) h += '<span><strong>' + (printIsAct ? 'Activity #' : 'Session #') + '</strong>' + esc(S.num) + '</span>';
+  if (printIsAct) {
+    var pA = S.activity;
+    var pModeL = pA.modeSel ? (pA.modeSel.charAt(0).toUpperCase() + pA.modeSel.slice(1)) : '—';
+    var pLevelL = pA.level ? (pA.level.charAt(0).toUpperCase() + pA.level.slice(1)) : '—';
+    h += '<span><strong>Mode:</strong>' + pModeL + '</span>';
+    h += '<span><strong>Level:</strong>' + pLevelL + '</span>';
+    h += '<span><strong>~' + (pA.minutes || 0) + '</strong> min</span>';
+  } else {
+    h += '<span><strong>' + S.sel.length + '</strong> components</span>';
+    h += '<span><strong>~' + totalMin() + '</strong> min</span>';
+  }
   h += '</div>';
-  S.sel.forEach(function(id, i) {
-    var c = findComp(id);
-    if (!c) return;
-    var d = S.data[id] || {};
-    var total = (d.correct || 0) + (d.incorrect || 0);
-    var pct = total > 0 ? Math.round((d.correct / total) * 100) : null;
-    h += '<div class="cmp ' + c.cat.charAt(0) + '">';
-    h += '<div class="ch" style="background:' + c.color + '">';
-    h += '<h3><span class="n">' + (i + 1) + '</span>' + c.icon + ' ' + esc(c.label) + '</h3>';
-    h += '<div><span class="bdg">' + (MNAMES[d.mode] || "Both") + '</span><span class="bdg">~' + d.minutes + ' min</span>';
-    if (pct !== null) h += '<span class="bdg ' + (pct >= 80 ? 'bdg-h' : pct >= 50 ? 'bdg-m' : 'bdg-l') + '">' + pct + '% (' + d.correct + '/' + total + ')</span>';
+
+  if (printIsAct) {
+    var A = S.activity;
+    var total = (A.correct || 0) + (A.incorrect || 0);
+    var pct = total > 0 ? Math.round((A.correct / total) * 100) : null;
+    var catLetter = A.level ? A.level.charAt(0) : 'w';
+    h += '<div class="cmp ' + catLetter + '">';
+    h += '<div class="ch" style="background:#EEE6F5">';
+    h += '<h3>🎯 ' + esc(A.target || 'Activity') + '</h3>';
+    h += '<div>';
+    if (A.modeSel) h += '<span class="bdg">' + (A.modeSel.charAt(0).toUpperCase() + A.modeSel.slice(1)) + '</span>';
+    if (A.level) h += '<span class="bdg">' + (A.level.charAt(0).toUpperCase() + A.level.slice(1)) + '</span>';
+    h += '<span class="bdg">~' + (A.minutes || 0) + ' min</span>';
+    if (pct !== null) h += '<span class="bdg ' + (pct >= 80 ? 'bdg-h' : pct >= 50 ? 'bdg-m' : 'bdg-l') + '">' + pct + '% (' + (A.correct || 0) + '/' + total + ')</span>';
     h += '</div></div><div class="cb">';
-    h += d.target
-      ? '<div class="tgt"><span class="k">Target</span>' + esc(d.target) + '</div>'
-      : '<div class="tgt"><span class="k">Target</span>___________________________________</div>';
-    if (d.materials) h += '<div class="info"><span class="k">Materials</span>' + esc(d.materials) + '</div>';
-    if (printIsAct) {
-      if ((d.iDo || '').trim()) h += '<div class="info" style="margin-top:6px;padding:5px 8px;background:#F3EEFA;border-left:3px solid #8a6cb8;border-radius:0 6px 6px 0"><span class="k" style="color:#5d3b8c">🧑\u200D🏫 I Do</span>' + esc(d.iDo) + '</div>';
-      if ((d.weDo || '').trim()) h += '<div class="info" style="margin-top:4px;padding:5px 8px;background:#EEF3FA;border-left:3px solid #4e7fb8;border-radius:0 6px 6px 0"><span class="k" style="color:#2e5a94">🤝 We Do</span>' + esc(d.weDo) + '</div>';
-      if ((d.youDo || '').trim()) h += '<div class="info" style="margin-top:4px;padding:5px 8px;background:#ECF5EE;border-left:3px solid #27ae60;border-radius:0 6px 6px 0"><span class="k" style="color:#1a7a43">🎓 You Do</span>' + esc(d.youDo) + '</div>';
-    }
-    if (d.cue) h += '<div class="info"><span class="k">Cue</span>' + esc(d.cue) + '</div>';
-    if (d.notes) h += '<div class="info"><span class="k">Notes</span><em>' + esc(d.notes) + '</em></div>';
+    if (!A.target) h += '<div class="tgt"><span class="k">Target</span>___________________________________</div>';
+    if (A.materials) h += '<div class="info"><span class="k">Materials</span>' + esc(A.materials) + '</div>';
+
+    // GRR blocks — always print them (blank if empty), since this is the whole point of Activity mode
+    h += '<div class="info" style="margin-top:8px;padding:7px 10px;background:#F3EEFA;border-left:4px solid #8a6cb8;border-radius:0 6px 6px 0"><span class="k" style="color:#5d3b8c">🧑\u200D🏫 I Do</span>' + ((A.iDo || '').trim() ? esc(A.iDo) : '___________________________________') + '</div>';
+    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#EEF3FA;border-left:4px solid #4e7fb8;border-radius:0 6px 6px 0"><span class="k" style="color:#2e5a94">🤝 We Do</span>' + ((A.weDo || '').trim() ? esc(A.weDo) : '___________________________________') + '</div>';
+    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#ECF5EE;border-left:4px solid #27ae60;border-radius:0 6px 6px 0"><span class="k" style="color:#1a7a43">🎓 You Do</span>' + ((A.youDo || '').trim() ? esc(A.youDo) : '___________________________________') + '</div>';
+
+    if (A.cue) h += '<div class="info" style="margin-top:6px"><span class="k">Cue</span>' + esc(A.cue) + '</div>';
+    if (A.notes) h += '<div class="info"><span class="k">Notes</span><em>' + esc(A.notes) + '</em></div>';
     if (total === 0) {
-      h += '<div class="gr">';
-      for (var g = 0; g < 20; g++) h += '<div class="gc"></div>';
+      h += '<div class="gr" style="margin-top:8px">';
+      for (var gA = 0; gA < 30; gA++) h += '<div class="gc"></div>';
       h += '</div><div class="nl"></div><div class="nl"></div>';
     }
     h += '</div></div>';
-  });
+    h += '<div class="info" style="margin-top:10px;font-size:8.5px;color:#7A7A8E;font-style:italic;text-align:center">Framework: Gradual Release of Responsibility (Pearson &amp; Gallagher, 1983; Fisher &amp; Frey, 2013)</div>';
+  } else {
+    S.sel.forEach(function(id, i) {
+      var c = findComp(id);
+      if (!c) return;
+      var d = S.data[id] || {};
+      var total = (d.correct || 0) + (d.incorrect || 0);
+      var pct = total > 0 ? Math.round((d.correct / total) * 100) : null;
+      h += '<div class="cmp ' + c.cat.charAt(0) + '">';
+      h += '<div class="ch" style="background:' + c.color + '">';
+      h += '<h3><span class="n">' + (i + 1) + '</span>' + c.icon + ' ' + esc(c.label) + '</h3>';
+      h += '<div><span class="bdg">' + (MNAMES[d.mode] || "Both") + '</span><span class="bdg">~' + d.minutes + ' min</span>';
+      if (pct !== null) h += '<span class="bdg ' + (pct >= 80 ? 'bdg-h' : pct >= 50 ? 'bdg-m' : 'bdg-l') + '">' + pct + '% (' + d.correct + '/' + total + ')</span>';
+      h += '</div></div><div class="cb">';
+      h += d.target
+        ? '<div class="tgt"><span class="k">Target</span>' + esc(d.target) + '</div>'
+        : '<div class="tgt"><span class="k">Target</span>___________________________________</div>';
+      if (d.materials) h += '<div class="info"><span class="k">Materials</span>' + esc(d.materials) + '</div>';
+      if (d.cue) h += '<div class="info"><span class="k">Cue</span>' + esc(d.cue) + '</div>';
+      if (d.notes) h += '<div class="info"><span class="k">Notes</span><em>' + esc(d.notes) + '</em></div>';
+      if (total === 0) {
+        h += '<div class="gr">';
+        for (var g = 0; g < 20; g++) h += '<div class="gc"></div>';
+        h += '</div><div class="nl"></div><div class="nl"></div>';
+      }
+      h += '</div></div>';
+    });
+  }
   h += '<div class="ft">&copy; 2026 RTN Communication &amp; Literacy &middot; CC BY-NC 4.0</div></body></html>';
   var w = window.open(URL.createObjectURL(new Blob([h], {type: "text/html"})), "_blank");
   if (w) setTimeout(function() { w.print(); }, 500);
@@ -363,79 +480,107 @@ function render() {
     h += '</div></section>';
 
     if (isActivity) {
-      // ── ACTIVITY MODE: Single-skill chooser + GRR structure ──
-      var pickedId = S.sel[0];
-      h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h2>Choose One Skill Focus</h2>';
-      if (pickedId) { var pc = findComp(pickedId); h += '<span style="font-size:12px;color:var(--mu);font-weight:600">' + (pc ? pc.label : '') + ' · ~' + totalMin() + ' min</span>'; }
-      h += '</div>';
-      h += '<p style="font-size:12px;color:var(--mu);margin:0 0 12px">Tap a component to focus on one skill. Selecting another replaces your choice.</p>';
-      h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px">';
-      COMPONENTS.forEach(function(comp) {
-        var isSel = S.sel.indexOf(comp.id) >= 0;
-        h += '<button class="card' + (isSel ? " sel" : (pickedId ? " dim" : "")) + '" onclick="togSel(\'' + comp.id + '\')" style="width:100%;text-align:left;border:' + (isSel ? '2px solid var(--ac)' : '1px solid var(--bd)') + ';background:var(--card);padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:var(--ff)">';
-        h += '<span style="font-size:18px">' + comp.icon + '</span>';
-        h += '<div style="flex:1;min-width:0"><div class="fh" style="font-weight:600;font-size:14px;color:var(--tx)">' + comp.label + '</div>';
-        h += '<div style="font-size:11px;color:var(--mu);margin-top:1px">' + comp.desc + '</div></div>';
-        h += '<span style="font-size:9px;padding:2px 7px;border-radius:7px;font-weight:600;background:' + comp.color + ';color:#4a4a5a">' + comp.cat + '</span>';
+      // ═══ ACTIVITY MODE — Stepped, visual, big-box planner ═══
+      var A = S.activity;
+      var stepN = function(n, label, done) {
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:34px;height:34px;border-radius:10px;background:' + (done ? 'var(--ag)' : 'var(--bd)') + ';color:' + (done ? '#fff' : 'var(--mu)') + ';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;font-family:var(--ff);flex-shrink:0">' + (done ? '✓' : n) + '</div><div class="fh" style="font-weight:700;font-size:16px;color:var(--tx)">' + label + '</div></div>';
+      };
+
+      // ── STEP 1: Mode (Decoding / Encoding) ──
+      h += '<section class="card" style="padding:20px;margin-bottom:14px">';
+      h += stepN(1, 'Mode', !!A.modeSel);
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+      ACT_MODES.forEach(function(m) {
+        var sel = A.modeSel === m.id;
+        h += '<button onclick="actUpdR(\'modeSel\',\'' + m.id + '\')" style="padding:22px 16px;border-radius:16px;border:' + (sel ? '3px solid ' + m.color : '2px solid var(--bd)') + ';background:' + (sel ? m.soft : 'var(--card)') + ';cursor:pointer;text-align:center;font-family:var(--ff);transition:all 0.15s">';
+        h += '<div style="font-size:36px;margin-bottom:6px">' + m.icon + '</div>';
+        h += '<div class="fh" style="font-weight:700;font-size:16px;color:' + (sel ? m.color : 'var(--tx)') + ';letter-spacing:-0.01em">' + m.label + '</div>';
+        h += '<div style="font-size:11px;color:var(--mu);margin-top:4px">' + m.desc + '</div>';
         h += '</button>';
       });
+      h += '</div></section>';
+
+      // ── STEP 2: Linguistic Level ──
+      h += '<section class="card" style="padding:20px;margin-bottom:14px' + (A.modeSel ? '' : ';opacity:0.5;pointer-events:none') + '">';
+      h += stepN(2, 'Linguistic Level', !!A.level);
+      h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
+      LEVELS.forEach(function(l) {
+        var sel = A.level === l.id;
+        h += '<button onclick="actUpdR(\'level\',\'' + l.id + '\')" style="padding:18px 12px;border-radius:14px;border:' + (sel ? '3px solid var(--ac)' : '2px solid var(--bd)') + ';background:' + (sel ? 'rgba(138,108,184,0.10)' : 'var(--card)') + ';cursor:pointer;text-align:center;font-family:var(--ff);transition:all 0.15s">';
+        h += '<div style="font-size:32px;margin-bottom:4px">' + l.icon + '</div>';
+        h += '<div class="fh" style="font-weight:700;font-size:14px;color:' + (sel ? 'var(--ac)' : 'var(--tx)') + '">' + l.label + '</div>';
+        h += '<div style="font-size:10px;color:var(--mu);margin-top:3px;line-height:1.4">' + l.desc + '</div>';
+        h += '</button>';
+      });
+      h += '</div></section>';
+
+      // ── STEP 3: Target ──
+      h += '<section class="card" style="padding:20px;margin-bottom:14px' + (A.modeSel && A.level ? '' : ';opacity:0.5;pointer-events:none') + '">';
+      h += stepN(3, 'Target / Focus Skill', !!A.target.trim());
+      h += '<textarea class="ta" rows="2" oninput="actUpd(\'target\',this.value)" placeholder="What specific skill are you targeting? e.g., CVC blending, short vowel /a/, heart word \'said\', decodable passage fluency..." style="font-size:15px;padding:14px 16px">' + esc(A.target || '') + '</textarea>';
+      if (A.modeSel && A.level) {
+        var suggestions = getSuggestedTargets(A.level, A.modeSel);
+        if (suggestions.length > 0) {
+          h += '<div style="margin-top:10px"><div style="font-size:10px;font-weight:700;color:var(--mu);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">Suggested for ' + (A.modeSel === 'decoding' ? 'Decoding' : 'Encoding') + ' · ' + (LEVELS.find ? LEVELS.find(function(x){return x.id===A.level;}).label : A.level) + '</div>';
+          h += '<div style="display:flex;flex-wrap:wrap;gap:3px;max-height:140px;overflow-y:auto">';
+          suggestions.forEach(function(t) {
+            h += '<button class="chip" onclick="actUpdR(\'target\',\'' + esc(t).replace(/'/g, "\\'") + '\')">' + esc(t) + '</button>';
+          });
+          h += '</div></div>';
+        }
+      }
+      // Materials + minutes inline
+      h += '<div style="margin-top:14px;display:grid;grid-template-columns:1fr auto;gap:10px">';
+      h += '<div><label class="lbl">MATERIALS</label><input class="inp" value="' + esc(A.materials || '') + '" oninput="actUpd(\'materials\',this.value)" placeholder="phonogram cards, whiteboard, decodable text..."></div>';
+      h += '<div><label class="lbl">MINUTES</label><input type="number" class="inp" style="width:80px;text-align:center" min="1" max="60" value="' + (A.minutes || 10) + '" onchange="actUpdR(\'minutes\',+this.value)"></div>';
+      h += '</div>';
+      h += '</section>';
+
+      // ── STEP 4: Activity Structure (GRR — BIG boxes) ──
+      var grrDone = (A.iDo || '').trim() || (A.weDo || '').trim() || (A.youDo || '').trim();
+      h += '<section class="card" style="padding:20px;margin-bottom:14px' + (A.target.trim() ? '' : ';opacity:0.5;pointer-events:none') + '">';
+      h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">';
+      h += '<div style="width:34px;height:34px;border-radius:10px;background:' + (grrDone ? 'var(--ag)' : 'var(--bd)') + ';color:' + (grrDone ? '#fff' : 'var(--mu)') + ';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">' + (grrDone ? '✓' : '4') + '</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:16px">Activity Structure</div>';
+      h += '<div style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-top:1px">Gradual Release of Responsibility</div></div>';
+      h += '</div>';
+      h += '<p style="font-size:12px;color:var(--mu);margin:10px 0 16px;line-height:1.55">Responsibility shifts gradually from teacher → student (Pearson &amp; Gallagher, 1983; Fisher &amp; Frey, 2013).</p>';
+
+      h += '<div style="display:flex;flex-direction:column;gap:14px">';
+
+      // I DO (bigger, more visual)
+      h += '<div style="border-radius:14px;border:2px solid #8a6cb8;background:rgba(138,108,184,0.06);padding:14px 16px">';
+      h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+      h += '<div style="width:44px;height:44px;border-radius:12px;background:#8a6cb8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🧑‍🏫</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#5d3b8c">I DO</div>';
+      h += '<div style="font-size:11px;color:var(--mu)">Teacher models, thinks aloud, demonstrates</div></div></div>';
+      h += '<textarea class="ta" rows="4" oninput="actUpd(\'iDo\',this.value)" placeholder="How will you explicitly model this skill? Script your teacher talk. Narrate your thinking. Example: \'Watch me. I see the letters s-a-t. I know /s/, /a/, /t/. I blend: sss-aaa-ttt → sat.\'" style="font-size:14px;background:var(--bg)">' + esc(A.iDo || '') + '</textarea>';
       h += '</div>';
 
-      // Selected editor (only render if something picked)
-      if (pickedId) {
-        var comp = findComp(pickedId);
-        var d = S.data[pickedId] || {};
-        h += '<section class="card" style="padding:18px;margin-bottom:14px;border:2px solid var(--ac)">';
-        h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-size:22px">' + comp.icon + '</span>';
-        h += '<div><div class="fh" style="font-weight:700;font-size:16px">' + comp.label + '</div>';
-        h += '<div style="font-size:11px;color:var(--mu)">' + comp.desc + '</div></div></div>';
-        h += '<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:10px">';
-        h += '<div><label class="lbl">TARGET / CONCEPT</label><input class="inp" value="' + esc(d.target || "") + '" oninput="upd(\'' + pickedId + '\',\'target\',this.value)" placeholder="What are you targeting?"></div>';
-        h += '<div><label class="lbl">MODE</label><select class="sl" style="width:105px" onchange="updR(\'' + pickedId + '\',\'mode\',this.value)"><option value="decoding"' + (d.mode === "decoding" ? " selected" : "") + '>Decoding</option><option value="encoding"' + (d.mode === "encoding" ? " selected" : "") + '>Encoding</option><option value="both"' + (d.mode === "both" ? " selected" : "") + '>Both</option></select></div>';
-        h += '<div><label class="lbl">MIN</label><input type="number" class="inp" style="width:55px;text-align:center" min="1" max="60" value="' + (d.minutes || comp.min) + '" onchange="updR(\'' + pickedId + '\',\'minutes\',+this.value)"></div>';
-        h += '</div>';
-        h += '<button style="background:none;border:none;font-size:11px;color:var(--ac);cursor:pointer;font-weight:600;padding:0;font-family:var(--ff)" onclick="togSug(\'' + pickedId + '\')">' + (S.showSug === pickedId ? '&#9662; Hide suggestions' : '&#9656; Suggested targets') + '</button>';
-        if (S.showSug === pickedId) {
-          h += '<div style="margin-top:5px;display:flex;flex-wrap:wrap">';
-          comp.targets.forEach(function(t) {
-            h += '<button class="chip" onclick="pickTarget(\'' + pickedId + '\',\'' + esc(t).replace(/'/g, "\\'") + '\')">' + esc(t) + '</button>';
-          });
-          h += '</div>';
-        }
-        h += '<div style="margin-top:10px"><label class="lbl">MATERIALS (optional)</label><input class="inp" value="' + esc(d.materials || "") + '" oninput="upd(\'' + pickedId + '\',\'materials\',this.value)" placeholder="e.g., phonogram cards, whiteboard, letter tiles..."></div>';
-        h += '</section>';
+      // WE DO
+      h += '<div style="border-radius:14px;border:2px solid #4e7fb8;background:rgba(78,127,184,0.06);padding:14px 16px">';
+      h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+      h += '<div style="width:44px;height:44px;border-radius:12px;background:#4e7fb8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🤝</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#2e5a94">WE DO</div>';
+      h += '<div style="font-size:11px;color:var(--mu)">Guided practice together — you scaffold with cues</div></div></div>';
+      h += '<textarea class="ta" rows="4" oninput="actUpd(\'weDo\',this.value)" placeholder="How will you practice together? What scaffolds/cues will you use? Example: \'We try the next three words together. I\'ll point to each letter — you tell me the sound. If stuck, I\'ll give a verbal prompt, then a model.\'" style="font-size:14px;background:var(--bg)">' + esc(A.weDo || '') + '</textarea>';
+      h += '</div>';
 
-        // ── GRR Framework — Gradual Release of Responsibility ──
-        h += '<section class="card" style="padding:18px;margin-bottom:14px">';
-        h += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
-        h += '<h2>Activity Structure</h2>';
-        h += '<span style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase">Gradual Release of Responsibility</span>';
-        h += '</div>';
-        h += '<p style="font-size:11px;color:var(--mu);margin:0 0 14px;line-height:1.55">Plan the three phases of instruction. Responsibility shifts gradually from teacher to student (Pearson &amp; Gallagher, 1983; Fisher &amp; Frey, 2013).</p>';
+      // YOU DO
+      h += '<div style="border-radius:14px;border:2px solid #27ae60;background:rgba(39,174,96,0.06);padding:14px 16px">';
+      h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+      h += '<div style="width:44px;height:44px;border-radius:12px;background:#27ae60;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎓</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#1a7a43">YOU DO</div>';
+      h += '<div style="font-size:11px;color:var(--mu)">Independent application — where you collect data</div></div></div>';
+      h += '<textarea class="ta" rows="4" oninput="actUpd(\'youDo\',this.value)" placeholder="How will the student apply this independently? What will you watch for? Example: \'Student reads 10 unseen CVC words aloud. I mark correct/incorrect per word. Target ≥ 80% accuracy before next step.\'" style="font-size:14px;background:var(--bg)">' + esc(A.youDo || '') + '</textarea>';
+      h += '</div>';
 
-        h += '<div style="display:flex;flex-direction:column;gap:12px">';
+      h += '</div></section>';
 
-        h += '<div style="border-left:4px solid #8a6cb8;padding:10px 14px;background:rgba(138,108,184,0.06);border-radius:0 10px 10px 0">';
-        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">🧑‍🏫</span><div class="fh" style="font-weight:700;font-size:13px;color:#5d3b8c">I DO <span style="font-weight:500;color:var(--mu);font-size:11px;margin-left:4px">Teacher models &amp; explains</span></div></div>';
-        h += '<textarea class="ta" rows="2" oninput="upd(\'' + pickedId + '\',\'iDo\',this.value)" placeholder="How will you explicitly model this skill? Narrate your thinking aloud.">' + esc(d.iDo || '') + '</textarea>';
-        h += '</div>';
-
-        h += '<div style="border-left:4px solid #4e7fb8;padding:10px 14px;background:rgba(78,127,184,0.06);border-radius:0 10px 10px 0">';
-        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">🤝</span><div class="fh" style="font-weight:700;font-size:13px;color:#2e5a94">WE DO <span style="font-weight:500;color:var(--mu);font-size:11px;margin-left:4px">Guided practice together</span></div></div>';
-        h += '<textarea class="ta" rows="2" oninput="upd(\'' + pickedId + '\',\'weDo\',this.value)" placeholder="How will you scaffold guided practice? What cues will you use?">' + esc(d.weDo || '') + '</textarea>';
-        h += '</div>';
-
-        h += '<div style="border-left:4px solid #27ae60;padding:10px 14px;background:rgba(39,174,96,0.06);border-radius:0 10px 10px 0">';
-        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">🎓</span><div class="fh" style="font-weight:700;font-size:13px;color:#1a7a43">YOU DO <span style="font-weight:500;color:var(--mu);font-size:11px;margin-left:4px">Independent application &amp; data collection</span></div></div>';
-        h += '<textarea class="ta" rows="2" oninput="upd(\'' + pickedId + '\',\'youDo\',this.value)" placeholder="How will the student apply this independently? This is where you collect data.">' + esc(d.youDo || '') + '</textarea>';
-        h += '</div>';
-
-        h += '</div></section>';
-      }
-
-      h += '<div style="display:flex;gap:8px;margin-top:18px;justify-content:center">';
+      h += '<div style="display:flex;gap:8px;margin-top:18px;justify-content:center;flex-wrap:wrap">';
       h += '<button class="btn btn-s" style="font-size:13px" onclick="doPrint()">🖨️ Print Blank</button>';
-      h += '<button class="btn btn-p" style="font-size:15px;padding:13px 30px' + (pickedId ? '' : ';opacity:.4;pointer-events:none') + '" onclick="go(\'collect\')">Start Activity →</button></div>';
+      var canStart = A.modeSel && A.level && A.target.trim();
+      h += '<button class="btn btn-p" style="font-size:15px;padding:13px 30px' + (canStart ? '' : ';opacity:.4;pointer-events:none') + '" onclick="go(\'collect\')">Collect Data →</button></div>';
 
     } else {
       // ── SESSION MODE: Original multi-component flow ──
@@ -496,81 +641,129 @@ function render() {
     h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px"><h2>' + liveTitle + (S.name ? ' <span style="font-weight:400;font-size:15px"> — ' + esc(S.name) + '</span>' : '') + '</h2><span style="font-size:11px;color:var(--mu)">' + S.date + '</span></div>';
     h += '<p style="font-size:11px;color:var(--mu);margin:0 0 14px">Tap the green check for correct, red X for incorrect. Percentage updates live.</p>';
 
-    // Activity-mode GRR reminder cards above the tapper
-    if (isActivity && S.sel.length > 0) {
-      var actId = S.sel[0];
-      var actD = S.data[actId] || {};
-      var hasAnyGRR = (actD.iDo || '').trim() || (actD.weDo || '').trim() || (actD.youDo || '').trim();
+    if (isActivity) {
+      // ═══ ACTIVITY-MODE COLLECT (single target, from S.activity) ═══
+      var A = S.activity;
+      var aTotal = (A.correct || 0) + (A.incorrect || 0);
+      var aPct = aTotal > 0 ? Math.round((A.correct / aTotal) * 100) : null;
+      var modeData = null, levelData = null;
+      for (var mm = 0; mm < ACT_MODES.length; mm++) if (ACT_MODES[mm].id === A.modeSel) modeData = ACT_MODES[mm];
+      for (var ll = 0; ll < LEVELS.length; ll++) if (LEVELS[ll].id === A.level) levelData = LEVELS[ll];
+
+      // Overview card: mode + level pills, target, materials
+      h += '<section class="card" style="padding:16px 18px;margin-bottom:12px">';
+      h += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px">';
+      if (modeData) h += '<span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;background:' + modeData.soft + ';color:' + modeData.color + ';letter-spacing:0.5px">' + modeData.icon + ' ' + modeData.label.toUpperCase() + '</span>';
+      if (levelData) h += '<span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--bd);color:var(--tx);letter-spacing:0.5px">' + levelData.icon + ' ' + levelData.label.toUpperCase() + '</span>';
+      h += '<span style="font-size:10px;color:var(--mu);margin-left:auto">~' + (A.minutes || 0) + ' min</span>';
+      h += '</div>';
+      if (A.target) {
+        h += '<div class="fh" style="font-weight:700;font-size:17px;line-height:1.35;color:var(--tx)">🎯 ' + esc(A.target) + '</div>';
+      } else {
+        h += '<div style="font-size:13px;color:var(--mu);font-style:italic">No target set — <a href="#" onclick="go(\'plan\');return false" style="color:var(--ac);text-decoration:underline">go back to Plan</a> to add one.</div>';
+      }
+      if (A.materials) h += '<div style="font-size:11px;color:var(--mu);margin-top:4px">Materials: ' + esc(A.materials) + '</div>';
+      h += '</section>';
+
+      // GRR reminder
+      var hasAnyGRR = (A.iDo || '').trim() || (A.weDo || '').trim() || (A.youDo || '').trim();
       if (hasAnyGRR) {
         h += '<section class="card" style="padding:12px 14px;margin-bottom:12px">';
-        h += '<div style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Activity Flow</div>';
+        h += '<div style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Activity Flow · Gradual Release</div>';
         h += '<div style="display:flex;flex-direction:column;gap:6px">';
-        if ((actD.iDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #8a6cb8;padding:2px 10px"><span style="font-weight:700;color:#5d3b8c;font-size:10px;letter-spacing:1px">I DO</span> · ' + esc(actD.iDo) + '</div>';
-        if ((actD.weDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #4e7fb8;padding:2px 10px"><span style="font-weight:700;color:#2e5a94;font-size:10px;letter-spacing:1px">WE DO</span> · ' + esc(actD.weDo) + '</div>';
-        if ((actD.youDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #27ae60;padding:2px 10px"><span style="font-weight:700;color:#1a7a43;font-size:10px;letter-spacing:1px">YOU DO</span> · ' + esc(actD.youDo) + '</div>';
+        if ((A.iDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #8a6cb8;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#5d3b8c;font-size:10px;letter-spacing:1px">🧑‍🏫 I DO</span> · ' + esc(A.iDo) + '</div>';
+        if ((A.weDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #4e7fb8;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#2e5a94;font-size:10px;letter-spacing:1px">🤝 WE DO</span> · ' + esc(A.weDo) + '</div>';
+        if ((A.youDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #27ae60;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#1a7a43;font-size:10px;letter-spacing:1px">🎓 YOU DO</span> · ' + esc(A.youDo) + '</div>';
         h += '</div></section>';
       }
-    }
-    h += '<div style="display:flex;flex-direction:column;gap:8px">';
 
-    S.sel.forEach(function(id, i) {
-      var comp = findComp(id);
-      if (!comp) return;
-      var d = S.data[id] || {};
-      var total = (d.correct || 0) + (d.incorrect || 0);
-      var pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
-      // In activity mode, auto-expand the single component
-      var isExp = isActivity ? true : (S.expanded === id);
+      // Big tapper card
+      h += '<section class="card" style="padding:20px 16px 18px">';
+      h += '<div style="display:flex;align-items:center;justify-content:center;gap:32px;margin-bottom:16px">';
+      h += '<button class="tapper tp-n" onclick="actTap(0)" aria-label="Incorrect">&#10007;</button>';
+      h += '<div style="text-align:center;min-width:110px"><div class="fh" style="font-size:46px;font-weight:700;line-height:1;color:' + (aPct === null ? 'var(--mu)' : pctCol(aPct)) + '">' + (aPct !== null ? aPct : 0) + '%</div>';
+      h += '<div style="font-size:11px;color:var(--mu);margin-top:3px">' + (A.correct || 0) + ' / ' + aTotal + ' trials</div></div>';
+      h += '<button class="tapper tp-y" onclick="actTap(1)" aria-label="Correct">&#10003;</button></div>';
 
-      h += '<div class="card" style="overflow:hidden">';
-      h += '<button onclick="togExp(\'' + id + '\')" aria-expanded="' + isExp + '" style="width:100%;background:none;border:none;cursor:pointer;color:var(--tx);padding:12px 14px;display:flex;align-items:center;gap:8px;text-align:left;font-family:var(--ff);outline:none">';
-      h += '<span class="num" style="width:24px;height:24px;border-radius:7px">' + (i + 1) + '</span>';
-      h += '<span style="font-size:15px">' + comp.icon + '</span>';
-      h += '<div style="flex:1;min-width:0"><div class="fh" style="font-weight:600;font-size:13px">' + comp.label + '</div>';
-      if (d.target) h += '<div style="font-size:10px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(d.target) + '</div>';
-      h += '</div>';
-      if (pct !== null) h += '<span class="pb ' + pctCls(pct) + '">' + pct + '% <span style="font-size:10px;font-weight:500;opacity:.7">(' + (d.correct || 0) + '/' + total + ')</span></span>';
-      h += '<span style="font-size:11px;color:var(--mu)">' + (isExp ? '&#9662;' : '&#9656;') + '</span></button>';
-
-      if (isExp) {
-        h += '<div style="padding:0 14px 16px;border-top:1px solid var(--bd);padding-top:14px">';
-        // Tapper
-        h += '<div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:14px">';
-        h += '<button class="tapper tp-n" onclick="tap(\'' + id + '\',0)" aria-label="Incorrect">&#10007;</button>';
-        h += '<div style="text-align:center;min-width:80px"><div class="fh" style="font-size:36px;font-weight:700;line-height:1;color:' + (pct === null ? 'var(--mu)' : pctCol(pct || 0)) + '">' + (pct !== null ? pct : 0) + '%</div>';
-        h += '<div style="font-size:11px;color:var(--mu);margin-top:2px">' + (d.correct || 0) + ' / ' + total + ' trials</div></div>';
-        h += '<button class="tapper tp-y" onclick="tap(\'' + id + '\',1)" aria-label="Correct">&#10003;</button></div>';
-
-        // Dots
-        if (total > 0 && total <= 50) {
-          h += '<div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-bottom:12px" aria-hidden="true">';
-          for (var dc = 0; dc < (d.correct || 0); dc++) h += '<span class="dot" style="background:var(--gn)"></span>';
-          for (var di = 0; di < (d.incorrect || 0); di++) h += '<span class="dot" style="background:var(--rd)"></span>';
-          h += '</div>';
-        }
-        if (total > 0) h += '<div style="text-align:center;margin-bottom:12px"><button class="btn-i" style="text-decoration:underline;font-size:10px" onclick="resetData(\'' + id + '\')">Reset</button></div>';
-
-        // Cue + mode
-        h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-        h += '<div><label class="lbl">CUE LEVEL</label><select class="sl" onchange="updR(\'' + id + '\',\'cue\',this.value)"><option value="">Select...</option>';
-        CUES.forEach(function(c) { h += '<option value="' + c + '"' + (d.cue === c ? ' selected' : '') + '>' + c + '</option>'; });
-        h += '</select></div>';
-        h += '<div style="display:flex;align-items:flex-end;font-size:12px;color:var(--mu);padding-bottom:10px">' + (MNAMES[d.mode] || "Both") + ' · ~' + d.minutes + ' min</div></div>';
-
-        // Notes
-        h += '<div style="margin-top:8px"><label class="lbl">SESSION NOTES</label><textarea class="ta" rows="2" oninput="upd(\'' + id + '\',\'notes\',this.value)" placeholder="Error patterns, observations, next steps...">' + esc(d.notes || '') + '</textarea></div>';
-
-        // Next button
-        if (i < S.sel.length - 1) {
-          var nextC = findComp(S.sel[i + 1]);
-          if (nextC) h += '<div style="text-align:center;margin-top:12px"><button class="btn btn-p" style="font-size:12px;padding:8px 20px" onclick="togExp(\'' + S.sel[i + 1] + '\')">Next: ' + nextC.label + ' →</button></div>';
-        }
+      // Dots
+      if (aTotal > 0 && aTotal <= 50) {
+        h += '<div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-bottom:12px" aria-hidden="true">';
+        for (var adc = 0; adc < (A.correct || 0); adc++) h += '<span class="dot" style="background:var(--gn)"></span>';
+        for (var adi = 0; adi < (A.incorrect || 0); adi++) h += '<span class="dot" style="background:var(--rd)"></span>';
         h += '</div>';
       }
-      h += '</div>';
-    });
+      if (aTotal > 0) h += '<div style="text-align:center;margin-bottom:14px"><button class="btn-i" style="text-decoration:underline;font-size:10px" onclick="actReset()">Reset trials</button></div>';
 
-    h += '</div>';
+      // Cue + mode/level info
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">';
+      h += '<div><label class="lbl">CUE LEVEL</label><select class="sl" onchange="actUpdR(\'cue\',this.value)"><option value="">Select...</option>';
+      CUES.forEach(function(c) { h += '<option value="' + c + '"' + (A.cue === c ? ' selected' : '') + '>' + c + '</option>'; });
+      h += '</select></div>';
+      h += '<div style="display:flex;align-items:flex-end;font-size:12px;color:var(--mu);padding-bottom:10px">' + (modeData ? modeData.label : 'Mode') + ' · ' + (levelData ? levelData.label : 'Level') + '</div>';
+      h += '</div>';
+
+      // Notes
+      h += '<div style="margin-top:10px"><label class="lbl">ACTIVITY NOTES</label><textarea class="ta" rows="3" oninput="actUpd(\'notes\',this.value)" placeholder="Error patterns, observations, next steps...">' + esc(A.notes || '') + '</textarea></div>';
+      h += '</section>';
+
+    } else {
+      // ═══ SESSION-MODE COLLECT (existing multi-component flow) ═══
+      h += '<div style="display:flex;flex-direction:column;gap:8px">';
+
+      S.sel.forEach(function(id, i) {
+        var comp = findComp(id);
+        if (!comp) return;
+        var d = S.data[id] || {};
+        var total = (d.correct || 0) + (d.incorrect || 0);
+        var pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
+        var isExp = S.expanded === id;
+
+        h += '<div class="card" style="overflow:hidden">';
+        h += '<button onclick="togExp(\'' + id + '\')" aria-expanded="' + isExp + '" style="width:100%;background:none;border:none;cursor:pointer;color:var(--tx);padding:12px 14px;display:flex;align-items:center;gap:8px;text-align:left;font-family:var(--ff);outline:none">';
+        h += '<span class="num" style="width:24px;height:24px;border-radius:7px">' + (i + 1) + '</span>';
+        h += '<span style="font-size:15px">' + comp.icon + '</span>';
+        h += '<div style="flex:1;min-width:0"><div class="fh" style="font-weight:600;font-size:13px">' + comp.label + '</div>';
+        if (d.target) h += '<div style="font-size:10px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(d.target) + '</div>';
+        h += '</div>';
+        if (pct !== null) h += '<span class="pb ' + pctCls(pct) + '">' + pct + '% <span style="font-size:10px;font-weight:500;opacity:.7">(' + (d.correct || 0) + '/' + total + ')</span></span>';
+        h += '<span style="font-size:11px;color:var(--mu)">' + (isExp ? '&#9662;' : '&#9656;') + '</span></button>';
+
+        if (isExp) {
+          h += '<div style="padding:0 14px 16px;border-top:1px solid var(--bd);padding-top:14px">';
+          h += '<div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:14px">';
+          h += '<button class="tapper tp-n" onclick="tap(\'' + id + '\',0)" aria-label="Incorrect">&#10007;</button>';
+          h += '<div style="text-align:center;min-width:80px"><div class="fh" style="font-size:36px;font-weight:700;line-height:1;color:' + (pct === null ? 'var(--mu)' : pctCol(pct || 0)) + '">' + (pct !== null ? pct : 0) + '%</div>';
+          h += '<div style="font-size:11px;color:var(--mu);margin-top:2px">' + (d.correct || 0) + ' / ' + total + ' trials</div></div>';
+          h += '<button class="tapper tp-y" onclick="tap(\'' + id + '\',1)" aria-label="Correct">&#10003;</button></div>';
+
+          if (total > 0 && total <= 50) {
+            h += '<div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-bottom:12px" aria-hidden="true">';
+            for (var dc = 0; dc < (d.correct || 0); dc++) h += '<span class="dot" style="background:var(--gn)"></span>';
+            for (var di = 0; di < (d.incorrect || 0); di++) h += '<span class="dot" style="background:var(--rd)"></span>';
+            h += '</div>';
+          }
+          if (total > 0) h += '<div style="text-align:center;margin-bottom:12px"><button class="btn-i" style="text-decoration:underline;font-size:10px" onclick="resetData(\'' + id + '\')">Reset</button></div>';
+
+          h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+          h += '<div><label class="lbl">CUE LEVEL</label><select class="sl" onchange="updR(\'' + id + '\',\'cue\',this.value)"><option value="">Select...</option>';
+          CUES.forEach(function(c) { h += '<option value="' + c + '"' + (d.cue === c ? ' selected' : '') + '>' + c + '</option>'; });
+          h += '</select></div>';
+          h += '<div style="display:flex;align-items:flex-end;font-size:12px;color:var(--mu);padding-bottom:10px">' + (MNAMES[d.mode] || "Both") + ' · ~' + d.minutes + ' min</div></div>';
+
+          h += '<div style="margin-top:8px"><label class="lbl">SESSION NOTES</label><textarea class="ta" rows="2" oninput="upd(\'' + id + '\',\'notes\',this.value)" placeholder="Error patterns, observations, next steps...">' + esc(d.notes || '') + '</textarea></div>';
+
+          if (i < S.sel.length - 1) {
+            var nextC = findComp(S.sel[i + 1]);
+            if (nextC) h += '<div style="text-align:center;margin-top:12px"><button class="btn btn-p" style="font-size:12px;padding:8px 20px" onclick="togExp(\'' + S.sel[i + 1] + '\')">Next: ' + nextC.label + ' →</button></div>';
+          }
+          h += '</div>';
+        }
+        h += '</div>';
+      });
+
+      h += '</div>';
+    }
+
     h += '<div style="display:flex;gap:8px;margin-top:18px;justify-content:center"><button class="btn btn-s" onclick="go(\'plan\')">← Edit Plan</button>';
     h += '<button class="btn btn-p" style="padding:13px 28px" onclick="go(\'summary\')">View Summary →</button></div>';
   }
@@ -584,7 +777,12 @@ function render() {
 
     // Overall stats
     var allC = 0, allI = 0;
-    S.sel.forEach(function(id) { allC += (S.data[id] && S.data[id].correct) || 0; allI += (S.data[id] && S.data[id].incorrect) || 0; });
+    if (isActivity) {
+      allC = S.activity.correct || 0;
+      allI = S.activity.incorrect || 0;
+    } else {
+      S.sel.forEach(function(id) { allC += (S.data[id] && S.data[id].correct) || 0; allI += (S.data[id] && S.data[id].incorrect) || 0; });
+    }
     var allT = allC + allI;
     if (allT > 0) {
       h += '<div class="card" style="padding:18px;margin-bottom:14px;background:linear-gradient(135deg,#f8f6ff,#f0f8f6)">';
@@ -597,11 +795,32 @@ function render() {
       h += '</div></div>';
     }
 
-    // Activity-mode GRR summary block (before the component card)
-    if (isActivity && S.sel.length > 0) {
-      var sumId = S.sel[0];
-      var sumD = S.data[sumId] || {};
-      var hasGRR = (sumD.iDo || '').trim() || (sumD.weDo || '').trim() || (sumD.youDo || '').trim();
+    if (isActivity) {
+      // ═══ ACTIVITY-MODE SUMMARY ═══
+      var sA = S.activity;
+      var sTotal = (sA.correct || 0) + (sA.incorrect || 0);
+      var sPct = sTotal > 0 ? Math.round(((sA.correct || 0) / sTotal) * 100) : null;
+      var sModeData = null, sLevelData = null;
+      for (var sm = 0; sm < ACT_MODES.length; sm++) if (ACT_MODES[sm].id === sA.modeSel) sModeData = ACT_MODES[sm];
+      for (var sl = 0; sl < LEVELS.length; sl++) if (LEVELS[sl].id === sA.level) sLevelData = LEVELS[sl];
+
+      // Target + meta card
+      h += '<div class="card" style="padding:16px;margin-bottom:12px">';
+      h += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px">';
+      if (sModeData) h += '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;background:' + sModeData.soft + ';color:' + sModeData.color + ';letter-spacing:0.5px">' + sModeData.icon + ' ' + sModeData.label.toUpperCase() + '</span>';
+      if (sLevelData) h += '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;background:var(--bd);color:var(--tx);letter-spacing:0.5px">' + sLevelData.icon + ' ' + sLevelData.label.toUpperCase() + '</span>';
+      h += '<span style="font-size:10px;color:var(--mu);margin-left:auto">~' + (sA.minutes || 0) + ' min</span>';
+      h += '</div>';
+      if (sA.target) h += '<div class="fh" style="font-weight:700;font-size:15px;line-height:1.4;margin-bottom:4px">🎯 ' + esc(sA.target) + '</div>';
+      else h += '<div style="font-size:12px;color:var(--mu);font-style:italic">No target set</div>';
+      if (sA.materials) h += '<div style="font-size:11px;color:var(--mu)">Materials: ' + esc(sA.materials) + '</div>';
+      if (sA.cue) h += '<div style="font-size:11px;color:var(--mu)">Cue Level: ' + esc(sA.cue) + '</div>';
+      if (sTotal > 0 && sPct !== null) h += '<div class="prog" style="margin-top:8px"><div class="prog-f" style="width:' + sPct + '%;background:' + pctCol(sPct) + '"></div></div>';
+      if (sA.notes) h += '<div style="font-size:11px;color:var(--mu);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">Notes: ' + esc(sA.notes) + '</div>';
+      h += '</div>';
+
+      // GRR structure card
+      var hasGRR = (sA.iDo || '').trim() || (sA.weDo || '').trim() || (sA.youDo || '').trim();
       if (hasGRR) {
         h += '<section class="card" style="padding:16px;margin-bottom:14px">';
         h += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
@@ -609,56 +828,58 @@ function render() {
         h += '<span style="font-size:9px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase">Gradual Release of Responsibility</span>';
         h += '</div>';
         h += '<div style="display:flex;flex-direction:column;gap:8px">';
-        if ((sumD.iDo || '').trim()) {
-          h += '<div style="border-left:4px solid #8a6cb8;padding:6px 12px;background:rgba(138,108,184,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#5d3b8c;font-size:10px;letter-spacing:1.5px;margin-bottom:2px">🧑‍🏫 I DO</div>';
-          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sumD.iDo) + '</div></div>';
+        if ((sA.iDo || '').trim()) {
+          h += '<div style="border-left:4px solid #8a6cb8;padding:8px 12px;background:rgba(138,108,184,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#5d3b8c;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🧑‍🏫 I DO</div>';
+          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.iDo) + '</div></div>';
         }
-        if ((sumD.weDo || '').trim()) {
-          h += '<div style="border-left:4px solid #4e7fb8;padding:6px 12px;background:rgba(78,127,184,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#2e5a94;font-size:10px;letter-spacing:1.5px;margin-bottom:2px">🤝 WE DO</div>';
-          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sumD.weDo) + '</div></div>';
+        if ((sA.weDo || '').trim()) {
+          h += '<div style="border-left:4px solid #4e7fb8;padding:8px 12px;background:rgba(78,127,184,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#2e5a94;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🤝 WE DO</div>';
+          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.weDo) + '</div></div>';
         }
-        if ((sumD.youDo || '').trim()) {
-          h += '<div style="border-left:4px solid #27ae60;padding:6px 12px;background:rgba(39,174,96,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#1a7a43;font-size:10px;letter-spacing:1.5px;margin-bottom:2px">🎓 YOU DO</div>';
-          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sumD.youDo) + '</div></div>';
+        if ((sA.youDo || '').trim()) {
+          h += '<div style="border-left:4px solid #27ae60;padding:8px 12px;background:rgba(39,174,96,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#1a7a43;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🎓 YOU DO</div>';
+          h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.youDo) + '</div></div>';
         }
-        h += '</div></section>';
+        h += '</div>';
+        h += '<div style="margin-top:10px;font-size:9px;color:var(--mu);font-style:italic;text-align:center">Pearson &amp; Gallagher (1983); Fisher &amp; Frey (2013)</div>';
+        h += '</section>';
       }
-    }
+    } else {
+      // ═══ SESSION-MODE SUMMARY (per-component) ═══
+      h += '<div style="display:flex;flex-direction:column;gap:8px">';
+      S.sel.forEach(function(id, i) {
+        var comp = findComp(id);
+        if (!comp) return;
+        var d = S.data[id] || {};
+        var total = (d.correct || 0) + (d.incorrect || 0);
+        var pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
 
-    // Per-component
-    h += '<div style="display:flex;flex-direction:column;gap:8px">';
-    S.sel.forEach(function(id, i) {
-      var comp = findComp(id);
-      if (!comp) return;
-      var d = S.data[id] || {};
-      var total = (d.correct || 0) + (d.incorrect || 0);
-      var pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
-
-      h += '<div class="card" style="padding:12px 16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="flex:1">';
-      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">';
-      if (!isActivity) h += '<span class="num">' + (i + 1) + '</span>';
-      h += '<span style="font-size:14px">' + comp.icon + '</span>';
-      h += '<span class="fh" style="font-weight:600;font-size:13px">' + comp.label + '</span>';
-      h += '<span style="font-size:9px;padding:2px 6px;border-radius:6px;background:var(--bd);color:var(--mu);font-weight:600">' + (MNAMES[d.mode] || "Both") + ' · ~' + d.minutes + 'm</span></div>';
-      if (d.target) h += '<div style="font-size:12px;font-weight:600;margin-bottom:1px">Target: ' + esc(d.target) + '</div>';
-      if (d.materials) h += '<div style="font-size:11px;color:var(--mu)">Materials: ' + esc(d.materials) + '</div>';
-      if (d.cue) h += '<div style="font-size:11px;color:var(--mu)">Cue: ' + esc(d.cue) + '</div>';
-      if (d.notes) h += '<div style="font-size:11px;color:var(--mu);font-style:italic;margin-top:2px">Notes: ' + esc(d.notes) + '</div>';
-      h += '</div><div style="text-align:right;flex-shrink:0">';
-      if (pct !== null) {
-        h += '<div class="fh" style="font-size:20px;font-weight:700;color:' + pctCol(pct) + '">' + pct + '%</div>';
-        h += '<div style="font-size:10px;color:var(--mu)">' + d.correct + '/' + total + '</div>';
-      } else {
-        h += '<div style="font-size:10px;color:var(--mu)">No data</div>';
-      }
-      h += '</div></div>';
-      if (total > 0) h += '<div class="prog"><div class="prog-f" style="width:' + pct + '%;background:' + pctCol(pct) + '"></div></div>';
+        h += '<div class="card" style="padding:12px 16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="flex:1">';
+        h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">';
+        h += '<span class="num">' + (i + 1) + '</span>';
+        h += '<span style="font-size:14px">' + comp.icon + '</span>';
+        h += '<span class="fh" style="font-weight:600;font-size:13px">' + comp.label + '</span>';
+        h += '<span style="font-size:9px;padding:2px 6px;border-radius:6px;background:var(--bd);color:var(--mu);font-weight:600">' + (MNAMES[d.mode] || "Both") + ' · ~' + d.minutes + 'm</span></div>';
+        if (d.target) h += '<div style="font-size:12px;font-weight:600;margin-bottom:1px">Target: ' + esc(d.target) + '</div>';
+        if (d.materials) h += '<div style="font-size:11px;color:var(--mu)">Materials: ' + esc(d.materials) + '</div>';
+        if (d.cue) h += '<div style="font-size:11px;color:var(--mu)">Cue: ' + esc(d.cue) + '</div>';
+        if (d.notes) h += '<div style="font-size:11px;color:var(--mu);font-style:italic;margin-top:2px">Notes: ' + esc(d.notes) + '</div>';
+        h += '</div><div style="text-align:right;flex-shrink:0">';
+        if (pct !== null) {
+          h += '<div class="fh" style="font-size:20px;font-weight:700;color:' + pctCol(pct) + '">' + pct + '%</div>';
+          h += '<div style="font-size:10px;color:var(--mu)">' + d.correct + '/' + total + '</div>';
+        } else {
+          h += '<div style="font-size:10px;color:var(--mu)">No data</div>';
+        }
+        h += '</div></div>';
+        if (total > 0) h += '<div class="prog"><div class="prog-f" style="width:' + pct + '%;background:' + pctCol(pct) + '"></div></div>';
+        h += '</div>';
+      });
       h += '</div>';
-    });
-    h += '</div>';
+    }
 
     h += '<div class="no-print" style="display:flex;gap:8px;margin-top:18px;justify-content:center">';
     h += '<button class="btn btn-s" onclick="go(\'collect\')">← Collect</button>';
