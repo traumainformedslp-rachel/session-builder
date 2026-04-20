@@ -28,6 +28,7 @@ var MNAMES = {decoding:"Decoding",encoding:"Encoding",both:"Both"};
 // ─── State ───
 var S = {
   view: "plan",
+  mode: null, // null = chooser, "activity" = single-skill GRR, "session" = full structured literacy
   dark: false,
   name: "",
   date: new Date().toISOString().split("T")[0],
@@ -52,7 +53,12 @@ function ensureData() {
   S.sel.forEach(function(id) {
     if (!S.data[id]) {
       var c = findComp(id);
-      S.data[id] = {target:"",materials:"",minutes:c?c.min:5,mode:c?c.mode:"both",correct:0,incorrect:0,cue:"",notes:""};
+      S.data[id] = {target:"",materials:"",minutes:c?c.min:5,mode:c?c.mode:"both",correct:0,incorrect:0,cue:"",notes:"",iDo:"",weDo:"",youDo:""};
+    } else {
+      // Backfill GRR fields for any pre-existing component data
+      if (S.data[id].iDo == null) S.data[id].iDo = "";
+      if (S.data[id].weDo == null) S.data[id].weDo = "";
+      if (S.data[id].youDo == null) S.data[id].youDo = "";
     }
   });
 }
@@ -82,11 +88,43 @@ function toggleDark() {
 }
 
 function togSel(id) {
-  var i = S.sel.indexOf(id);
-  if (i >= 0) S.sel.splice(i, 1);
-  else S.sel.push(id);
+  if (S.mode === "activity") {
+    // Activity mode = single skill focus
+    if (S.sel.length === 1 && S.sel[0] === id) S.sel = [];
+    else S.sel = [id];
+  } else {
+    var i = S.sel.indexOf(id);
+    if (i >= 0) S.sel.splice(i, 1);
+    else S.sel.push(id);
+  }
   ensureData();
   render();
+}
+
+function setMode(m) {
+  S.mode = m;
+  S.view = "plan";
+  S.sel = [];
+  S.data = {};
+  S.expanded = null;
+  S.showSug = null;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function startOver() {
+  if (window.confirm("Start over? This will clear the current plan and return to the chooser.")) {
+    S.mode = null;
+    S.view = "plan";
+    S.sel = [];
+    S.data = {};
+    S.name = "";
+    S.num = "";
+    S.expanded = null;
+    S.showSug = null;
+    render();
+    window.scrollTo(0, 0);
+  }
 }
 
 function moveComp(id, dir) {
@@ -249,14 +287,51 @@ function render() {
   var el = document.getElementById("app");
   var h = '';
 
+  // ═══ CHOOSER (Mode Selector) ═══
+  if (S.mode === null) {
+    h += '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px 40px">';
+    h += '<div style="position:fixed;top:16px;right:16px"><button class="btn btn-s btn-sm" onclick="toggleDark()" aria-label="Toggle dark mode">' + (S.dark ? "☀️" : "🌙") + '</button></div>';
+    h += '<div class="card" style="max-width:640px;width:100%;padding:36px 32px;text-align:center">';
+    h += '<div style="background:var(--ag);border-radius:14px;padding:22px 20px;margin-bottom:28px;box-shadow:0 4px 20px rgba(138,108,184,0.25)">';
+    h += '<div class="fh" style="color:#fff;font-weight:700;font-size:26px;letter-spacing:-0.01em">Session Builder</div>';
+    h += '<div style="color:#ffffffdd;font-size:12px;margin-top:2px">Structured Literacy Planning · Data Collection</div>';
+    h += '<div style="color:#ffffff99;font-size:10px;margin-top:4px;font-family:\'Space Mono\',monospace;letter-spacing:1.5px;text-transform:uppercase">RTN COMMUNICATION &amp; LITERACY</div>';
+    h += '</div>';
+    h += '<div style="font-size:13px;color:var(--mu);margin-bottom:22px;line-height:1.6">What would you like to plan today?</div>';
+    h += '<div style="display:flex;gap:14px;flex-wrap:wrap">';
+    h += '<button onclick="setMode(\'activity\')" style="flex:1;min-width:220px;padding:26px 20px;border-radius:18px;border:3px solid #7eb8e0;background:rgba(126,184,224,0.10);cursor:pointer;text-align:center;font-family:var(--ff);transition:all 0.2s">';
+    h += '<div style="font-size:40px;margin-bottom:6px">🎯</div>';
+    h += '<div class="fh" style="font-weight:700;font-size:17px;color:#4a8ec0;letter-spacing:-0.01em">Plan an Activity</div>';
+    h += '<div style="font-size:11px;color:var(--mu);margin-top:8px;line-height:1.55">Focus on one skill<br>I Do → We Do → You Do<br>Single-target data collection</div>';
+    h += '</button>';
+    h += '<button onclick="setMode(\'session\')" style="flex:1;min-width:220px;padding:26px 20px;border-radius:18px;border:3px solid #9b59b6;background:rgba(155,89,182,0.10);cursor:pointer;text-align:center;font-family:var(--ff);transition:all 0.2s">';
+    h += '<div style="font-size:40px;margin-bottom:6px">📋</div>';
+    h += '<div class="fh" style="font-weight:700;font-size:17px;color:#7b4a96;letter-spacing:-0.01em">Plan a Full Session</div>';
+    h += '<div style="font-size:11px;color:var(--mu);margin-top:8px;line-height:1.55">Multiple components<br>Full structured literacy<br>Multi-skill data collection</div>';
+    h += '</button>';
+    h += '</div>';
+    h += '<div style="margin-top:22px;font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:0.5px;line-height:1.6">';
+    h += 'Evidence-Based · Curriculum-Agnostic<br>Rachel Terra Norton, MS, CCC-SLP · rachelslp.org';
+    h += '</div>';
+    h += '</div>';
+    h += '</div>';
+    el.innerHTML = h;
+    return;
+  }
+
+  var isActivity = S.mode === "activity";
+  var titleText = isActivity ? "Activity Builder" : "Session Builder";
+  var logoMark = isActivity ? "AB" : "SB";
+
   // ── Header ──
   h += '<header class="header no-print">';
-  h += '<div style="display:flex;align-items:center;gap:10px"><div class="logo-mark">SB</div><div><div class="logo-text">Session Builder</div><div class="logo-sub">RTN Communication &amp; Literacy</div></div></div>';
+  h += '<div style="display:flex;align-items:center;gap:10px"><div class="logo-mark">' + logoMark + '</div><div><div class="logo-text">' + titleText + '</div><div class="logo-sub">RTN Communication &amp; Literacy</div></div></div>';
   h += '<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">';
   h += '<button class="btn-tab' + (S.view === "plan" ? " on" : "") + '" onclick="go(\'plan\')">📝 Plan</button>';
   h += '<button class="btn-tab' + (S.view === "collect" ? " on" : "") + '" onclick="go(\'collect\')">📊 Collect</button>';
   h += '<button class="btn-tab' + (S.view === "summary" ? " on" : "") + '" onclick="go(\'summary\')">📄 Summary</button>';
   h += '<div style="width:1px;height:18px;background:var(--bd);margin:0 2px"></div>';
+  h += '<button class="btn btn-s btn-sm" onclick="startOver()" aria-label="Start over" title="Start over">↩</button>';
   h += '<button class="btn btn-s btn-sm" onclick="toggleDark()" aria-label="Toggle dark mode">' + (S.dark ? "☀️" : "🌙") + '</button>';
   h += '</div></header>';
 
@@ -264,66 +339,164 @@ function render() {
 
   // ═══ PLAN ═══
   if (S.view === "plan") {
-    h += '<section class="card" style="padding:18px;margin-bottom:14px"><h2>Session Info</h2>';
+    var infoTitle = isActivity ? "Activity Info" : "Session Info";
+    var numLabel = isActivity ? "ACTIVITY #" : "SESSION #";
+    h += '<section class="card" style="padding:18px;margin-bottom:14px"><h2>' + infoTitle + '</h2>';
     h += '<div class="g3" style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-top:12px">';
     h += '<div><label class="lbl">STUDENT NAME / INITIALS</label><input class="inp" value="' + esc(S.name) + '" oninput="S.name=this.value" placeholder="Optional"></div>';
     h += '<div><label class="lbl">DATE</label><input type="date" class="inp" value="' + S.date + '" oninput="S.date=this.value"></div>';
-    h += '<div><label class="lbl">SESSION #</label><input class="inp" value="' + esc(S.num) + '" oninput="S.num=this.value" placeholder="e.g. 12"></div>';
+    h += '<div><label class="lbl">' + numLabel + '</label><input class="inp" value="' + esc(S.num) + '" oninput="S.num=this.value" placeholder="e.g. 12"></div>';
     h += '</div></section>';
-    h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h2>Session Components</h2><span style="font-size:12px;color:var(--mu);font-weight:600">' + S.sel.length + ' selected · ~' + totalMin() + ' min</span></div>';
-    h += '<p style="font-size:12px;color:var(--mu);margin:0 0 12px">Check components to include. Set targets and reorder. Tap a suggested target or type your own.</p>';
-    h += '<div style="display:flex;flex-direction:column;gap:8px">';
 
-    COMPONENTS.forEach(function(comp) {
-      var isSel = S.sel.indexOf(comp.id) >= 0;
-      var oi = S.sel.indexOf(comp.id);
-      var d = S.data[comp.id] || {};
-      h += '<div class="card' + (isSel ? " sel" : " dim") + '">';
-      h += '<div style="padding:12px 14px;display:flex;align-items:flex-start;gap:10px">';
-      h += '<input type="checkbox" ' + (isSel ? "checked" : "") + ' onchange="togSel(\'' + comp.id + '\')" style="width:19px;height:19px;accent-color:var(--ac);margin-top:2px;cursor:pointer" aria-label="Include ' + esc(comp.label) + '">';
-      h += '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
-      if (isSel) h += '<span class="num">' + (oi + 1) + '</span>';
-      h += '<span style="font-size:17px">' + comp.icon + '</span>';
-      h += '<span class="fh" style="font-weight:600;font-size:14px">' + comp.label + '</span>';
-      h += '<span style="font-size:9px;padding:2px 7px;border-radius:7px;font-weight:600;background:' + comp.color + ';color:#4a4a5a">' + comp.cat + '</span>';
-      h += '</div><div style="font-size:11px;color:var(--mu);margin-top:1px">' + comp.desc + '</div></div>';
-      if (isSel) {
-        h += '<div style="display:flex;flex-direction:column;gap:1px;flex-shrink:0">';
-        h += '<button class="btn-i" onclick="moveComp(\'' + comp.id + '\',-1)"' + (oi === 0 ? ' style="opacity:.25"' : '') + '>&#9650;</button>';
-        h += '<button class="btn-i" onclick="moveComp(\'' + comp.id + '\',1)"' + (oi === S.sel.length - 1 ? ' style="opacity:.25"' : '') + '>&#9660;</button></div>';
-      }
+    if (isActivity) {
+      // ── ACTIVITY MODE: Single-skill chooser + GRR structure ──
+      var pickedId = S.sel[0];
+      h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h2>Choose One Skill Focus</h2>';
+      if (pickedId) { var pc = findComp(pickedId); h += '<span style="font-size:12px;color:var(--mu);font-weight:600">' + (pc ? pc.label : '') + ' · ~' + totalMin() + ' min</span>'; }
       h += '</div>';
-      if (isSel) {
-        h += '<div style="padding:0 14px 12px;border-top:1px solid var(--bd);padding-top:10px">';
-        h += '<div class="gt" style="display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:6px">';
-        h += '<div><label class="lbl">TARGET / CONCEPT</label><input class="inp" value="' + esc(d.target || "") + '" oninput="upd(\'' + comp.id + '\',\'target\',this.value)" placeholder="What are you targeting?"></div>';
-        h += '<div><label class="lbl">MODE</label><select class="sl" style="width:105px" onchange="updR(\'' + comp.id + '\',\'mode\',this.value)"><option value="decoding"' + (d.mode === "decoding" ? " selected" : "") + '>Decoding</option><option value="encoding"' + (d.mode === "encoding" ? " selected" : "") + '>Encoding</option><option value="both"' + (d.mode === "both" ? " selected" : "") + '>Both</option></select></div>';
-        h += '<div><label class="lbl">MIN</label><input type="number" class="inp" style="width:55px;text-align:center" min="1" max="30" value="' + (d.minutes || comp.min) + '" onchange="updR(\'' + comp.id + '\',\'minutes\',+this.value)"></div>';
+      h += '<p style="font-size:12px;color:var(--mu);margin:0 0 12px">Tap a component to focus on one skill. Selecting another replaces your choice.</p>';
+      h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px">';
+      COMPONENTS.forEach(function(comp) {
+        var isSel = S.sel.indexOf(comp.id) >= 0;
+        h += '<button class="card' + (isSel ? " sel" : (pickedId ? " dim" : "")) + '" onclick="togSel(\'' + comp.id + '\')" style="width:100%;text-align:left;border:' + (isSel ? '2px solid var(--ac)' : '1px solid var(--bd)') + ';background:var(--card);padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:var(--ff)">';
+        h += '<span style="font-size:18px">' + comp.icon + '</span>';
+        h += '<div style="flex:1;min-width:0"><div class="fh" style="font-weight:600;font-size:14px;color:var(--tx)">' + comp.label + '</div>';
+        h += '<div style="font-size:11px;color:var(--mu);margin-top:1px">' + comp.desc + '</div></div>';
+        h += '<span style="font-size:9px;padding:2px 7px;border-radius:7px;font-weight:600;background:' + comp.color + ';color:#4a4a5a">' + comp.cat + '</span>';
+        h += '</button>';
+      });
+      h += '</div>';
+
+      // Selected editor (only render if something picked)
+      if (pickedId) {
+        var comp = findComp(pickedId);
+        var d = S.data[pickedId] || {};
+        h += '<section class="card" style="padding:18px;margin-bottom:14px;border:2px solid var(--ac)">';
+        h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-size:22px">' + comp.icon + '</span>';
+        h += '<div><div class="fh" style="font-weight:700;font-size:16px">' + comp.label + '</div>';
+        h += '<div style="font-size:11px;color:var(--mu)">' + comp.desc + '</div></div></div>';
+        h += '<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:10px">';
+        h += '<div><label class="lbl">TARGET / CONCEPT</label><input class="inp" value="' + esc(d.target || "") + '" oninput="upd(\'' + pickedId + '\',\'target\',this.value)" placeholder="What are you targeting?"></div>';
+        h += '<div><label class="lbl">MODE</label><select class="sl" style="width:105px" onchange="updR(\'' + pickedId + '\',\'mode\',this.value)"><option value="decoding"' + (d.mode === "decoding" ? " selected" : "") + '>Decoding</option><option value="encoding"' + (d.mode === "encoding" ? " selected" : "") + '>Encoding</option><option value="both"' + (d.mode === "both" ? " selected" : "") + '>Both</option></select></div>';
+        h += '<div><label class="lbl">MIN</label><input type="number" class="inp" style="width:55px;text-align:center" min="1" max="60" value="' + (d.minutes || comp.min) + '" onchange="updR(\'' + pickedId + '\',\'minutes\',+this.value)"></div>';
         h += '</div>';
-        h += '<button style="background:none;border:none;font-size:11px;color:var(--ac);cursor:pointer;font-weight:600;padding:0;font-family:var(--ff)" onclick="togSug(\'' + comp.id + '\')">' + (S.showSug === comp.id ? '&#9662; Hide suggestions' : '&#9656; Suggested targets') + '</button>';
-        if (S.showSug === comp.id) {
+        h += '<button style="background:none;border:none;font-size:11px;color:var(--ac);cursor:pointer;font-weight:600;padding:0;font-family:var(--ff)" onclick="togSug(\'' + pickedId + '\')">' + (S.showSug === pickedId ? '&#9662; Hide suggestions' : '&#9656; Suggested targets') + '</button>';
+        if (S.showSug === pickedId) {
           h += '<div style="margin-top:5px;display:flex;flex-wrap:wrap">';
           comp.targets.forEach(function(t) {
-            h += '<button class="chip" onclick="pickTarget(\'' + comp.id + '\',\'' + esc(t).replace(/'/g, "\\'") + '\')">' + esc(t) + '</button>';
+            h += '<button class="chip" onclick="pickTarget(\'' + pickedId + '\',\'' + esc(t).replace(/'/g, "\\'") + '\')">' + esc(t) + '</button>';
           });
           h += '</div>';
         }
-        h += '<div style="margin-top:6px"><label class="lbl">MATERIALS (optional)</label><input class="inp" value="' + esc(d.materials || "") + '" oninput="upd(\'' + comp.id + '\',\'materials\',this.value)" placeholder="e.g., phonogram cards, whiteboard, letter tiles..."></div>';
-        h += '</div>';
-      }
-      h += '</div>';
-    });
+        h += '<div style="margin-top:10px"><label class="lbl">MATERIALS (optional)</label><input class="inp" value="' + esc(d.materials || "") + '" oninput="upd(\'' + pickedId + '\',\'materials\',this.value)" placeholder="e.g., phonogram cards, whiteboard, letter tiles..."></div>';
+        h += '</section>';
 
-    h += '</div>';
-    h += '<div style="display:flex;gap:8px;margin-top:18px;justify-content:center">';
-    h += '<button class="btn btn-s" style="font-size:13px" onclick="doPrint()">🖨️ Print Blank</button>';
-    h += '<button class="btn btn-p" style="font-size:15px;padding:13px 30px" onclick="go(\'collect\')">Start Session →</button></div>';
+        // ── GRR Framework — Gradual Release of Responsibility ──
+        h += '<section class="card" style="padding:18px;margin-bottom:14px">';
+        h += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
+        h += '<h2>Activity Structure</h2>';
+        h += '<span style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase">Gradual Release of Responsibility</span>';
+        h += '</div>';
+        h += '<p style="font-size:11px;color:var(--mu);margin:0 0 14px;line-height:1.55">Plan the three phases of instruction. Responsibility shifts gradually from teacher to student (Pearson &amp; Gallagher, 1983; Fisher &amp; Frey, 2013).</p>';
+
+        h += '<div style="display:flex;flex-direction:column;gap:12px">';
+
+        h += '<div style="border-left:4px solid #8a6cb8;padding:10px 14px;background:rgba(138,108,184,0.06);border-radius:0 10px 10px 0">';
+        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">🧑‍🏫</span><div class="fh" style="font-weight:700;font-size:13px;color:#5d3b8c">I DO <span style="font-weight:500;color:var(--mu);font-size:11px;margin-left:4px">Teacher models &amp; explains</span></div></div>';
+        h += '<textarea class="ta" rows="2" oninput="upd(\'' + pickedId + '\',\'iDo\',this.value)" placeholder="How will you explicitly model this skill? Narrate your thinking aloud.">' + esc(d.iDo || '') + '</textarea>';
+        h += '</div>';
+
+        h += '<div style="border-left:4px solid #4e7fb8;padding:10px 14px;background:rgba(78,127,184,0.06);border-radius:0 10px 10px 0">';
+        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">🤝</span><div class="fh" style="font-weight:700;font-size:13px;color:#2e5a94">WE DO <span style="font-weight:500;color:var(--mu);font-size:11px;margin-left:4px">Guided practice together</span></div></div>';
+        h += '<textarea class="ta" rows="2" oninput="upd(\'' + pickedId + '\',\'weDo\',this.value)" placeholder="How will you scaffold guided practice? What cues will you use?">' + esc(d.weDo || '') + '</textarea>';
+        h += '</div>';
+
+        h += '<div style="border-left:4px solid #27ae60;padding:10px 14px;background:rgba(39,174,96,0.06);border-radius:0 10px 10px 0">';
+        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">🎓</span><div class="fh" style="font-weight:700;font-size:13px;color:#1a7a43">YOU DO <span style="font-weight:500;color:var(--mu);font-size:11px;margin-left:4px">Independent application &amp; data collection</span></div></div>';
+        h += '<textarea class="ta" rows="2" oninput="upd(\'' + pickedId + '\',\'youDo\',this.value)" placeholder="How will the student apply this independently? This is where you collect data.">' + esc(d.youDo || '') + '</textarea>';
+        h += '</div>';
+
+        h += '</div></section>';
+      }
+
+      h += '<div style="display:flex;gap:8px;margin-top:18px;justify-content:center">';
+      h += '<button class="btn btn-s" style="font-size:13px" onclick="doPrint()">🖨️ Print Blank</button>';
+      h += '<button class="btn btn-p" style="font-size:15px;padding:13px 30px' + (pickedId ? '' : ';opacity:.4;pointer-events:none') + '" onclick="go(\'collect\')">Start Activity →</button></div>';
+
+    } else {
+      // ── SESSION MODE: Original multi-component flow ──
+      h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h2>Session Components</h2><span style="font-size:12px;color:var(--mu);font-weight:600">' + S.sel.length + ' selected · ~' + totalMin() + ' min</span></div>';
+      h += '<p style="font-size:12px;color:var(--mu);margin:0 0 12px">Check components to include. Set targets and reorder. Tap a suggested target or type your own.</p>';
+      h += '<div style="display:flex;flex-direction:column;gap:8px">';
+
+      COMPONENTS.forEach(function(comp) {
+        var isSel = S.sel.indexOf(comp.id) >= 0;
+        var oi = S.sel.indexOf(comp.id);
+        var d = S.data[comp.id] || {};
+        h += '<div class="card' + (isSel ? " sel" : " dim") + '">';
+        h += '<div style="padding:12px 14px;display:flex;align-items:flex-start;gap:10px">';
+        h += '<input type="checkbox" ' + (isSel ? "checked" : "") + ' onchange="togSel(\'' + comp.id + '\')" style="width:19px;height:19px;accent-color:var(--ac);margin-top:2px;cursor:pointer" aria-label="Include ' + esc(comp.label) + '">';
+        h += '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
+        if (isSel) h += '<span class="num">' + (oi + 1) + '</span>';
+        h += '<span style="font-size:17px">' + comp.icon + '</span>';
+        h += '<span class="fh" style="font-weight:600;font-size:14px">' + comp.label + '</span>';
+        h += '<span style="font-size:9px;padding:2px 7px;border-radius:7px;font-weight:600;background:' + comp.color + ';color:#4a4a5a">' + comp.cat + '</span>';
+        h += '</div><div style="font-size:11px;color:var(--mu);margin-top:1px">' + comp.desc + '</div></div>';
+        if (isSel) {
+          h += '<div style="display:flex;flex-direction:column;gap:1px;flex-shrink:0">';
+          h += '<button class="btn-i" onclick="moveComp(\'' + comp.id + '\',-1)"' + (oi === 0 ? ' style="opacity:.25"' : '') + '>&#9650;</button>';
+          h += '<button class="btn-i" onclick="moveComp(\'' + comp.id + '\',1)"' + (oi === S.sel.length - 1 ? ' style="opacity:.25"' : '') + '>&#9660;</button></div>';
+        }
+        h += '</div>';
+        if (isSel) {
+          h += '<div style="padding:0 14px 12px;border-top:1px solid var(--bd);padding-top:10px">';
+          h += '<div class="gt" style="display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:6px">';
+          h += '<div><label class="lbl">TARGET / CONCEPT</label><input class="inp" value="' + esc(d.target || "") + '" oninput="upd(\'' + comp.id + '\',\'target\',this.value)" placeholder="What are you targeting?"></div>';
+          h += '<div><label class="lbl">MODE</label><select class="sl" style="width:105px" onchange="updR(\'' + comp.id + '\',\'mode\',this.value)"><option value="decoding"' + (d.mode === "decoding" ? " selected" : "") + '>Decoding</option><option value="encoding"' + (d.mode === "encoding" ? " selected" : "") + '>Encoding</option><option value="both"' + (d.mode === "both" ? " selected" : "") + '>Both</option></select></div>';
+          h += '<div><label class="lbl">MIN</label><input type="number" class="inp" style="width:55px;text-align:center" min="1" max="30" value="' + (d.minutes || comp.min) + '" onchange="updR(\'' + comp.id + '\',\'minutes\',+this.value)"></div>';
+          h += '</div>';
+          h += '<button style="background:none;border:none;font-size:11px;color:var(--ac);cursor:pointer;font-weight:600;padding:0;font-family:var(--ff)" onclick="togSug(\'' + comp.id + '\')">' + (S.showSug === comp.id ? '&#9662; Hide suggestions' : '&#9656; Suggested targets') + '</button>';
+          if (S.showSug === comp.id) {
+            h += '<div style="margin-top:5px;display:flex;flex-wrap:wrap">';
+            comp.targets.forEach(function(t) {
+              h += '<button class="chip" onclick="pickTarget(\'' + comp.id + '\',\'' + esc(t).replace(/'/g, "\\'") + '\')">' + esc(t) + '</button>';
+            });
+            h += '</div>';
+          }
+          h += '<div style="margin-top:6px"><label class="lbl">MATERIALS (optional)</label><input class="inp" value="' + esc(d.materials || "") + '" oninput="upd(\'' + comp.id + '\',\'materials\',this.value)" placeholder="e.g., phonogram cards, whiteboard, letter tiles..."></div>';
+          h += '</div>';
+        }
+        h += '</div>';
+      });
+
+      h += '</div>';
+      h += '<div style="display:flex;gap:8px;margin-top:18px;justify-content:center">';
+      h += '<button class="btn btn-s" style="font-size:13px" onclick="doPrint()">🖨️ Print Blank</button>';
+      h += '<button class="btn btn-p" style="font-size:15px;padding:13px 30px" onclick="go(\'collect\')">Start Session →</button></div>';
+    }
   }
 
   // ═══ COLLECT ═══
   if (S.view === "collect") {
-    h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px"><h2>Live Session' + (S.name ? ' <span style="font-weight:400;font-size:15px"> — ' + esc(S.name) + '</span>' : '') + '</h2><span style="font-size:11px;color:var(--mu)">' + S.date + '</span></div>';
+    var liveTitle = isActivity ? "Live Activity" : "Live Session";
+    h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px"><h2>' + liveTitle + (S.name ? ' <span style="font-weight:400;font-size:15px"> — ' + esc(S.name) + '</span>' : '') + '</h2><span style="font-size:11px;color:var(--mu)">' + S.date + '</span></div>';
     h += '<p style="font-size:11px;color:var(--mu);margin:0 0 14px">Tap the green check for correct, red X for incorrect. Percentage updates live.</p>';
+
+    // Activity-mode GRR reminder cards above the tapper
+    if (isActivity && S.sel.length > 0) {
+      var actId = S.sel[0];
+      var actD = S.data[actId] || {};
+      var hasAnyGRR = (actD.iDo || '').trim() || (actD.weDo || '').trim() || (actD.youDo || '').trim();
+      if (hasAnyGRR) {
+        h += '<section class="card" style="padding:12px 14px;margin-bottom:12px">';
+        h += '<div style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Activity Flow</div>';
+        h += '<div style="display:flex;flex-direction:column;gap:6px">';
+        if ((actD.iDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #8a6cb8;padding:2px 10px"><span style="font-weight:700;color:#5d3b8c;font-size:10px;letter-spacing:1px">I DO</span> · ' + esc(actD.iDo) + '</div>';
+        if ((actD.weDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #4e7fb8;padding:2px 10px"><span style="font-weight:700;color:#2e5a94;font-size:10px;letter-spacing:1px">WE DO</span> · ' + esc(actD.weDo) + '</div>';
+        if ((actD.youDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #27ae60;padding:2px 10px"><span style="font-weight:700;color:#1a7a43;font-size:10px;letter-spacing:1px">YOU DO</span> · ' + esc(actD.youDo) + '</div>';
+        h += '</div></section>';
+      }
+    }
     h += '<div style="display:flex;flex-direction:column;gap:8px">';
 
     S.sel.forEach(function(id, i) {
