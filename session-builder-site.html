@@ -114,6 +114,7 @@
     const MODES = { decoding:"Decoding", encoding:"Encoding", both:"Both" };
 
     function SessionBuilder() {
+      const [landed, setLanded] = useState(false);
       const [view, setView] = useState("plan");
       const [darkMode, setDarkMode] = useState(() => {
         try { return localStorage.getItem('rtn-theme') === 'dark'; } catch(e) { return false; }
@@ -267,19 +268,95 @@ ${comps.map((c, i) => {
         document.body.style.color = tx;
       }, [bg, tx]);
 
+      // ─── LANDING SCREEN ─── (matches intake landing aesthetic)
+      if (!landed) {
+        const ToggleBtn = (
+          <button onClick={() => setDarkMode(!darkMode)}
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            style={{ position: "fixed", top: 18, right: 22, zIndex: 100, padding: "7px 14px", borderRadius: 100, border: `1px solid ${bd}`, background: cardBg, color: mu, fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.06em", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "border-color 0.2s ease, color 0.2s ease" }}
+          >
+            <span style={{ fontSize: 13, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
+            {darkMode ? "Dark" : "Light"}
+          </button>
+        );
+        return (
+          <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, position: "relative", zIndex: 1 }}>
+            {ToggleBtn}
+            <div style={{ maxWidth: 600, width: "100%", textAlign: "left" }}>
+
+              <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: darkMode ? "#5c544c" : "#847d75", marginBottom: 18, paddingBottom: 10, borderBottom: `1px solid ${bd}`, display: "inline-block" }}>
+                Structured Literacy · Plan · Collect · Print
+              </p>
+
+              <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: "clamp(34px, 5.5vw, 48px)", fontWeight: 500, letterSpacing: "-0.015em", lineHeight: 1.08, color: tx, marginBottom: 14, position: "relative", display: "inline-block", paddingBottom: 10 }}>
+                Session Builder
+                <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 3, borderRadius: 2, background: "linear-gradient(90deg, #8dd4b0 0%, #b8a0d8 50%, #f4b5c5 100%)", opacity: 0.78 }} />
+              </h1>
+
+              <p style={{ fontSize: 16, color: darkMode ? "#b9b0a3" : mu, lineHeight: 1.7, marginBottom: 32, maxWidth: 520 }}>
+                A free, clinician-built planner for structured literacy sessions. Choose components, set targets, collect live data &mdash; then print or export a clean session summary.
+              </p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12, marginBottom: 32 }}>
+                {[
+                  { id: "new", letter: "N", title: "New Session", deep: "#7a5ea8", mid: "#b8a0d8", soft: darkMode ? "#261e30" : "#efe8f6", lines: ["Start with no components","Pick from 14 building blocks","Fully custom session"], action: () => { setSelected([]); setLanded(true); } },
+                  { id: "quick", letter: "Q", title: "Quick Template", deep: "#4f9c74", mid: "#8dd4b0", soft: darkMode ? "#1e2b22" : "#e8f6ed", lines: ["8-component starter set","Phonics → encoding → text","Edit anything before you start"], action: () => { setSelected(["pa","visual","auditory","blend","wordread","wordspell","sentspell","connected"]); setLanded(true); } },
+                ].map(opt => (
+                  <button key={opt.id} onClick={opt.action}
+                    style={{
+                      padding: "24px 22px",
+                      borderRadius: 18,
+                      border: `1px solid ${bd}`,
+                      background: cardBg,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease",
+                      fontFamily: "inherit",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = opt.mid; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = bd; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                      <span style={{ width: 28, height: 28, borderRadius: 8, background: opt.soft, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 14, color: opt.deep }}>{opt.letter}</span>
+                      <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500, fontSize: 19, color: tx, letterSpacing: "-0.005em" }}>{opt.title}</span>
+                    </div>
+                    <ul style={{ listStyle: "none", margin: 0, padding: 0, color: darkMode ? "#b9b0a3" : mu, fontSize: 13.5, lineHeight: 1.7 }}>
+                      {opt.lines.map((line, i) => (
+                        <li key={i} style={{ paddingLeft: 14, position: "relative" }}>
+                          <span style={{ position: "absolute", left: 0, top: 9, width: 6, height: 6, borderRadius: "50%", background: opt.mid }} />
+                          {line}
+                        </li>
+                      ))}
+                    </ul>
+                    <div style={{ marginTop: 14, fontFamily: "'Space Mono', monospace", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: opt.deep }}>Begin →</div>
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ paddingTop: 20, borderTop: `1px solid ${bd}`, fontFamily: "'Space Mono', monospace", fontSize: 10, fontWeight: 500, letterSpacing: "0.16em", textTransform: "uppercase", color: darkMode ? "#5c544c" : "#847d75", lineHeight: 1.9 }}>
+                Free · Open-source · Built for SLPs<br />
+                Rachel Terra Norton, MS, CCC-SLP · rachelslp.org
+              </div>
+
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh" }}>
           <div ref={liveRef} role="status" aria-live="polite" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }} />
 
           {/* HEADER */}
           <header className="no-print" style={{ position: "sticky", top: 6, zIndex: 100, background: darkMode ? "rgba(26,24,21,0.92)" : "rgba(251,248,244,0.92)", backdropFilter: "saturate(160%) blur(12px)", WebkitBackdropFilter: "saturate(160%) blur(12px)", borderBottom: `1px solid ${bd}`, padding: "12px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button onClick={() => setLanded(false)} aria-label="Back to start"
+              style={{ display: "flex", alignItems: "center", gap: 12, background: "transparent", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit", color: tx }}>
               <div style={{ width: 34, height: 34, borderRadius: 10, background: ag, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>SB</div>
-              <div>
+              <div style={{ textAlign: "left" }}>
                 <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: 16, lineHeight: 1.1, color: tx, letterSpacing: "-0.005em" }}>Session Builder</div>
                 <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9.5, color: mu, letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2 }}>RTN Communication &amp; Literacy</div>
               </div>
-            </div>
+            </button>
             <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
               {[{ id: "plan", label: "Plan" }, { id: "collect", label: "Collect" }, { id: "summary", label: "Summary" }].map(t => (
                 <button key={t.id} onClick={() => { setView(t.id); announce(t.label + " view"); if (t.id === "collect" && !expandedInCollect) setExpandedInCollect(selected[0] || null); }}
