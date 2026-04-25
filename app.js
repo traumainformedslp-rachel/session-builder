@@ -418,34 +418,80 @@ function render() {
   var el = document.getElementById("app");
   var h = '';
 
-  // ═══ CHOOSER (Mode Selector) ═══
+  // ═══ CHOOSER (Landing Screen — editorial calm) ═══
   if (S.mode === null) {
-    h += '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px 40px">';
-    h += '<div style="position:fixed;top:16px;right:16px"><button class="btn btn-s btn-sm" onclick="toggleDark()" aria-label="Toggle dark mode">' + (S.dark ? "☀️" : "🌙") + '</button></div>';
-    h += '<div class="card" style="max-width:640px;width:100%;padding:36px 32px;text-align:center">';
-    h += '<div style="background:var(--ag);border-radius:14px;padding:22px 20px;margin-bottom:28px;box-shadow:0 4px 20px rgba(138,108,184,0.25)">';
-    h += '<div class="fh" style="color:#fff;font-weight:700;font-size:26px;letter-spacing:-0.01em">Session Builder</div>';
-    h += '<div style="color:#ffffffdd;font-size:12px;margin-top:2px">Structured Literacy Planning · Data Collection</div>';
-    h += '<div style="color:#ffffff99;font-size:10px;margin-top:4px;font-family:\'Space Mono\',monospace;letter-spacing:1.5px;text-transform:uppercase">RTN COMMUNICATION &amp; LITERACY</div>';
-    h += '</div>';
-    h += '<div style="font-size:13px;color:var(--mu);margin-bottom:22px;line-height:1.6">What would you like to plan today?</div>';
-    h += '<div style="display:flex;gap:14px;flex-wrap:wrap">';
-    h += '<button onclick="setMode(\'activity\')" style="flex:1;min-width:220px;padding:26px 20px;border-radius:18px;border:3px solid #7eb8e0;background:rgba(126,184,224,0.10);cursor:pointer;text-align:center;font-family:var(--ff);transition:all 0.2s">';
-    h += '<div style="font-size:40px;margin-bottom:6px">🎯</div>';
-    h += '<div class="fh" style="font-weight:700;font-size:17px;color:#4a8ec0;letter-spacing:-0.01em">Plan an Activity</div>';
-    h += '<div style="font-size:11px;color:var(--mu);margin-top:8px;line-height:1.55">Focus on one skill<br>I Do → We Do → You Do<br>Single-target data collection</div>';
+    h += '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px 40px;position:relative;z-index:1">';
+    h += '<button onclick="toggleDark()" aria-label="Toggle dark mode" style="position:fixed;top:18px;right:22px;z-index:100;padding:7px 14px;border-radius:100px;border:1px solid var(--bd);background:var(--card);color:var(--mu);font-family:\'DM Sans\',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.06em;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:border-color 0.2s ease, color 0.2s ease">';
+    h += '<span style="font-size:13px;line-height:1">' + (S.dark ? '☾' : '☀') + '</span>' + (S.dark ? 'Dark' : 'Light');
     h += '</button>';
-    h += '<button onclick="setMode(\'session\')" style="flex:1;min-width:220px;padding:26px 20px;border-radius:18px;border:3px solid #9b59b6;background:rgba(155,89,182,0.10);cursor:pointer;text-align:center;font-family:var(--ff);transition:all 0.2s">';
-    h += '<div style="font-size:40px;margin-bottom:6px">📋</div>';
-    h += '<div class="fh" style="font-weight:700;font-size:17px;color:#7b4a96;letter-spacing:-0.01em">Plan a Full Session</div>';
-    h += '<div style="font-size:11px;color:var(--mu);margin-top:8px;line-height:1.55">Multiple components<br>Full structured literacy<br>Multi-skill data collection</div>';
+
+    h += '<div style="max-width:600px;width:100%;text-align:left">';
+
+    // Kicker with hairline rule
+    h += '<p style="font-family:\'Space Mono\',monospace;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--mu);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--bd);display:inline-block">';
+    h += 'Structured Literacy · Plan · Collect · Print';
+    h += '</p>';
+
+    // Big Fraunces heading with rainbow underline
+    h += '<h1 style="font-family:\'Fraunces\',Georgia,serif;font-size:clamp(34px,5.5vw,48px);font-weight:500;letter-spacing:-0.015em;line-height:1.08;color:var(--tx);margin-bottom:14px;position:relative;display:inline-block;padding-bottom:10px">';
+    h += 'Session Builder';
+    h += '<span style="position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:2px;background:linear-gradient(90deg, #8dd4b0 0%, #b8a0d8 50%, #f4b5c5 100%);opacity:0.78"></span>';
+    h += '</h1>';
+
+    // Lede
+    h += '<p style="font-size:16px;color:var(--mu);line-height:1.7;margin-bottom:32px;max-width:520px">';
+    h += 'A free, clinician-built planner for structured literacy. Choose your scope, set targets, collect live data &mdash; then print or export a clean session summary.';
+    h += '</p>';
+
+    // Two card-style buttons
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:32px">';
+
+    // Card 1: Activity (mint)
+    h += '<button onclick="setMode(\'activity\')" style="padding:24px 22px;border-radius:18px;border:1px solid var(--bd);background:var(--card);cursor:pointer;text-align:left;transition:transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;font-family:inherit"';
+    h += ' onmouseenter="this.style.borderColor=\'#8dd4b0\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)\'"';
+    h += ' onmouseleave="this.style.borderColor=\'var(--bd)\';this.style.transform=\'translateY(0)\';this.style.boxShadow=\'none\'">';
+    h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
+    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#1e2b22' : '#e8f6ed') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'Fraunces\',serif;font-weight:600;font-size:14px;color:#4f9c74">A</span>';
+    h += '<span style="font-family:\'Fraunces\',Georgia,serif;font-weight:500;font-size:19px;color:var(--tx);letter-spacing:-0.005em">Plan an Activity</span>';
+    h += '</div>';
+    h += '<ul style="list-style:none;margin:0;padding:0;color:var(--mu);font-size:13.5px;line-height:1.7">';
+    ['Focus on one skill','I Do → We Do → You Do','Single-target data collection'].forEach(function(line){
+      h += '<li style="padding-left:14px;position:relative">';
+      h += '<span style="position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:#8dd4b0"></span>';
+      h += line;
+      h += '</li>';
+    });
+    h += '</ul>';
+    h += '<div style="margin-top:14px;font-family:\'Space Mono\',monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#4f9c74">Begin →</div>';
     h += '</button>';
+
+    // Card 2: Session (lavender)
+    h += '<button onclick="setMode(\'session\')" style="padding:24px 22px;border-radius:18px;border:1px solid var(--bd);background:var(--card);cursor:pointer;text-align:left;transition:transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;font-family:inherit"';
+    h += ' onmouseenter="this.style.borderColor=\'#b8a0d8\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)\'"';
+    h += ' onmouseleave="this.style.borderColor=\'var(--bd)\';this.style.transform=\'translateY(0)\';this.style.boxShadow=\'none\'">';
+    h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
+    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#261e30' : '#efe8f6') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'Fraunces\',serif;font-weight:600;font-size:14px;color:#7a5ea8">S</span>';
+    h += '<span style="font-family:\'Fraunces\',Georgia,serif;font-weight:500;font-size:19px;color:var(--tx);letter-spacing:-0.005em">Plan a Full Session</span>';
     h += '</div>';
-    h += '<div style="margin-top:22px;font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:0.5px;line-height:1.6">';
-    h += 'Evidence-Based · Curriculum-Agnostic<br>Rachel Terra Norton, MS, CCC-SLP · rachelslp.org';
+    h += '<ul style="list-style:none;margin:0;padding:0;color:var(--mu);font-size:13.5px;line-height:1.7">';
+    ['Multiple components','Full structured literacy','Multi-skill data collection'].forEach(function(line){
+      h += '<li style="padding-left:14px;position:relative">';
+      h += '<span style="position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:#b8a0d8"></span>';
+      h += line;
+      h += '</li>';
+    });
+    h += '</ul>';
+    h += '<div style="margin-top:14px;font-family:\'Space Mono\',monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#7a5ea8">Begin →</div>';
+    h += '</button>';
+
     h += '</div>';
+
+    // Footer signature
+    h += '<div style="padding-top:20px;border-top:1px solid var(--bd);font-family:\'Space Mono\',monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--mu);line-height:1.9">';
+    h += 'Evidence-Based · Curriculum-Agnostic · Free<br>Rachel Terra Norton, MS, CCC-SLP · rachelslp.org';
     h += '</div>';
-    h += '</div>';
+
+    h += '</div></div>';
     el.innerHTML = h;
     return;
   }
