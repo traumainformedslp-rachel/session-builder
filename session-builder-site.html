@@ -16,30 +16,61 @@
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-text-size-adjust: 100%; }
-    body { font-family: 'DM Sans', system-ui, sans-serif; background: #F9F8F5; color: #28283A; min-height: 100vh; }
-    :focus-visible { outline: 3px solid #6FA0C8 !important; outline-offset: 2px; }
+    html[data-theme="dark"] body { background: #1a1815 !important; color: #ece5d9 !important; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: #fbf8f4; color: #2a2724; min-height: 100vh; }
+    :focus-visible { outline: 2px solid #b8a0d8 !important; outline-offset: 3px; border-radius: 2px; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
-    @media print { .no-print { display: none !important; } body { background: #fff !important; } }
+    @media print { .no-print { display: none !important; } body { background: #fff !important; } .rainbow-bar { display: none !important; } }
+
+    /* Subtle pastel washes */
+    body::before {
+      content: ''; position: fixed; pointer-events: none; inset: 0;
+      background:
+        radial-gradient(circle at 10% 15%, #efe8f6 0%, transparent 40%),
+        radial-gradient(circle at 92% 78%, #e8f6ed 0%, transparent 44%),
+        radial-gradient(circle at 50% 50%, #faeaee 0%, transparent 30%);
+      opacity: 0.85; z-index: 0;
+      transition: opacity 0.3s ease;
+    }
+    html[data-theme="dark"] body::before { opacity: 0.35; }
+
+    /* Rainbow top bar */
+    .rainbow-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      height: 6px; width: 100%;
+      background: linear-gradient(90deg, #8dd4b0 0%, #b8a0d8 50%, #f4b5c5 100%);
+    }
 
     /* Loading state */
     #loading-screen {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 100vh; font-family: 'DM Sans', sans-serif; color: #7A7A8E; gap: 16px;
+      min-height: 100vh; font-family: 'DM Sans', sans-serif; color: #847d75; gap: 16px;
     }
     #loading-screen .spinner {
       width: 36px; height: 36px; border-radius: 50%;
-      border: 3px solid #E8E4DF; border-top-color: #6FA0C8;
+      border: 3px solid #e6dfd5; border-top-color: #b8a0d8;
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
+
+  <!-- Theme initializer (prevents flash) -->
+  <script>
+    (function(){
+      try {
+        var saved = localStorage.getItem('rtn-theme');
+        document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+      } catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+    })();
+  </script>
 </head>
 <body>
+  <div class="rainbow-bar" aria-hidden="true"></div>
   <div id="root">
     <div id="loading-screen">
       <div class="spinner"></div>
@@ -84,11 +115,19 @@
 
     function SessionBuilder() {
       const [view, setView] = useState("plan");
-      const [darkMode, setDarkMode] = useState(false);
+      const [darkMode, setDarkMode] = useState(() => {
+        try { return localStorage.getItem('rtn-theme') === 'dark'; } catch(e) { return false; }
+      });
+
+      // Persist theme + sync with site-wide data-theme attribute
+      useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        try { localStorage.setItem('rtn-theme', darkMode ? 'dark' : 'light'); } catch(e) {}
+      }, [darkMode]);
       const [studentName, setStudentName] = useState("");
       const [sessionDate, setSessionDate] = useState(new Date().toISOString().split("T")[0]);
       const [sessionNum, setSessionNum] = useState("");
-      const [selected, setSelected] = useState(["pa","visual","auditory","blend","wordread","wordspell","sentspell","connected"]);
+      const [selected, setSelected] = useState([]);
       const [componentData, setComponentData] = useState({});
       const [showSuggestions, setShowSuggestions] = useState(null);
       const [expandedInCollect, setExpandedInCollect] = useState(null);
@@ -131,22 +170,22 @@
 
       const totalMinutes = selected.reduce((s, id) => s + (componentData[id]?.minutes || 0), 0);
 
-      // Theme
-      const bg = darkMode ? "#111120" : "#F9F8F5";
-      const cardBg = darkMode ? "#1b1b30" : "#FFFFFF";
-      const tx = darkMode ? "#E0E0EE" : "#28283A";
-      const mu = darkMode ? "#7878A0" : "#7A7A8E";
-      const bd = darkMode ? "#2a2a44" : "#E8E4DF";
-      const ac = "#6FA0C8";
-      const ag = "linear-gradient(135deg, #C4A8E0, #A8C4E0, #A8E0C4)";
-      const gn = "#4CAF7D";
-      const rd = "#D4695A";
+      // Theme — editorial calm: cream/ink with mint/lavender/pink accents
+      const bg = darkMode ? "#1a1815" : "#fbf8f4";
+      const cardBg = darkMode ? "#232020" : "#FFFFFF";
+      const tx = darkMode ? "#ece5d9" : "#2a2724";
+      const mu = darkMode ? "#82796f" : "#56504a";
+      const bd = darkMode ? "#34302c" : "#e6dfd5";
+      const ac = "#7a5ea8"; // lavender-deep
+      const ag = "linear-gradient(90deg, #8dd4b0 0%, #b8a0d8 50%, #f4b5c5 100%)";
+      const gn = "#4f9c74"; // mint-deep
+      const rd = "#c47086"; // pink-deep
 
-      const inp = { width: "100%", padding: "9px 12px", borderRadius: 10, border: `1px solid ${bd}`, background: darkMode ? "#111120" : "#FAFAFA", color: tx, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none" };
-      const bb = { border: "none", borderRadius: 10, padding: "10px 20px", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer", outline: "none" };
-      const pb = { ...bb, background: ag, color: "#28283A", boxShadow: "0 2px 10px rgba(0,0,0,0.08)" };
-      const sbtn = { ...bb, background: darkMode ? "#2a2a44" : "#F0EDE8", color: tx };
-      const cs = { background: cardBg, borderRadius: 16, border: `1px solid ${bd}` };
+      const inp = { width: "100%", padding: "9px 12px", borderRadius: 10, border: `1px solid ${bd}`, background: darkMode ? "#1a1815" : "#FAFAFA", color: tx, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none" };
+      const bb = { border: "none", borderRadius: 100, padding: "10px 22px", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer", outline: "none", letterSpacing: "0.01em" };
+      const pb = { ...bb, background: tx, color: bg, boxShadow: "0 1px 2px rgba(40,36,32,0.04), 0 2px 6px rgba(40,36,32,0.04)" };
+      const sbtn = { ...bb, background: "transparent", color: tx, border: `1px solid ${bd}` };
+      const cs = { background: cardBg, borderRadius: 18, border: `1px solid ${bd}` };
 
       // PDF / Print
       const generatePDF = useCallback(() => {
@@ -233,23 +272,23 @@ ${comps.map((c, i) => {
           <div ref={liveRef} role="status" aria-live="polite" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }} />
 
           {/* HEADER */}
-          <header className="no-print" style={{ position: "sticky", top: 0, zIndex: 100, background: darkMode ? "rgba(17,17,32,0.96)" : "rgba(249,248,245,0.96)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderBottom: `1px solid ${bd}`, padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 9, background: ag, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#28283A" }}>SB</div>
+          <header className="no-print" style={{ position: "sticky", top: 6, zIndex: 100, background: darkMode ? "rgba(26,24,21,0.92)" : "rgba(251,248,244,0.92)", backdropFilter: "saturate(160%) blur(12px)", WebkitBackdropFilter: "saturate(160%) blur(12px)", borderBottom: `1px solid ${bd}`, padding: "12px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: ag, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>SB</div>
               <div>
-                <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 700, fontSize: 15, lineHeight: 1.1 }}>Session Builder</div>
-                <div style={{ fontSize: 9, color: mu, letterSpacing: 0.4 }}>RTN Communication & Literacy</div>
+                <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: 16, lineHeight: 1.1, color: tx, letterSpacing: "-0.005em" }}>Session Builder</div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9.5, color: mu, letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2 }}>RTN Communication &amp; Literacy</div>
               </div>
             </div>
             <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
-              {[{ id: "plan", label: "📝 Plan" }, { id: "collect", label: "📊 Collect" }, { id: "summary", label: "📄 Summary" }].map(t => (
+              {[{ id: "plan", label: "Plan" }, { id: "collect", label: "Collect" }, { id: "summary", label: "Summary" }].map(t => (
                 <button key={t.id} onClick={() => { setView(t.id); announce(t.label + " view"); if (t.id === "collect" && !expandedInCollect) setExpandedInCollect(selected[0] || null); }}
                   aria-current={view === t.id ? "page" : undefined}
-                  style={{ ...bb, padding: "7px 14px", fontSize: 12, background: view === t.id ? ag : "transparent", color: view === t.id ? "#28283A" : mu, fontWeight: view === t.id ? 700 : 500 }}
+                  style={{ ...bb, padding: "7px 16px", fontSize: 12.5, background: view === t.id ? tx : "transparent", color: view === t.id ? bg : mu, fontWeight: 500, border: view === t.id ? `1px solid ${tx}` : `1px solid transparent` }}
                 >{t.label}</button>
               ))}
-              <div style={{ width: 1, height: 18, background: bd, margin: "0 2px" }} />
-              <button onClick={() => setDarkMode(!darkMode)} style={{ ...sbtn, padding: "5px 9px", fontSize: 14 }} aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>{darkMode ? "☀️" : "🌙"}</button>
+              <div style={{ width: 1, height: 18, background: bd, margin: "0 4px" }} />
+              <button onClick={() => setDarkMode(!darkMode)} style={{ ...sbtn, padding: "6px 12px", fontSize: 11, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em" }} aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>{darkMode ? "☾ Dark" : "☀ Light"}</button>
             </div>
           </header>
 
