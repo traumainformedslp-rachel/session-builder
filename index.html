@@ -13,28 +13,28 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#FEFCFA;
-  --card:#FFFFFF;
-  --tx:#2D2A3E;
-  --mu:#7a7890;
-  --bd:#ede8f5;
-  --soft:#f3eefa;
-  --pu:#8a6cb8;
-  --pu-deep:#6e5294;
-  --pi:#d4718e;
-  --ac:#8a6cb8; /* legacy alias → --pu; kept for app.js compatibility */
-  --gn:#4CAF7D;
-  --rd:#D4695A;
-  --ag:linear-gradient(135deg,#8a6cb8,#d4718e);
-  --rainbow:linear-gradient(90deg,#F9C5C5,#FDDBB4,#FFF0A8,#C2EDD0,#BEE3F8,#D8C8F8,#EED4F8);
+  --bg:#fbf8f4;
+  --card:#ffffff;
+  --tx:#2a2724;
+  --mu:#56504a;
+  --bd:#e6dfd5;
+  --soft:#efe8f6;
+  --pu:#7a5ea8;        /* lavender-deep */
+  --pu-deep:#6a4f98;
+  --pi:#c47086;        /* pink-deep */
+  --ac:#7a5ea8;        /* legacy alias → --pu; kept for app.js compatibility */
+  --gn:#4f9c74;        /* mint-deep */
+  --rd:#c47086;        /* pink-deep (replaces red) */
+  --ag:linear-gradient(90deg,#8dd4b0 0%,#b8a0d8 50%,#f4b5c5 100%);
+  --rainbow:linear-gradient(90deg,#8dd4b0 0%,#b8a0d8 50%,#f4b5c5 100%);
   --ff:'DM Sans',sans-serif;
   --fh:'Fraunces',Georgia,serif;
   --fm:'Space Mono',ui-monospace,monospace;
   --radius:18px;
-  --shadow-sm:0 2px 8px rgba(45,42,62,.05);
-  --shadow:0 4px 16px rgba(45,42,62,.08);
+  --shadow-sm:0 1px 2px rgba(40,36,32,.04),0 2px 6px rgba(40,36,32,.04);
+  --shadow:0 2px 4px rgba(40,36,32,.04),0 8px 24px rgba(40,36,32,.06);
 }
-.dark{--bg:#111120;--card:#1b1b30;--tx:#E0E0EE;--mu:#7878A0;--bd:#2a2a44;--soft:#2a2344}
+[data-theme="dark"], .dark { --bg:#1a1815; --card:#232020; --tx:#ece5d9; --mu:#82796f; --bd:#34302c; --soft:#261e30; }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--ff);background:var(--bg);color:var(--tx);min-height:100vh;line-height:1.55;transition:background .2s,color .2s}
 :focus-visible{outline:3px solid var(--pu)!important;outline-offset:2px}
