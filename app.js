@@ -5,21 +5,21 @@
 
 // ─── Component Data ───
 var COMPONENTS = [
-  {id:"pa",label:"Phonemic Awareness",desc:"Blending & segmenting warm-up",icon:"\uD83D\uDD0A",min:2,cat:"sound",mode:"decoding",color:"#E8D5F5",targets:["Phoneme blending (3-4 phonemes)","Phoneme segmentation","Phoneme deletion (initial)","Phoneme deletion (final)","Phoneme substitution","Syllable segmentation","Onset-rime blending"]},
-  {id:"visual",label:"Phonogram Review: Reading",desc:"Visual drill / deck work (see grapheme, say sound)",icon:"\uD83D\uDC41\uFE0F",min:3,cat:"sound",mode:"decoding",color:"#D5E8F5",targets:["Short vowels","Consonant digraphs (sh, ch, th, wh)","Blends","Long vowel teams","R-controlled vowels","VCe patterns","Diphthongs","Vowel teams review","Level 1 phonograms","Level 2 phonograms","Level 3 phonograms","Level 4 phonograms"]},
-  {id:"auditory",label:"Phonogram Review: Spelling",desc:"Auditory drill (hear sound, write grapheme)",icon:"\u270D\uFE0F",min:3,cat:"sound",mode:"encoding",color:"#D5F5E8",targets:["Short vowels","Consonant digraphs","Long vowel spellings","R-controlled spellings","Spelling alternatives review"]},
-  {id:"blend",label:"Blending & Word Building",desc:"Blending board, word chains, letter tiles",icon:"\uD83E\uDDF1",min:5,cat:"word",mode:"decoding",color:"#F5F0D5",targets:["CVC blending","CCVC / CVCC blending","CVCe word building","Multisyllabic word building","Word chains (swap one sound)","Syllable-by-syllable blending"]},
-  {id:"wordread",label:"Word-Level Reading",desc:"Word cards, lists, sorts, flash",icon:"\uD83D\uDD24",min:5,cat:"word",mode:"decoding",color:"#F5E0D5",targets:["CVC words","CVCe words","Vowel team words","R-controlled words","Multisyllabic: VC/CV","Multisyllabic: V/CV","Multisyllabic: C-le","Mixed review","Word sorts by pattern"]},
-  {id:"sentread",label:"Sentence-Level Reading",desc:"Read controlled sentences with target patterns",icon:"\uD83D\uDCDD",min:3,cat:"text",mode:"decoding",color:"#F5D5D8",targets:["Sentences with target pattern","Phrase-scoop reading","Controlled text sentences","Mixed decodable sentences"]},
-  {id:"fluency",label:"Reading Fluency",desc:"Timed reads, repeated reading, prosody",icon:"\u26A1",min:5,cat:"text",mode:"decoding",color:"#E0E8F5",targets:["Word-level fluency (flash)","Phrase-level fluency","Passage: cold read + hot read","Repeated reading (timed)","Prosody practice","WCPM progress monitoring"]},
-  {id:"newconcept",label:"New Concept / Skill Introduction",desc:"Explicitly teach a new pattern, rule, or concept",icon:"\uD83D\uDCA1",min:10,cat:"word",mode:"both",color:"#F5F5D5",targets:["New phonogram introduction","New syllable type","Spelling rule (doubling, e-drop, y-change)","New vowel team","New prefix/suffix","New Latin root","Syllable division pattern","Soft c / soft g"]},
-  {id:"wordspell",label:"Word-Level Spelling",desc:"SOS, dictation, encoding with tiles or writing",icon:"\u270F\uFE0F",min:5,cat:"word",mode:"encoding",color:"#D5F5F0",targets:["CVC dictation","CVCe dictation","Vowel team dictation","SOS (simultaneous oral spelling)","Spelling with letter tiles","Syllable-by-syllable encoding","Spelling rule application","Arm-tap spelling"]},
-  {id:"sentspell",label:"Sentence-Level Spelling",desc:"Sentence dictation with proofreading",icon:"\uD83D\uDCCB",min:5,cat:"text",mode:"encoding",color:"#E8F5D5",targets:["Sentence dictation (1-2 sentences)","Proofreading practice","Capitals & punctuation check","Dictation with target words","Paragraph dictation"]},
-  {id:"irregular",label:"Irregular / Heart Words",desc:"High-frequency words with irregular spellings",icon:"\u2764\uFE0F",min:5,cat:"word",mode:"both",color:"#F5D5E8",targets:["Heart word introduction (new)","Heart word review (previously taught)","Heart word reading flash","Heart word spelling practice","Mapping regular vs. irregular parts","Dolch words (by level)","Fry First 100","Fry Second 100","UFLI heart words","Scope Level 1 learned words","Scope Level 2 learned words","Scope Level 3-4 learned words","Functional sight words (exit, danger, open...)"]},
-  {id:"connected",label:"Connected Text / Decodable",desc:"Apply skills in decodable passages or books",icon:"\uD83D\uDCDA",min:10,cat:"text",mode:"decoding",color:"#D5D8F5",targets:["Decodable passage (new)","Decodable passage (reread for fluency)","Decodable book","Controlled text with target pattern","Comprehension check after reading"]},
-  {id:"morphology",label:"Morphology & Word Study",desc:"Prefixes, suffixes, roots, word analysis",icon:"\uD83E\uDDE9",min:5,cat:"word",mode:"both",color:"#F0D5F5",targets:["Prefix meaning & identification","Suffix meaning & identification","Base word + suffix practice","Latin root analysis","Greek combining forms","Affix peel-off reading","Word building with morphemes","Spelling rule with suffixes"]},
-  {id:"vocab",label:"Vocabulary",desc:"Word meaning, context clues, semantic mapping",icon:"\uD83D\uDDC2\uFE0F",min:5,cat:"word",mode:"both",color:"#D5F0E8",targets:["Morpheme-based word meaning","Context clue strategy","Semantic mapping","Multiple meaning words","Tier 2 vocabulary","Synonyms & antonyms"]},
-  {id:"comp",label:"Comprehension",desc:"Sentence or passage-level understanding",icon:"\uD83E\uDDE0",min:5,cat:"text",mode:"decoding",color:"#F5E8D5",targets:["Visualize & verbalize","Who-what-where sentence check","Main idea identification","Retell / summarize","Inferencing","Text structure ID","Question generation"]}
+  {id:"pa",label:"Phonemic Awareness",desc:"Blending & segmenting warm-up",icon:"\uD83D\uDD0A",min:2,cat:"sound",mode:"decoding",color:"#efe8f6",targets:["Phoneme blending (3-4 phonemes)","Phoneme segmentation","Phoneme deletion (initial)","Phoneme deletion (final)","Phoneme substitution","Syllable segmentation","Onset-rime blending"]},
+  {id:"visual",label:"Phonogram Review: Reading",desc:"Visual drill / deck work (see grapheme, say sound)",icon:"\uD83D\uDC41\uFE0F",min:3,cat:"sound",mode:"decoding",color:"#efe8f6",targets:["Short vowels","Consonant digraphs (sh, ch, th, wh)","Blends","Long vowel teams","R-controlled vowels","VCe patterns","Diphthongs","Vowel teams review","Level 1 phonograms","Level 2 phonograms","Level 3 phonograms","Level 4 phonograms"]},
+  {id:"auditory",label:"Phonogram Review: Spelling",desc:"Auditory drill (hear sound, write grapheme)",icon:"\u270D\uFE0F",min:3,cat:"sound",mode:"encoding",color:"#efe8f6",targets:["Short vowels","Consonant digraphs","Long vowel spellings","R-controlled spellings","Spelling alternatives review"]},
+  {id:"blend",label:"Blending & Word Building",desc:"Blending board, word chains, letter tiles",icon:"\uD83E\uDDF1",min:5,cat:"word",mode:"decoding",color:"#e8f6ed",targets:["CVC blending","CCVC / CVCC blending","CVCe word building","Multisyllabic word building","Word chains (swap one sound)","Syllable-by-syllable blending"]},
+  {id:"wordread",label:"Word-Level Reading",desc:"Word cards, lists, sorts, flash",icon:"\uD83D\uDD24",min:5,cat:"word",mode:"decoding",color:"#e8f6ed",targets:["CVC words","CVCe words","Vowel team words","R-controlled words","Multisyllabic: VC/CV","Multisyllabic: V/CV","Multisyllabic: C-le","Mixed review","Word sorts by pattern"]},
+  {id:"sentread",label:"Sentence-Level Reading",desc:"Read controlled sentences with target patterns",icon:"\uD83D\uDCDD",min:3,cat:"text",mode:"decoding",color:"#faeaee",targets:["Sentences with target pattern","Phrase-scoop reading","Controlled text sentences","Mixed decodable sentences"]},
+  {id:"fluency",label:"Reading Fluency",desc:"Timed reads, repeated reading, prosody",icon:"\u26A1",min:5,cat:"text",mode:"decoding",color:"#faeaee",targets:["Word-level fluency (flash)","Phrase-level fluency","Passage: cold read + hot read","Repeated reading (timed)","Prosody practice","WCPM progress monitoring"]},
+  {id:"newconcept",label:"New Concept / Skill Introduction",desc:"Explicitly teach a new pattern, rule, or concept",icon:"\uD83D\uDCA1",min:10,cat:"word",mode:"both",color:"#e8f6ed",targets:["New phonogram introduction","New syllable type","Spelling rule (doubling, e-drop, y-change)","New vowel team","New prefix/suffix","New Latin root","Syllable division pattern","Soft c / soft g"]},
+  {id:"wordspell",label:"Word-Level Spelling",desc:"SOS, dictation, encoding with tiles or writing",icon:"\u270F\uFE0F",min:5,cat:"word",mode:"encoding",color:"#e8f6ed",targets:["CVC dictation","CVCe dictation","Vowel team dictation","SOS (simultaneous oral spelling)","Spelling with letter tiles","Syllable-by-syllable encoding","Spelling rule application","Arm-tap spelling"]},
+  {id:"sentspell",label:"Sentence-Level Spelling",desc:"Sentence dictation with proofreading",icon:"\uD83D\uDCCB",min:5,cat:"text",mode:"encoding",color:"#faeaee",targets:["Sentence dictation (1-2 sentences)","Proofreading practice","Capitals & punctuation check","Dictation with target words","Paragraph dictation"]},
+  {id:"irregular",label:"Irregular / Heart Words",desc:"High-frequency words with irregular spellings",icon:"\u2764\uFE0F",min:5,cat:"word",mode:"both",color:"#e8f6ed",targets:["Heart word introduction (new)","Heart word review (previously taught)","Heart word reading flash","Heart word spelling practice","Mapping regular vs. irregular parts","Dolch words (by level)","Fry First 100","Fry Second 100","UFLI heart words","Scope Level 1 learned words","Scope Level 2 learned words","Scope Level 3-4 learned words","Functional sight words (exit, danger, open...)"]},
+  {id:"connected",label:"Connected Text / Decodable",desc:"Apply skills in decodable passages or books",icon:"\uD83D\uDCDA",min:10,cat:"text",mode:"decoding",color:"#faeaee",targets:["Decodable passage (new)","Decodable passage (reread for fluency)","Decodable book","Controlled text with target pattern","Comprehension check after reading"]},
+  {id:"morphology",label:"Morphology & Word Study",desc:"Prefixes, suffixes, roots, word analysis",icon:"\uD83E\uDDE9",min:5,cat:"word",mode:"both",color:"#e8f6ed",targets:["Prefix meaning & identification","Suffix meaning & identification","Base word + suffix practice","Latin root analysis","Greek combining forms","Affix peel-off reading","Word building with morphemes","Spelling rule with suffixes"]},
+  {id:"vocab",label:"Vocabulary",desc:"Word meaning, context clues, semantic mapping",icon:"\uD83D\uDDC2\uFE0F",min:5,cat:"word",mode:"both",color:"#e8f6ed",targets:["Morpheme-based word meaning","Context clue strategy","Semantic mapping","Multiple meaning words","Tier 2 vocabulary","Synonyms & antonyms"]},
+  {id:"comp",label:"Comprehension",desc:"Sentence or passage-level understanding",icon:"\uD83E\uDDE0",min:5,cat:"text",mode:"decoding",color:"#faeaee",targets:["Visualize & verbalize","Who-what-where sentence check","Main idea identification","Retell / summarize","Inferencing","Text structure ID","Question generation"]}
 ];
 
 var CUES = ["Independent","Monitoring","Verbal Cue","Visual Cue","Model","Physical Prompt"];
@@ -305,13 +305,13 @@ function doPrint() {
   h += 'body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#28283A;padding:22px 24px;line-height:1.5;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}';
   h += '.title{font-family:"Fraunces",Georgia,serif;font-size:23px;font-weight:700;letter-spacing:-.01em;color:#28283A;line-height:1.1}';
   h += '.sub{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:12px;color:#7A7A8E;margin-top:2px}';
-  h += '.meta{font-size:10.5px;margin:12px 0 14px;padding:9px 14px;background:linear-gradient(135deg,#F3ECFC,#ECF5F2);border-radius:10px;display:flex;flex-wrap:wrap;gap:4px 18px}';
+  h += '.meta{font-size:10.5px;margin:12px 0 14px;padding:9px 14px;background:linear-gradient(135deg,#efe8f6,#e8f6ed);border-radius:10px;display:flex;flex-wrap:wrap;gap:4px 18px}';
   h += '.meta strong{color:#28283A;font-weight:600;margin-right:3px}.meta span{color:#555}';
   h += '.cmp{border:1px solid #E8E4DF;border-radius:10px;margin-bottom:8px;page-break-inside:avoid;overflow:hidden;position:relative;padding-left:6px}';
   h += '.cmp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}';
-  h += '.cmp.s::before{background:#8B6FBF}';
-  h += '.cmp.w::before{background:#C28460}';
-  h += '.cmp.t::before{background:#4E7FB8}';
+  h += '.cmp.s::before{background:#b8a0d8}';
+  h += '.cmp.w::before{background:#8dd4b0}';
+  h += '.cmp.t::before{background:#f4b5c5}';
   h += '.ch{padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}';
   h += '.ch h3{font-family:"Fraunces",Georgia,serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}';
   h += '.ch .n{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:10.5px;background:#fff;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}';
@@ -354,7 +354,7 @@ function doPrint() {
     var pct = total > 0 ? Math.round((A.correct / total) * 100) : null;
     var catLetter = A.level ? A.level.charAt(0) : 'w';
     h += '<div class="cmp ' + catLetter + '">';
-    h += '<div class="ch" style="background:#EEE6F5">';
+    h += '<div class="ch" style="background:#efe8f6">';
     h += '<h3>🎯 ' + esc(A.target || 'Activity') + '</h3>';
     h += '<div>';
     if (A.modeSel) h += '<span class="bdg">' + (A.modeSel.charAt(0).toUpperCase() + A.modeSel.slice(1)) + '</span>';
@@ -366,9 +366,9 @@ function doPrint() {
     if (A.materials) h += '<div class="info"><span class="k">Materials</span>' + esc(A.materials) + '</div>';
 
     // GRR blocks — always print them (blank if empty), since this is the whole point of Activity mode
-    h += '<div class="info" style="margin-top:8px;padding:7px 10px;background:#F3EEFA;border-left:4px solid #8a6cb8;border-radius:0 6px 6px 0"><span class="k" style="color:#5d3b8c">🧑\u200D🏫 I Do</span>' + ((A.iDo || '').trim() ? esc(A.iDo) : '___________________________________') + '</div>';
-    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#EEF3FA;border-left:4px solid #4e7fb8;border-radius:0 6px 6px 0"><span class="k" style="color:#2e5a94">🤝 We Do</span>' + ((A.weDo || '').trim() ? esc(A.weDo) : '___________________________________') + '</div>';
-    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#ECF5EE;border-left:4px solid #27ae60;border-radius:0 6px 6px 0"><span class="k" style="color:#1a7a43">🎓 You Do</span>' + ((A.youDo || '').trim() ? esc(A.youDo) : '___________________________________') + '</div>';
+    h += '<div class="info" style="margin-top:8px;padding:7px 10px;background:#efe8f6;border-left:4px solid #b8a0d8;border-radius:0 6px 6px 0"><span class="k" style="color:#7a5ea8">' + '🧑‍🏫' + ' I Do</span>' + ((A.iDo || '').trim() ? esc(A.iDo) : '___________________________________') + '</div>';
+    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#e8f6ed;border-left:4px solid #8dd4b0;border-radius:0 6px 6px 0"><span class="k" style="color:#3a8a60">🤝 We Do</span>' + ((A.weDo || '').trim() ? esc(A.weDo) : '___________________________________') + '</div>';
+    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#faeaee;border-left:4px solid #f4b5c5;border-radius:0 6px 6px 0"><span class="k" style="color:#a05068">🎓 You Do</span>' + ((A.youDo || '').trim() ? esc(A.youDo) : '___________________________________') + '</div>';
 
     if (A.cue) h += '<div class="info" style="margin-top:6px"><span class="k">Cue</span>' + esc(A.cue) + '</div>';
     if (A.notes) h += '<div class="info"><span class="k">Notes</span><em>' + esc(A.notes) + '</em></div>';
@@ -598,7 +598,7 @@ function render() {
       h += '<div style="border-radius:14px;border:2px solid #8a6cb8;background:rgba(138,108,184,0.06);padding:14px 16px">';
       h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
       h += '<div style="width:44px;height:44px;border-radius:12px;background:#8a6cb8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🧑‍🏫</div>';
-      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#5d3b8c">I DO</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#7a5ea8">I DO</div>';
       h += '<div style="font-size:11px;color:var(--mu)">Teacher models, thinks aloud, demonstrates</div></div></div>';
       h += '<textarea class="ta" rows="4" oninput="actUpd(\'iDo\',this.value)" placeholder="How will you explicitly model this skill? Script your teacher talk. Narrate your thinking. Example: \'Watch me. I see the letters s-a-t. I know /s/, /a/, /t/. I blend: sss-aaa-ttt → sat.\'" style="font-size:14px;background:var(--bg)">' + esc(A.iDo || '') + '</textarea>';
       h += '</div>';
@@ -607,7 +607,7 @@ function render() {
       h += '<div style="border-radius:14px;border:2px solid #4e7fb8;background:rgba(78,127,184,0.06);padding:14px 16px">';
       h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
       h += '<div style="width:44px;height:44px;border-radius:12px;background:#4e7fb8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🤝</div>';
-      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#2e5a94">WE DO</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#3a8a60">WE DO</div>';
       h += '<div style="font-size:11px;color:var(--mu)">Guided practice together — you scaffold with cues</div></div></div>';
       h += '<textarea class="ta" rows="4" oninput="actUpd(\'weDo\',this.value)" placeholder="How will you practice together? What scaffolds/cues will you use? Example: \'We try the next three words together. I\'ll point to each letter — you tell me the sound. If stuck, I\'ll give a verbal prompt, then a model.\'" style="font-size:14px;background:var(--bg)">' + esc(A.weDo || '') + '</textarea>';
       h += '</div>';
@@ -616,7 +616,7 @@ function render() {
       h += '<div style="border-radius:14px;border:2px solid #27ae60;background:rgba(39,174,96,0.06);padding:14px 16px">';
       h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
       h += '<div style="width:44px;height:44px;border-radius:12px;background:#27ae60;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎓</div>';
-      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#1a7a43">YOU DO</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#a05068">YOU DO</div>';
       h += '<div style="font-size:11px;color:var(--mu)">Independent application — where you collect data</div></div></div>';
       h += '<textarea class="ta" rows="4" oninput="actUpd(\'youDo\',this.value)" placeholder="How will the student apply this independently? What will you watch for? Example: \'Student reads 10 unseen CVC words aloud. I mark correct/incorrect per word. Target ≥ 80% accuracy before next step.\'" style="font-size:14px;background:var(--bg)">' + esc(A.youDo || '') + '</textarea>';
       h += '</div>';
@@ -717,9 +717,9 @@ function render() {
         h += '<section class="card" style="padding:12px 14px;margin-bottom:12px">';
         h += '<div style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Activity Flow · Gradual Release</div>';
         h += '<div style="display:flex;flex-direction:column;gap:6px">';
-        if ((A.iDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #8a6cb8;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#5d3b8c;font-size:10px;letter-spacing:1px">🧑‍🏫 I DO</span> · ' + esc(A.iDo) + '</div>';
-        if ((A.weDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #4e7fb8;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#2e5a94;font-size:10px;letter-spacing:1px">🤝 WE DO</span> · ' + esc(A.weDo) + '</div>';
-        if ((A.youDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #27ae60;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#1a7a43;font-size:10px;letter-spacing:1px">🎓 YOU DO</span> · ' + esc(A.youDo) + '</div>';
+        if ((A.iDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #b8a0d8;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#7a5ea8;font-size:10px;letter-spacing:1px">🧑‍🏫 I DO</span> · ' + esc(A.iDo) + '</div>';
+        if ((A.weDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #8dd4b0;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#3a8a60;font-size:10px;letter-spacing:1px">🤝 WE DO</span> · ' + esc(A.weDo) + '</div>';
+        if ((A.youDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #f4b5c5;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#a05068;font-size:10px;letter-spacing:1px">🎓 YOU DO</span> · ' + esc(A.youDo) + '</div>';
         h += '</div></section>';
       }
 
@@ -876,17 +876,17 @@ function render() {
         h += '<div style="display:flex;flex-direction:column;gap:8px">';
         if ((sA.iDo || '').trim()) {
           h += '<div style="border-left:4px solid #8a6cb8;padding:8px 12px;background:rgba(138,108,184,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#5d3b8c;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🧑‍🏫 I DO</div>';
+          h += '<div style="font-weight:700;color:#7a5ea8;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🧑‍🏫 I DO</div>';
           h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.iDo) + '</div></div>';
         }
         if ((sA.weDo || '').trim()) {
           h += '<div style="border-left:4px solid #4e7fb8;padding:8px 12px;background:rgba(78,127,184,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#2e5a94;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🤝 WE DO</div>';
+          h += '<div style="font-weight:700;color:#3a8a60;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🤝 WE DO</div>';
           h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.weDo) + '</div></div>';
         }
         if ((sA.youDo || '').trim()) {
           h += '<div style="border-left:4px solid #27ae60;padding:8px 12px;background:rgba(39,174,96,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#1a7a43;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🎓 YOU DO</div>';
+          h += '<div style="font-weight:700;color:#a05068;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🎓 YOU DO</div>';
           h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.youDo) + '</div></div>';
         }
         h += '</div>';
