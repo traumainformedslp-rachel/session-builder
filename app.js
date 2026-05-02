@@ -299,12 +299,12 @@ function doPrint() {
   var h = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Session Plan</title>';
   h += '<link rel="preconnect" href="https://fonts.googleapis.com">';
   h += '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
-  h += '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">';
+  h += '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">';
   h += '<style>';
   h += '*{margin:0;padding:0;box-sizing:border-box}';
   h += 'body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#28283A;padding:22px 24px;line-height:1.5;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}';
-  h += '.title{font-family:"Fraunces",Georgia,serif;font-size:23px;font-weight:700;letter-spacing:-.01em;color:#28283A;line-height:1.1}';
-  h += '.sub{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:12px;color:#7A7A8E;margin-top:2px}';
+  h += '.title{font-family:"DM Sans",system-ui,sans-serif;font-size:23px;font-weight:700;letter-spacing:-.01em;color:#28283A;line-height:1.1}';
+  h += '.sub{font-family:"DM Sans",system-ui,sans-serif;font-style:italic;font-size:12px;color:#7A7A8E;margin-top:2px}';
   h += '.meta{font-size:10.5px;margin:12px 0 14px;padding:9px 14px;background:linear-gradient(135deg,#efe8f6,#e8f6ed);border-radius:10px;display:flex;flex-wrap:wrap;gap:4px 18px}';
   h += '.meta strong{color:#28283A;font-weight:600;margin-right:3px}.meta span{color:#555}';
   h += '.cmp{border:1px solid #E8E4DF;border-radius:10px;margin-bottom:8px;page-break-inside:avoid;overflow:hidden;position:relative;padding-left:6px}';
@@ -313,8 +313,8 @@ function doPrint() {
   h += '.cmp.w::before{background:#8dd4b0}';
   h += '.cmp.t::before{background:#f4b5c5}';
   h += '.ch{padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}';
-  h += '.ch h3{font-family:"Fraunces",Georgia,serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}';
-  h += '.ch .n{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:10.5px;background:#fff;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}';
+  h += '.ch h3{font-family:"DM Sans",system-ui,sans-serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}';
+  h += '.ch .n{font-family:"DM Sans",system-ui,sans-serif;font-weight:700;font-size:10.5px;background:#fff;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}';
   h += '.bdg{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8.5px;font-weight:600;background:rgba(255,255,255,.8);color:#28283A;margin-left:3px;letter-spacing:.2px}';
   h += '.bdg-h{background:#C8EDCF;color:#1A5A2A}.bdg-m{background:#F5EECC;color:#5A4A1A}.bdg-l{background:#F5D0D0;color:#5A1A1A}';
   h += '.cb{padding:9px 12px 10px;background:#fff}';
@@ -325,7 +325,7 @@ function doPrint() {
   h += '.info em{font-style:italic;color:#28283A}';
   h += '.gr{display:flex;flex-wrap:wrap;gap:2px;margin-top:6px}.gc{width:15px;height:15px;border:1px solid #C4BFB8;border-radius:3px;background:#FAFAF8}';
   h += '.nl{border-bottom:1px solid #DDD;height:15px;margin-top:3px}';
-  h += '.ft{margin-top:14px;font-size:8.5px;color:#A0A0B0;text-align:center;border-top:1px solid #E8E4DF;padding-top:7px;font-family:"Fraunces",Georgia,serif;font-style:italic}';
+  h += '.ft{margin-top:14px;font-size:8.5px;color:#A0A0B0;text-align:center;border-top:1px solid #E8E4DF;padding-top:7px;font-family:"DM Sans",system-ui,sans-serif;font-style:italic}';
   h += '@media print{body{padding:14px 16px}}';
   h += '</style></head><body>';
   var printIsAct = S.mode === "activity";
@@ -428,12 +428,12 @@ function render() {
     h += '<div style="max-width:600px;width:100%;text-align:left">';
 
     // Kicker with hairline rule
-    h += '<p style="font-family:\'Space Mono\',monospace;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--mu);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--bd);display:inline-block">';
+    h += '<p style="font-family:\'DM Sans\',system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--mu);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--bd);display:inline-block">';
     h += 'Structured Literacy · Plan · Collect · Print';
     h += '</p>';
 
     // Big Fraunces heading with rainbow underline
-    h += '<h1 style="font-family:\'Fraunces\',Georgia,serif;font-size:clamp(34px,5.5vw,48px);font-weight:500;letter-spacing:-0.015em;line-height:1.08;color:var(--tx);margin-bottom:14px;position:relative;display:inline-block;padding-bottom:10px">';
+    h += '<h1 style="font-family:\'DM Sans\',system-ui,sans-serif;font-size:clamp(34px,5.5vw,48px);font-weight:500;letter-spacing:-0.015em;line-height:1.08;color:var(--tx);margin-bottom:14px;position:relative;display:inline-block;padding-bottom:10px">';
     h += 'Session Builder';
     h += '<span style="position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:2px;background:linear-gradient(90deg, #8dd4b0 0%, #b8a0d8 50%, #f4b5c5 100%);opacity:0.78"></span>';
     h += '</h1>';
@@ -451,8 +451,8 @@ function render() {
     h += ' onmouseenter="this.style.borderColor=\'#8dd4b0\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)\'"';
     h += ' onmouseleave="this.style.borderColor=\'var(--bd)\';this.style.transform=\'translateY(0)\';this.style.boxShadow=\'none\'">';
     h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#1e2b22' : '#e8f6ed') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'Fraunces\',serif;font-weight:600;font-size:14px;color:#4f9c74">A</span>';
-    h += '<span style="font-family:\'Fraunces\',Georgia,serif;font-weight:500;font-size:19px;color:var(--tx);letter-spacing:-0.005em">Plan an Activity</span>';
+    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#1e2b22' : '#e8f6ed') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'DM Sans\',system-ui,sans-serif;font-weight:600;font-size:14px;color:#4f9c74">A</span>';
+    h += '<span style="font-family:\'DM Sans\',system-ui,sans-serif;font-weight:500;font-size:19px;color:var(--tx);letter-spacing:-0.005em">Plan an Activity</span>';
     h += '</div>';
     h += '<ul style="list-style:none;margin:0;padding:0;color:var(--mu);font-size:13.5px;line-height:1.7">';
     ['Focus on one skill','I Do → We Do → You Do','Single-target data collection'].forEach(function(line){
@@ -462,7 +462,7 @@ function render() {
       h += '</li>';
     });
     h += '</ul>';
-    h += '<div style="margin-top:14px;font-family:\'Space Mono\',monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#4f9c74">Begin →</div>';
+    h += '<div style="margin-top:14px;font-family:\'DM Sans\',system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#4f9c74">Begin →</div>';
     h += '</button>';
 
     // Card 2: Session (lavender)
@@ -470,8 +470,8 @@ function render() {
     h += ' onmouseenter="this.style.borderColor=\'#b8a0d8\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)\'"';
     h += ' onmouseleave="this.style.borderColor=\'var(--bd)\';this.style.transform=\'translateY(0)\';this.style.boxShadow=\'none\'">';
     h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#261e30' : '#efe8f6') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'Fraunces\',serif;font-weight:600;font-size:14px;color:#7a5ea8">S</span>';
-    h += '<span style="font-family:\'Fraunces\',Georgia,serif;font-weight:500;font-size:19px;color:var(--tx);letter-spacing:-0.005em">Plan a Full Session</span>';
+    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#261e30' : '#efe8f6') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'DM Sans\',system-ui,sans-serif;font-weight:600;font-size:14px;color:#7a5ea8">S</span>';
+    h += '<span style="font-family:\'DM Sans\',system-ui,sans-serif;font-weight:500;font-size:19px;color:var(--tx);letter-spacing:-0.005em">Plan a Full Session</span>';
     h += '</div>';
     h += '<ul style="list-style:none;margin:0;padding:0;color:var(--mu);font-size:13.5px;line-height:1.7">';
     ['Multiple components','Full structured literacy','Multi-skill data collection'].forEach(function(line){
@@ -481,13 +481,13 @@ function render() {
       h += '</li>';
     });
     h += '</ul>';
-    h += '<div style="margin-top:14px;font-family:\'Space Mono\',monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#7a5ea8">Begin →</div>';
+    h += '<div style="margin-top:14px;font-family:\'DM Sans\',system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#7a5ea8">Begin →</div>';
     h += '</button>';
 
     h += '</div>';
 
     // Footer signature
-    h += '<div style="padding-top:20px;border-top:1px solid var(--bd);font-family:\'Space Mono\',monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--mu);line-height:1.9">';
+    h += '<div style="padding-top:20px;border-top:1px solid var(--bd);font-family:\'DM Sans\',system-ui,sans-serif;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--mu);line-height:1.9">';
     h += 'Evidence-Based · Curriculum-Agnostic · Free<br>Rachel Terra Norton, MS, CCC-SLP · rachelslp.org';
     h += '</div>';
 
@@ -588,7 +588,7 @@ function render() {
       h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">';
       h += '<div style="width:34px;height:34px;border-radius:10px;background:' + (grrDone ? 'var(--ag)' : 'var(--bd)') + ';color:' + (grrDone ? '#fff' : 'var(--mu)') + ';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">' + (grrDone ? '✓' : '4') + '</div>';
       h += '<div><div class="fh" style="font-weight:700;font-size:16px">Activity Structure</div>';
-      h += '<div style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-top:1px">Gradual Release of Responsibility</div></div>';
+      h += '<div style="font-size:10px;color:var(--mu);font-family:\'DM Sans\',system-ui,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-top:1px">Gradual Release of Responsibility</div></div>';
       h += '</div>';
       h += '<p style="font-size:12px;color:var(--mu);margin:10px 0 16px;line-height:1.55">Responsibility shifts gradually from teacher → student (Pearson &amp; Gallagher, 1983; Fisher &amp; Frey, 2013).</p>';
 
@@ -715,7 +715,7 @@ function render() {
       var hasAnyGRR = (A.iDo || '').trim() || (A.weDo || '').trim() || (A.youDo || '').trim();
       if (hasAnyGRR) {
         h += '<section class="card" style="padding:12px 14px;margin-bottom:12px">';
-        h += '<div style="font-size:10px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Activity Flow · Gradual Release</div>';
+        h += '<div style="font-size:10px;color:var(--mu);font-family:\'DM Sans\',system-ui,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Activity Flow · Gradual Release</div>';
         h += '<div style="display:flex;flex-direction:column;gap:6px">';
         if ((A.iDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #b8a0d8;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#7a5ea8;font-size:10px;letter-spacing:1px">🧑‍🏫 I DO</span> · ' + esc(A.iDo) + '</div>';
         if ((A.weDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #8dd4b0;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#3a8a60;font-size:10px;letter-spacing:1px">🤝 WE DO</span> · ' + esc(A.weDo) + '</div>';
@@ -871,7 +871,7 @@ function render() {
         h += '<section class="card" style="padding:16px;margin-bottom:14px">';
         h += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
         h += '<div class="fh" style="font-weight:700;font-size:13px">Activity Structure</div>';
-        h += '<span style="font-size:9px;color:var(--mu);font-family:\'Space Mono\',monospace;letter-spacing:1px;text-transform:uppercase">Gradual Release of Responsibility</span>';
+        h += '<span style="font-size:9px;color:var(--mu);font-family:\'DM Sans\',system-ui,sans-serif;letter-spacing:1px;text-transform:uppercase">Gradual Release of Responsibility</span>';
         h += '</div>';
         h += '<div style="display:flex;flex-direction:column;gap:8px">';
         if ((sA.iDo || '').trim()) {
