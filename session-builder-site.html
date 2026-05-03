@@ -88,21 +88,21 @@
        ═══════════════════════════════════════════════════════════════ */
 
     const SESSION_COMPONENTS = [
-      { id:"pa", label:"Phonemic Awareness", desc:"Blending & segmenting warm-up", icon:"🔊", defaultMin:2, category:"sound", defaultMode:"decoding", color:"#E8D5F5", suggestedTargets:["Phoneme blending (3-4 phonemes)","Phoneme segmentation","Phoneme deletion (initial)","Phoneme deletion (final)","Phoneme substitution","Syllable segmentation","Onset-rime blending"] },
-      { id:"visual", label:"Phonogram Review: Reading", desc:"Visual drill / deck work (see grapheme, say sound)", icon:"👁️", defaultMin:3, category:"sound", defaultMode:"decoding", color:"#D5E8F5", suggestedTargets:["Short vowels","Consonant digraphs (sh, ch, th, wh)","Blends","Long vowel teams","R-controlled vowels","VCe patterns","Diphthongs","Vowel teams review","Level 1 phonograms","Level 2 phonograms","Level 3 phonograms","Level 4 phonograms"] },
-      { id:"auditory", label:"Phonogram Review: Spelling", desc:"Auditory drill / what says (hear sound, write grapheme)", icon:"✍️", defaultMin:3, category:"sound", defaultMode:"encoding", color:"#D5F5E8", suggestedTargets:["Short vowels","Consonant digraphs","Long vowel spellings","R-controlled spellings","Spelling alternatives review"] },
-      { id:"blend", label:"Blending & Word Building", desc:"Blending board, word chains, letter tiles", icon:"🧱", defaultMin:5, category:"word", defaultMode:"decoding", color:"#F5F0D5", suggestedTargets:["CVC blending","CCVC / CVCC blending","CVCe word building","Multisyllabic word building","Word chains (swap one sound)","Syllable-by-syllable blending"] },
-      { id:"wordread", label:"Word-Level Reading", desc:"Word cards, lists, sorts, flash", icon:"🔤", defaultMin:5, category:"word", defaultMode:"decoding", color:"#F5E0D5", suggestedTargets:["CVC words","CVCe words","Vowel team words","R-controlled words","Multisyllabic: VC/CV","Multisyllabic: V/CV","Multisyllabic: C-le","Mixed review","Word sorts by pattern"] },
-      { id:"sentread", label:"Sentence-Level Reading", desc:"Read controlled sentences with target patterns", icon:"📝", defaultMin:3, category:"text", defaultMode:"decoding", color:"#F5D5D8", suggestedTargets:["Sentences with target pattern","Phrase-scoop reading","Controlled text sentences","Mixed decodable sentences"] },
-      { id:"fluency", label:"Reading Fluency", desc:"Timed reads, repeated reading, prosody", icon:"⚡", defaultMin:5, category:"text", defaultMode:"decoding", color:"#E0E8F5", suggestedTargets:["Word-level fluency (flash)","Phrase-level fluency","Passage: cold read + hot read","Repeated reading (timed)","Prosody practice","WCPM progress monitoring"] },
-      { id:"newconcept", label:"New Concept / Skill Introduction", desc:"Explicitly teach a new pattern, rule, or concept", icon:"💡", defaultMin:10, category:"word", defaultMode:"both", color:"#F5F5D5", suggestedTargets:["New phonogram introduction","New syllable type","Spelling rule (doubling, e-drop, y-change)","New vowel team","New prefix/suffix","New Latin root","Syllable division pattern","Soft c / soft g"] },
-      { id:"wordspell", label:"Word-Level Spelling", desc:"SOS, dictation, encoding with tiles or writing", icon:"✏️", defaultMin:5, category:"word", defaultMode:"encoding", color:"#D5F5F0", suggestedTargets:["CVC dictation","CVCe dictation","Vowel team dictation","SOS (simultaneous oral spelling)","Spelling with letter tiles","Syllable-by-syllable encoding","Spelling rule application","Arm-tap spelling"] },
-      { id:"sentspell", label:"Sentence-Level Spelling", desc:"Sentence dictation with proofreading", icon:"📋", defaultMin:5, category:"text", defaultMode:"encoding", color:"#E8F5D5", suggestedTargets:["Sentence dictation (1-2 sentences)","Proofreading practice","Capitals & punctuation check","Dictation with target words","Paragraph dictation"] },
-      { id:"irregular", label:"Irregular / Heart Words", desc:"High-frequency words with irregular spellings", icon:"❤️", defaultMin:5, category:"word", defaultMode:"both", color:"#F5D5E8", suggestedTargets:["Heart word introduction (new)","Heart word review (previously taught)","Heart word reading flash","Heart word spelling practice","Mapping regular vs. irregular parts"] },
-      { id:"connected", label:"Connected Text / Decodable", desc:"Apply skills in decodable passages or books", icon:"📚", defaultMin:10, category:"text", defaultMode:"decoding", color:"#D5D8F5", suggestedTargets:["Decodable passage (new)","Decodable passage (reread for fluency)","Decodable book","Controlled text with target pattern","Comprehension check after reading"] },
-      { id:"morphology", label:"Morphology & Word Study", desc:"Prefixes, suffixes, roots, word analysis", icon:"🧩", defaultMin:5, category:"word", defaultMode:"both", color:"#F0D5F5", suggestedTargets:["Prefix meaning & identification","Suffix meaning & identification","Base word + suffix practice","Latin root analysis","Greek combining forms","Affix peel-off reading","Word building with morphemes","Spelling rule with suffixes"] },
-      { id:"vocab", label:"Vocabulary", desc:"Word meaning, context clues, semantic mapping", icon:"🗂️", defaultMin:5, category:"word", defaultMode:"both", color:"#D5F0E8", suggestedTargets:["Morpheme-based word meaning","Context clue strategy","Semantic mapping","Multiple meaning words","Tier 2 vocabulary","Synonyms & antonyms"] },
-      { id:"comp", label:"Comprehension", desc:"Sentence or passage-level understanding", icon:"🧠", defaultMin:5, category:"text", defaultMode:"decoding", color:"#F5E8D5", suggestedTargets:["Visualize & verbalize","Who-what-where sentence check","Main idea identification","Retell / summarize","Inferencing","Text structure ID","Question generation"] },
+      { id:"pa", label:"Phonemic Awareness", desc:"Blending & segmenting warm-up", icon:"🔊", defaultMin:2, category:"sound", defaultMode:"decoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Phoneme blending (3-4 phonemes)","Phoneme segmentation","Phoneme deletion (initial)","Phoneme deletion (final)","Phoneme substitution","Syllable segmentation","Onset-rime blending"] },
+      { id:"visual", label:"Phonogram Review: Reading", desc:"Visual drill / deck work (see grapheme, say sound)", icon:"👁️", defaultMin:3, category:"sound", defaultMode:"decoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Short vowels","Consonant digraphs (sh, ch, th, wh)","Blends","Long vowel teams","R-controlled vowels","VCe patterns","Diphthongs","Vowel teams review","Level 1 phonograms","Level 2 phonograms","Level 3 phonograms","Level 4 phonograms"] },
+      { id:"auditory", label:"Phonogram Review: Spelling", desc:"Auditory drill / what says (hear sound, write grapheme)", icon:"✍️", defaultMin:3, category:"sound", defaultMode:"encoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Short vowels","Consonant digraphs","Long vowel spellings","R-controlled spellings","Spelling alternatives review"] },
+      { id:"blend", label:"Blending & Word Building", desc:"Blending board, word chains, letter tiles", icon:"🧱", defaultMin:5, category:"word", defaultMode:"decoding", color:"rgba(42,157,143,0.08)", suggestedTargets:["CVC blending","CCVC / CVCC blending","CVCe word building","Multisyllabic word building","Word chains (swap one sound)","Syllable-by-syllable blending"] },
+      { id:"wordread", label:"Word-Level Reading", desc:"Word cards, lists, sorts, flash", icon:"🔤", defaultMin:5, category:"word", defaultMode:"decoding", color:"rgba(42,157,143,0.08)", suggestedTargets:["CVC words","CVCe words","Vowel team words","R-controlled words","Multisyllabic: VC/CV","Multisyllabic: V/CV","Multisyllabic: C-le","Mixed review","Word sorts by pattern"] },
+      { id:"sentread", label:"Sentence-Level Reading", desc:"Read controlled sentences with target patterns", icon:"📝", defaultMin:3, category:"text", defaultMode:"decoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Sentences with target pattern","Phrase-scoop reading","Controlled text sentences","Mixed decodable sentences"] },
+      { id:"fluency", label:"Reading Fluency", desc:"Timed reads, repeated reading, prosody", icon:"⚡", defaultMin:5, category:"text", defaultMode:"decoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Word-level fluency (flash)","Phrase-level fluency","Passage: cold read + hot read","Repeated reading (timed)","Prosody practice","WCPM progress monitoring"] },
+      { id:"newconcept", label:"New Concept / Skill Introduction", desc:"Explicitly teach a new pattern, rule, or concept", icon:"💡", defaultMin:10, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.08)", suggestedTargets:["New phonogram introduction","New syllable type","Spelling rule (doubling, e-drop, y-change)","New vowel team","New prefix/suffix","New Latin root","Syllable division pattern","Soft c / soft g"] },
+      { id:"wordspell", label:"Word-Level Spelling", desc:"SOS, dictation, encoding with tiles or writing", icon:"✏️", defaultMin:5, category:"word", defaultMode:"encoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["CVC dictation","CVCe dictation","Vowel team dictation","SOS (simultaneous oral spelling)","Spelling with letter tiles","Syllable-by-syllable encoding","Spelling rule application","Arm-tap spelling"] },
+      { id:"sentspell", label:"Sentence-Level Spelling", desc:"Sentence dictation with proofreading", icon:"📋", defaultMin:5, category:"text", defaultMode:"encoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Sentence dictation (1-2 sentences)","Proofreading practice","Capitals & punctuation check","Dictation with target words","Paragraph dictation"] },
+      { id:"irregular", label:"Irregular / Heart Words", desc:"High-frequency words with irregular spellings", icon:"❤️", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.08)", suggestedTargets:["Heart word introduction (new)","Heart word review (previously taught)","Heart word reading flash","Heart word spelling practice","Mapping regular vs. irregular parts"] },
+      { id:"connected", label:"Connected Text / Decodable", desc:"Apply skills in decodable passages or books", icon:"📚", defaultMin:10, category:"text", defaultMode:"decoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Decodable passage (new)","Decodable passage (reread for fluency)","Decodable book","Controlled text with target pattern","Comprehension check after reading"] },
+      { id:"morphology", label:"Morphology & Word Study", desc:"Prefixes, suffixes, roots, word analysis", icon:"🧩", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.08)", suggestedTargets:["Prefix meaning & identification","Suffix meaning & identification","Base word + suffix practice","Latin root analysis","Greek combining forms","Affix peel-off reading","Word building with morphemes","Spelling rule with suffixes"] },
+      { id:"vocab", label:"Vocabulary", desc:"Word meaning, context clues, semantic mapping", icon:"🗂️", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.10)", suggestedTargets:["Morpheme-based word meaning","Context clue strategy","Semantic mapping","Multiple meaning words","Tier 2 vocabulary","Synonyms & antonyms"] },
+      { id:"comp", label:"Comprehension", desc:"Sentence or passage-level understanding", icon:"🧠", defaultMin:5, category:"text", defaultMode:"decoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Visualize & verbalize","Who-what-where sentence check","Main idea identification","Retell / summarize","Inferencing","Text structure ID","Question generation"] },
     ];
 
     const CUE_LEVELS = ["Independent","Monitoring","Verbal Cue","Visual Cue","Model","Physical Prompt"];
@@ -166,19 +166,21 @@
 
       const totalMinutes = selected.reduce((s, id) => s + (componentData[id]?.minutes || 0), 0);
 
-      // Theme — editorial calm: cream/ink with mint/lavender/pink accents
+      // Theme — matches RTN Eval Intake design system
       const bg = darkMode ? "#0d1b1a" : "#ffffff";
       const cardBg = darkMode ? "#142322" : "#ffffff";
       const tx = darkMode ? "#e0edec" : "#0f1419";
       const mu = darkMode ? "#a3bfbd" : "#4a5560";
+      const dm = darkMode ? "#6b8886" : "#9aa0a8";
       const bd = darkMode ? "#1e3332" : "#ebebeb";
-      const ac = "#2a9d8f"; // teal
-      const ag = "#2a9d8f";
-      const gn = "#4f9c74"; // mint-deep
-      const rd = "#c47086"; // pink-deep
+      const ac = darkMode ? "#3dbdad" : "#2a9d8f";
+      const acSoft = darkMode ? "rgba(61,189,173,0.1)" : "rgba(42,157,143,0.08)";
+      const acDeep = darkMode ? "#2a9d8f" : "#1f7a6f";
+      const gn = "#4f9c74";
+      const rd = "#c47086";
 
-      const inp = { width: "100%", padding: "9px 12px", borderRadius: 10, border: `1px solid ${bd}`, background: darkMode ? "#0d1b1a" : "#fafafa", color: tx, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none" };
-      const bb = { border: "none", borderRadius: 100, padding: "10px 22px", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer", outline: "none", letterSpacing: "0.01em" };
+      const inp = { width: "100%", padding: "10px 14px", borderRadius: 10, border: `2px solid ${bd}`, background: darkMode ? "#0d1b1a" : "#ffffff", color: tx, fontSize: 14, fontFamily: "'DM Sans', system-ui, sans-serif", outline: "none", boxSizing: "border-box" };
+      const bb = { border: "none", borderRadius: 100, padding: "10px 22px", fontFamily: "'DM Sans', system-ui, sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer", outline: "none", letterSpacing: "0.01em" };
       const pb = { ...bb, background: tx, color: bg, boxShadow: "0 1px 2px rgba(40,36,32,0.04), 0 2px 6px rgba(40,36,32,0.04)" };
       const sbtn = { ...bb, background: "transparent", color: tx, border: `1px solid ${bd}` };
       const cs = { background: cardBg, borderRadius: 18, border: `1px solid ${bd}` };
@@ -199,9 +201,9 @@ body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#2828
 .meta strong{color:#28283A;font-weight:600;margin-right:3px}.meta span{color:#555}
 .cmp{border:1px solid #E8E4DF;border-radius:10px;margin-bottom:8px;page-break-inside:avoid;overflow:hidden;position:relative;padding-left:6px}
 .cmp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}
-.cmp.s::before{background:#8B6FBF}
-.cmp.w::before{background:#C28460}
-.cmp.t::before{background:#4E7FB8}
+.cmp.s::before{background:#2a9d8f}
+.cmp.w::before{background:#1f7a6f}
+.cmp.t::before{background:#177a6b}
 .ch{padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .ch h3{font-family:"DM Sans",sans-serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}
 .ch .n{font-family:"DM Sans",sans-serif;font-weight:700;font-size:10.5px;background:#fff;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}
@@ -268,7 +270,9 @@ ${comps.map((c, i) => {
         const ToggleBtn = (
           <button onClick={() => setDarkMode(!darkMode)}
             aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            style={{ position: "fixed", top: 18, right: 22, zIndex: 100, padding: "7px 14px", borderRadius: 100, border: `1px solid ${bd}`, background: cardBg, color: mu, fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.06em", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "border-color 0.2s ease, color 0.2s ease" }}
+            style={{ position: "fixed", top: 18, right: 22, zIndex: 100, padding: "7px 14px", borderRadius: 100, border: `1px solid ${bd}`, background: cardBg, color: dm, fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.06em", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "border-color 0.2s ease, color 0.2s ease" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = tx; e.currentTarget.style.borderColor = dm; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = dm; e.currentTarget.style.borderColor = bd; }}
           >
             <span style={{ fontSize: 13, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
             {darkMode ? "Dark" : "Light"}
@@ -346,7 +350,7 @@ ${comps.map((c, i) => {
           <header className="no-print" style={{ position: "sticky", top: 6, zIndex: 100, background: darkMode ? "rgba(13,27,26,0.92)" : "rgba(255,255,255,0.92)", backdropFilter: "saturate(160%) blur(12px)", WebkitBackdropFilter: "saturate(160%) blur(12px)", borderBottom: `1px solid ${bd}`, padding: "12px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
             <button onClick={() => setLanded(false)} aria-label="Back to start"
               style={{ display: "flex", alignItems: "center", gap: 12, background: "transparent", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit", color: tx }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: ag, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>SB</div>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: ac, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>SB</div>
               <div style={{ textAlign: "left" }}>
                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 16, lineHeight: 1.1, color: tx, letterSpacing: "-0.005em" }}>Session Builder</div>
                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9.5, color: mu, letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2 }}>RTN Communication &amp; Literacy</div>
@@ -360,7 +364,14 @@ ${comps.map((c, i) => {
                 >{t.label}</button>
               ))}
               <div style={{ width: 1, height: 18, background: bd, margin: "0 4px" }} />
-              <button onClick={() => setDarkMode(!darkMode)} style={{ ...sbtn, padding: "6px 12px", fontSize: 11, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em" }} aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>{darkMode ? "☾ Dark" : "☀ Light"}</button>
+              <button onClick={() => setDarkMode(!darkMode)}
+                style={{ padding: "7px 14px", borderRadius: 100, border: `1px solid ${bd}`, background: cardBg, color: dm, fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.06em", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "border-color 0.2s ease, color 0.2s ease" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = tx; e.currentTarget.style.borderColor = dm; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = dm; e.currentTarget.style.borderColor = bd; }}
+                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>
+                <span style={{ fontSize: 13, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
+                {darkMode ? "Dark" : "Light"}
+              </button>
             </div>
           </header>
 
@@ -406,7 +417,7 @@ ${comps.map((c, i) => {
                             {isSel && <span style={{ fontSize: 11, fontWeight: 700, color: ac, fontFamily: "'DM Sans', sans-serif", background: darkMode ? "rgba(42,157,143,0.15)" : "rgba(42,157,143,0.1)", width: 22, height: 22, borderRadius: 6, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{oi + 1}</span>}
                             <span style={{ fontSize: 17 }}>{comp.icon}</span>
                             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14 }}>{comp.label}</span>
-                            <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 7, fontWeight: 600, background: darkMode ? "rgba(42,157,143,0.15)" : comp.color, color: darkMode ? "#bbb" : "#4a4a5a" }}>{comp.category}</span>
+                            <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 7, fontWeight: 600, background: acSoft, color: ac }}>{comp.category}</span>
                           </div>
                           <div style={{ fontSize: 11, color: mu, marginTop: 1 }}>{comp.desc}</div>
                         </div>
@@ -486,7 +497,7 @@ ${comps.map((c, i) => {
                     <div key={id} style={{ ...cs, overflow: "hidden" }}>
                       <button onClick={() => setExpandedInCollect(isExp ? null : id)} aria-expanded={isExp} aria-label={`${comp.label} - tap to ${isExp ? "collapse" : "expand"}`}
                         style={{ width: "100%", background: "none", border: "none", cursor: "pointer", color: tx, padding: "12px 14px", display: "flex", alignItems: "center", gap: 8, textAlign: "left", fontFamily: "'DM Sans', sans-serif", outline: "none" }}>
-                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 11, background: ag, color: "#28283A", width: 24, height: 24, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 11, background: ac, color: "#fff", width: 24, height: 24, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
                         <span style={{ fontSize: 15 }}>{comp.icon}</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13 }}>{comp.label}</div>
@@ -610,10 +621,10 @@ ${comps.map((c, i) => {
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                            <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 11, background: ag, color: "#28283A", width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                            <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 11, background: ac, color: "#fff", width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
                             <span style={{ fontSize: 14 }}>{comp.icon}</span>
                             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13 }}>{comp.label}</span>
-                            <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 6, background: darkMode ? "rgba(42,157,143,0.12)" : "rgba(42,157,143,0.06)", color: mu, fontWeight: 600 }}>{MODES[d.mode] || "Both"} &middot; ~{d.minutes}m</span>
+                            <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 6, background: acSoft, color: ac, fontWeight: 600 }}>{MODES[d.mode] || "Both"} &middot; ~{d.minutes}m</span>
                           </div>
                           {d.target && <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 1 }}>Target: {d.target}</div>}
                           {d.materials && <div style={{ fontSize: 11, color: mu }}>Materials: {d.materials}</div>}
