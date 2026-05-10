@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Session Builder — RTN Communication &amp; Literacy</title>
+  <title>Session Builder — RTN | Speech, Language &amp; Literacy</title>
   <meta name="description" content="A free, open-source structured literacy session planner with built-in data collection. Plan sessions across sound, word, and text levels in decoding and encoding formats." />
-  <meta name="author" content="Rachel Terra Norton, MS, CCC-SLP — RTN Communication & Literacy" />
+  <meta name="author" content="Rachel Terra Norton, MS, CCC-SLP — RTN | Speech, Language & Literacy" />
   <meta name="keywords" content="structured literacy, session planner, SLP, reading intervention, Orton-Gillingham, data collection, decoding, encoding, phonics, dyslexia" />
   <meta property="og:title" content="Session Builder — Structured Literacy Planner" />
   <meta property="og:description" content="Free structured literacy session planner with live data collection. Built for clinicians, by a clinician." />
@@ -83,7 +83,7 @@
     const { useState, useEffect, useRef, useCallback } = React;
 
     /* ═══════════════════════════════════════════════════════════════
-       SESSION BUILDER v2 — RTN Communication & Literacy
+       SESSION BUILDER v2 — RTN | Speech, Language & Literacy
        Universal Structured Literacy Session Planner + Data Collection
        ═══════════════════════════════════════════════════════════════ */
 
@@ -221,7 +221,7 @@ body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#2828
 @media print{body{padding:14px 16px}}
 </style></head><body>
 <div class="title">Structured Literacy Session Plan</div>
-<div class="sub">Session Builder &middot; RTN Communication &amp; Literacy</div>
+<div class="sub">Session Builder &middot; RTN | Speech, Language &amp; Literacy</div>
 <div class="meta">
 ${studentName ? `<span><strong>Student:</strong>${studentName}</span>` : ""}<span><strong>Date:</strong>${sessionDate}</span>${sessionNum ? `<span><strong>Session #</strong>${sessionNum}</span>` : ""}<span><strong>${comps.length}</strong> components</span><span><strong>~${totalMinutes}</strong> min</span>
 </div>
@@ -233,7 +233,7 @@ ${comps.map((c, i) => {
           const bdgCls = pct === null ? "" : pct >= 80 ? "bdg-h" : pct >= 50 ? "bdg-m" : "bdg-l";
           return `<div class="cmp ${catShort}"><div class="ch" style="background:${c.color}"><h3><span class="n">${i + 1}</span>${c.icon} ${c.label}</h3><div><span class="bdg">${MODES[c.d.mode] || "Both"}</span><span class="bdg">~${c.d.minutes} min</span>${pct !== null ? `<span class="bdg ${bdgCls}">${pct}% (${c.d.correct}/${total})</span>` : ""}</div></div><div class="cb">${c.d.target ? `<div class="tgt"><span class="k">Target</span>${c.d.target}</div>` : '<div class="tgt"><span class="k">Target</span>___________________________________</div>'}${c.d.materials ? `<div class="info"><span class="k">Materials</span>${c.d.materials}</div>` : ""}${c.d.cueLevel ? `<div class="info"><span class="k">Cue</span>${c.d.cueLevel}</div>` : ""}${c.d.notes ? `<div class="info"><span class="k">Notes</span><em>${c.d.notes}</em></div>` : ""}${!hasData ? `<div class="gr">${Array(20).fill('<div class="gc"></div>').join("")}</div><div class="nl"></div><div class="nl"></div>` : ""}</div></div>`;
         }).join("")}
-<div class="ft">&copy; 2026 RTN Communication &amp; Literacy &middot; CC BY-NC 4.0</div>
+<div class="ft">&copy; 2026 RTN | Speech, Language &amp; Literacy &middot; CC BY-NC 4.0</div>
 </body></html>`;
         const blob = new Blob([html], { type: "text/html" });
         const w = window.open(URL.createObjectURL(blob), "_blank");
@@ -253,7 +253,7 @@ ${comps.map((c, i) => {
           if (c.d.notes) l.push(`   Notes: ${c.d.notes}`);
           l.push("");
         });
-        l.push("© 2026 RTN Communication & Literacy | CC BY-NC 4.0");
+        l.push("© 2026 RTN | Speech, Language & Literacy | CC BY-NC 4.0");
         navigator.clipboard.writeText(l.join("\n"));
         setCopyFb(true);
         setTimeout(() => setCopyFb(false), 2000);
@@ -353,7 +353,7 @@ ${comps.map((c, i) => {
               <div style={{ width: 34, height: 34, borderRadius: 10, background: ac, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>SB</div>
               <div style={{ textAlign: "left" }}>
                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 16, lineHeight: 1.1, color: tx, letterSpacing: "-0.005em" }}>Session Builder</div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9.5, color: mu, letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2 }}>RTN Communication &amp; Literacy</div>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9.5, color: mu, letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2 }}>RTN | Speech, Language &amp; Literacy</div>
               </div>
             </button>
             <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
@@ -656,7 +656,7 @@ ${comps.map((c, i) => {
           </main>
 
           <footer className="no-print" style={{ textAlign: "center", padding: "14px 16px", fontSize: 9, color: mu, borderTop: `1px solid ${bd}` }}>
-            &copy; 2026 RTN Communication &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician.
+            &copy; 2026 RTN | Speech, Language &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician.
           </footer>
         </div>
       );

@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Session Builder — RTN Communication &amp; Literacy</title>
+  <title>Session Builder — RTN | Speech, Language &amp; Literacy</title>
   <meta name="description" content="A free, open-source structured literacy session planner with built-in data collection. Plan sessions across sound, word, and text levels in decoding and encoding formats." />
-  <meta name="author" content="Rachel Terra Norton, MS, CCC-SLP — RTN Communication & Literacy" />
+  <meta name="author" content="Rachel Terra Norton, MS, CCC-SLP — RTN | Speech, Language & Literacy" />
   <meta name="keywords" content="structured literacy, session planner, SLP, reading intervention, Orton-Gillingham, data collection, decoding, encoding, phonics, dyslexia" />
   <meta property="og:title" content="Session Builder — Structured Literacy Planner" />
   <meta property="og:description" content="Free structured literacy session planner with live data collection. Built for clinicians, by a clinician." />
@@ -22,10 +22,10 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-text-size-adjust: 100%; }
     html[data-theme="dark"] body { background: #0d1b1a !important; color: #e0edec !important; }
-    body { font-family: 'DM Sans', system-ui, sans-serif; background: #ffffff; color: #0f1419; min-height: 100vh; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: #ffffff; color: #0f1419; min-height: 100vh; line-height: 1.5; transition: background .3s, color .3s; }
     :focus-visible { outline: 2px solid #2a9d8f !important; outline-offset: 3px; border-radius: 2px; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
-    @media print { .no-print { display: none !important; } body { background: #fff !important; } .rainbow-bar { display: none !important; } }
+    @media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } body { background: #fff !important; padding: 10px !important; max-width: 100% !important; } .rainbow-bar { display: none !important; } }
 
     /* Subtle pastel washes — hidden */
     body::before {
@@ -83,7 +83,7 @@
     const { useState, useEffect, useRef, useCallback } = React;
 
     /* ═══════════════════════════════════════════════════════════════
-       SESSION BUILDER v2 — RTN Communication & Literacy
+       SESSION BUILDER v2 — RTN | Speech, Language & Literacy
        Universal Structured Literacy Session Planner + Data Collection
        ═══════════════════════════════════════════════════════════════ */
 
@@ -179,11 +179,12 @@
       const gn = "#4f9c74";
       const rd = "#c47086";
 
-      const inp = { width: "100%", padding: "10px 14px", borderRadius: 10, border: `2px solid ${bd}`, background: darkMode ? "#0d1b1a" : "#ffffff", color: tx, fontSize: 14, fontFamily: "'DM Sans', system-ui, sans-serif", outline: "none", boxSizing: "border-box" };
-      const bb = { border: "none", borderRadius: 100, padding: "10px 22px", fontFamily: "'DM Sans', system-ui, sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer", outline: "none", letterSpacing: "0.01em" };
-      const pb = { ...bb, background: tx, color: bg, boxShadow: "0 1px 2px rgba(40,36,32,0.04), 0 2px 6px rgba(40,36,32,0.04)" };
-      const sbtn = { ...bb, background: "transparent", color: tx, border: `1px solid ${bd}` };
-      const cs = { background: cardBg, borderRadius: 18, border: `1px solid ${bd}` };
+      const inputBg = darkMode ? "#1a2e2d" : "#f7f8f9";
+      const inp = { width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${bd}`, background: inputBg, color: tx, fontSize: 15, fontFamily: "'DM Sans', system-ui, sans-serif", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" };
+      const bb = { border: "none", borderRadius: 10, padding: "8px 16px", fontFamily: "'DM Sans', system-ui, sans-serif", fontWeight: 500, fontSize: 13, cursor: "pointer", outline: "none", transition: "all 0.2s" };
+      const pb = { ...bb, background: ac, color: "#fff" };
+      const sbtn = { ...bb, background: cardBg, color: mu, border: `1px solid ${bd}` };
+      const cs = { background: cardBg, borderRadius: 14, border: `1px solid ${bd}` };
 
       // PDF / Print
       const generatePDF = useCallback(() => {
@@ -221,7 +222,7 @@ body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#2828
 @media print{body{padding:14px 16px}}
 </style></head><body>
 <div class="title">Structured Literacy Session Plan</div>
-<div class="sub">Session Builder &middot; RTN Communication &amp; Literacy</div>
+<div class="sub">Session Builder &middot; RTN | Speech, Language &amp; Literacy</div>
 <div class="meta">
 ${studentName ? `<span><strong>Student:</strong>${studentName}</span>` : ""}<span><strong>Date:</strong>${sessionDate}</span>${sessionNum ? `<span><strong>Session #</strong>${sessionNum}</span>` : ""}<span><strong>${comps.length}</strong> components</span><span><strong>~${totalMinutes}</strong> min</span>
 </div>
@@ -233,7 +234,7 @@ ${comps.map((c, i) => {
           const bdgCls = pct === null ? "" : pct >= 80 ? "bdg-h" : pct >= 50 ? "bdg-m" : "bdg-l";
           return `<div class="cmp ${catShort}"><div class="ch" style="background:${c.color}"><h3><span class="n">${i + 1}</span>${c.icon} ${c.label}</h3><div><span class="bdg">${MODES[c.d.mode] || "Both"}</span><span class="bdg">~${c.d.minutes} min</span>${pct !== null ? `<span class="bdg ${bdgCls}">${pct}% (${c.d.correct}/${total})</span>` : ""}</div></div><div class="cb">${c.d.target ? `<div class="tgt"><span class="k">Target</span>${c.d.target}</div>` : '<div class="tgt"><span class="k">Target</span>___________________________________</div>'}${c.d.materials ? `<div class="info"><span class="k">Materials</span>${c.d.materials}</div>` : ""}${c.d.cueLevel ? `<div class="info"><span class="k">Cue</span>${c.d.cueLevel}</div>` : ""}${c.d.notes ? `<div class="info"><span class="k">Notes</span><em>${c.d.notes}</em></div>` : ""}${!hasData ? `<div class="gr">${Array(20).fill('<div class="gc"></div>').join("")}</div><div class="nl"></div><div class="nl"></div>` : ""}</div></div>`;
         }).join("")}
-<div class="ft">&copy; 2026 RTN Communication &amp; Literacy &middot; CC BY-NC 4.0</div>
+<div class="ft">&copy; 2026 RTN | Speech, Language &amp; Literacy &middot; CC BY-NC 4.0</div>
 </body></html>`;
         const blob = new Blob([html], { type: "text/html" });
         const w = window.open(URL.createObjectURL(blob), "_blank");
@@ -253,7 +254,7 @@ ${comps.map((c, i) => {
           if (c.d.notes) l.push(`   Notes: ${c.d.notes}`);
           l.push("");
         });
-        l.push("© 2026 RTN Communication & Literacy | CC BY-NC 4.0");
+        l.push("© 2026 RTN | Speech, Language & Literacy | CC BY-NC 4.0");
         navigator.clipboard.writeText(l.join("\n"));
         setCopyFb(true);
         setTimeout(() => setCopyFb(false), 2000);
@@ -267,141 +268,117 @@ ${comps.map((c, i) => {
 
       // ─── LANDING SCREEN ─── (matches intake landing aesthetic)
       if (!landed) {
-        const ToggleBtn = (
-          <button onClick={() => setDarkMode(!darkMode)}
-            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            style={{ position: "fixed", top: 18, right: 22, zIndex: 100, padding: "7px 14px", borderRadius: 100, border: `1px solid ${bd}`, background: cardBg, color: dm, fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.06em", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "border-color 0.2s ease, color 0.2s ease" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = tx; e.currentTarget.style.borderColor = dm; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = dm; e.currentTarget.style.borderColor = bd; }}
-          >
-            <span style={{ fontSize: 13, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
-            {darkMode ? "Dark" : "Light"}
-          </button>
-        );
         return (
-          <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, position: "relative", zIndex: 1 }}>
-            {ToggleBtn}
-            <div style={{ maxWidth: 600, width: "100%", textAlign: "left" }}>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", padding: "20px 20px 60px", maxWidth: 960, margin: "0 auto" }}>
+            <button onClick={() => setDarkMode(!darkMode)}
+              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              style={{ position: "fixed", top: 16, right: 16, zIndex: 1000, display: "flex", alignItems: "center", gap: 6,
+                background: cardBg, border: `1px solid ${bd}`, borderRadius: 40, padding: "6px 14px 6px 10px",
+                cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: mu,
+                transition: "all 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,.06)" }}>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
+              <span style={{ lineHeight: 1 }}>{darkMode ? "Dark" : "Light"}</span>
+            </button>
 
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: darkMode ? "#5e8a87" : "#4a5560", marginBottom: 18, paddingBottom: 10, borderBottom: `1px solid ${bd}`, display: "inline-block" }}>
-                Structured Literacy · Plan · Collect · Print
-              </p>
+            <div style={{ marginBottom: 28, paddingTop: 8 }}>
+              <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4, color: tx }}>Session Builder</h1>
+              <p style={{ fontSize: 14, color: dm }}>Plan structured literacy sessions, collect data, print summaries</p>
+            </div>
 
-              <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(34px, 5.5vw, 48px)", fontWeight: 500, letterSpacing: "-0.015em", lineHeight: 1.08, color: tx, marginBottom: 14, position: "relative", display: "inline-block", paddingBottom: 10 }}>
-                Session Builder
-                <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 3, borderRadius: 2, background: "#2a9d8f", opacity: 0.78 }} />
-              </h1>
-
-              <p style={{ fontSize: 16, color: darkMode ? "#a3bfbd" : mu, lineHeight: 1.7, marginBottom: 32, maxWidth: 520 }}>
-                A free, clinician-built planner for structured literacy sessions. Choose components, set targets, collect live data &mdash; then print or export a clean session summary.
-              </p>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12, marginBottom: 32 }}>
+            <div style={{ ...cs, padding: 20, marginBottom: 24 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: tx }}>Choose a starting point</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
                 {[
-                  { id: "new", letter: "N", title: "New Session", deep: "#1f7a6f", mid: "#2a9d8f", soft: darkMode ? "#142322" : "rgba(42,157,143,0.08)", lines: ["Start with no components","Pick from 14 building blocks","Fully custom session"], action: () => { setSelected([]); setLanded(true); } },
-                  { id: "quick", letter: "Q", title: "Quick Template", deep: "#1f7a6f", mid: "#2a9d8f", soft: darkMode ? "#142322" : "rgba(42,157,143,0.08)", lines: ["8-component starter set","Phonics → encoding → text","Edit anything before you start"], action: () => { setSelected(["pa","visual","auditory","blend","wordread","wordspell","sentspell","connected"]); setLanded(true); } },
+                  { id: "new", title: "New Session", desc: "Start with no components. Pick from 15 building blocks to create a fully custom session.", action: () => { setSelected([]); setLanded(true); } },
+                  { id: "quick", title: "Quick Template", desc: "8-component starter set covering phonics through encoding and connected text. Edit anything before you start.", action: () => { setSelected(["pa","visual","auditory","blend","wordread","wordspell","sentspell","connected"]); setLanded(true); } },
                 ].map(opt => (
                   <button key={opt.id} onClick={opt.action}
-                    style={{
-                      padding: "24px 22px",
-                      borderRadius: 18,
-                      border: `1px solid ${bd}`,
-                      background: cardBg,
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition: "transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease",
-                      fontFamily: "inherit",
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = opt.mid; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = bd; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                    style={{ padding: "16px 20px", borderRadius: 14, border: `1px solid ${bd}`, background: cardBg,
+                      cursor: "pointer", textAlign: "left", transition: "all 0.2s", fontFamily: "inherit" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = ac; e.currentTarget.style.background = acSoft; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = bd; e.currentTarget.style.background = cardBg; }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                      <span style={{ width: 28, height: 28, borderRadius: 8, background: opt.soft, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14, color: opt.deep }}>{opt.letter}</span>
-                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 19, color: tx, letterSpacing: "-0.005em" }}>{opt.title}</span>
-                    </div>
-                    <ul style={{ listStyle: "none", margin: 0, padding: 0, color: darkMode ? "#a3bfbd" : mu, fontSize: 13.5, lineHeight: 1.7 }}>
-                      {opt.lines.map((line, i) => (
-                        <li key={i} style={{ paddingLeft: 14, position: "relative" }}>
-                          <span style={{ position: "absolute", left: 0, top: 9, width: 6, height: 6, borderRadius: "50%", background: opt.mid }} />
-                          {line}
-                        </li>
-                      ))}
-                    </ul>
-                    <div style={{ marginTop: 14, fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: opt.deep }}>Begin →</div>
+                    <div style={{ fontWeight: 600, fontSize: 15, color: tx, marginBottom: 6 }}>{opt.title}</div>
+                    <div style={{ fontSize: 13, color: mu, lineHeight: 1.6 }}>{opt.desc}</div>
+                    <div style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: ac }}>Begin →</div>
                   </button>
                 ))}
               </div>
+            </div>
 
-              <div style={{ paddingTop: 20, borderTop: `1px solid ${bd}`, fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: "0.16em", textTransform: "uppercase", color: darkMode ? "#5e8a87" : "#4a5560", lineHeight: 1.9 }}>
-                Free · Open-source · Built for SLPs<br />
-                Rachel Terra Norton, MS, CCC-SLP · rachelslp.org
-              </div>
-
+            <div style={{ fontSize: 12, color: dm, lineHeight: 1.8 }}>
+              Free · Open-source · Built for SLPs<br />
+              Rachel Terra Norton, MS, CCC-SLP · rachelslp.org
             </div>
           </div>
         );
       }
 
       return (
-        <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh" }}>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", padding: "20px 20px 60px", maxWidth: 960, margin: "0 auto" }}>
           <div ref={liveRef} role="status" aria-live="polite" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }} />
 
-          {/* HEADER */}
-          <header className="no-print" style={{ position: "sticky", top: 6, zIndex: 100, background: darkMode ? "rgba(13,27,26,0.92)" : "rgba(255,255,255,0.92)", backdropFilter: "saturate(160%) blur(12px)", WebkitBackdropFilter: "saturate(160%) blur(12px)", borderBottom: `1px solid ${bd}`, padding: "12px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <button onClick={() => setLanded(false)} aria-label="Back to start"
-              style={{ display: "flex", alignItems: "center", gap: 12, background: "transparent", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit", color: tx }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: ac, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>SB</div>
-              <div style={{ textAlign: "left" }}>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 16, lineHeight: 1.1, color: tx, letterSpacing: "-0.005em" }}>Session Builder</div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9.5, color: mu, letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2 }}>RTN Communication &amp; Literacy</div>
-              </div>
-            </button>
-            <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
-              {[{ id: "plan", label: "Plan" }, { id: "collect", label: "Collect" }, { id: "summary", label: "Summary" }].map(t => (
-                <button key={t.id} onClick={() => { setView(t.id); announce(t.label + " view"); if (t.id === "collect" && !expandedInCollect) setExpandedInCollect(selected[0] || null); }}
-                  aria-current={view === t.id ? "page" : undefined}
-                  style={{ ...bb, padding: "7px 16px", fontSize: 12.5, background: view === t.id ? tx : "transparent", color: view === t.id ? bg : mu, fontWeight: 500, border: view === t.id ? `1px solid ${tx}` : `1px solid transparent` }}
-                >{t.label}</button>
-              ))}
-              <div style={{ width: 1, height: 18, background: bd, margin: "0 4px" }} />
-              <button onClick={() => setDarkMode(!darkMode)}
-                style={{ padding: "7px 14px", borderRadius: 100, border: `1px solid ${bd}`, background: cardBg, color: dm, fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.06em", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "border-color 0.2s ease, color 0.2s ease" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = tx; e.currentTarget.style.borderColor = dm; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = dm; e.currentTarget.style.borderColor = bd; }}
-                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>
-                <span style={{ fontSize: 13, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
-                {darkMode ? "Dark" : "Light"}
-              </button>
-            </div>
-          </header>
+          {/* THEME TOGGLE — fixed, matching literacy tracker */}
+          <button className="no-print" onClick={() => setDarkMode(!darkMode)}
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            style={{ position: "fixed", top: 16, right: 16, zIndex: 1000, display: "flex", alignItems: "center", gap: 6,
+              background: cardBg, border: `1px solid ${bd}`, borderRadius: 40, padding: "6px 14px 6px 10px",
+              cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: mu,
+              transition: "all 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,.06)" }}>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
+            <span style={{ lineHeight: 1 }}>{darkMode ? "Dark" : "Light"}</span>
+          </button>
 
-          <main style={{ maxWidth: 840, margin: "0 auto", padding: "14px 14px 80px" }}>
+          {/* HEADER — matching literacy tracker */}
+          <div className="no-print" style={{ marginBottom: 28, paddingTop: 8 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4, color: tx }}>Session Builder</h1>
+            <p style={{ fontSize: 14, color: dm }}>Plan structured literacy sessions, collect data, print summaries</p>
+          </div>
+
+          {/* VIEW TABS + TOOLBAR — matching literacy tracker toolbar style */}
+          <div className="no-print" style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+            {[{ id: "plan", label: "Plan" }, { id: "collect", label: "Collect" }, { id: "summary", label: "Summary" }].map(t => (
+              <button key={t.id} onClick={() => { setView(t.id); announce(t.label + " view"); if (t.id === "collect" && !expandedInCollect) setExpandedInCollect(selected[0] || null); }}
+                aria-current={view === t.id ? "page" : undefined}
+                style={{ padding: "8px 16px", border: `1px solid ${view === t.id ? ac : bd}`, borderRadius: 10, background: view === t.id ? ac : cardBg,
+                  color: view === t.id ? "#fff" : mu, fontFamily: "inherit", fontSize: 13, fontWeight: view === t.id ? 600 : 500, cursor: "pointer", transition: "all 0.2s" }}
+              >{t.label}</button>
+            ))}
+            <div style={{ flex: 1 }} />
+            <button onClick={() => setLanded(false)} style={{ ...sbtn, fontSize: 12 }}>← Start Over</button>
+          </div>
+
+          <main>
 
             {/* ═══ PLAN VIEW ═══ */}
             {view === "plan" && (<React.Fragment>
-              <section style={{ ...cs, padding: 18, marginBottom: 14 }}>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, margin: "0 0 12px" }}>Session Info</h2>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 10 }}>
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 3 }}>STUDENT NAME / INITIALS</label>
-                    <input value={studentName} onChange={e => setStudentName(e.target.value)} placeholder="Optional" style={inp} aria-label="Student name or initials" />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 3 }}>DATE</label>
-                    <input type="date" value={sessionDate} onChange={e => setSessionDate(e.target.value)} style={inp} aria-label="Session date" />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 3 }}>SESSION #</label>
-                    <input value={sessionNum} onChange={e => setSessionNum(e.target.value)} placeholder="e.g. 12" style={inp} aria-label="Session number" />
-                  </div>
+              <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".5px", color: dm, marginBottom: 4 }}>Student Name</label>
+                  <input value={studentName} onChange={e => setStudentName(e.target.value)} placeholder="Enter student name" style={inp} aria-label="Student name" />
                 </div>
-              </section>
-
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, margin: 0 }}>Session Components</h2>
-                <span style={{ fontSize: 12, color: mu, fontWeight: 600 }}>{selected.length} selected &middot; ~{totalMinutes} min</span>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".5px", color: dm, marginBottom: 4 }}>Date</label>
+                  <input type="date" value={sessionDate} onChange={e => setSessionDate(e.target.value)} style={inp} aria-label="Session date" />
+                </div>
+                <div style={{ flex: 1, minWidth: 120 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".5px", color: dm, marginBottom: 4 }}>Session #</label>
+                  <input value={sessionNum} onChange={e => setSessionNum(e.target.value)} placeholder="e.g. 12" style={inp} aria-label="Session number" />
+                </div>
               </div>
-              <p style={{ fontSize: 12, color: mu, margin: "0 0 12px" }}>Check components to include. Set targets and reorder with arrows. Tap a suggested target or type your own.</p>
+
+              {/* Progress summary */}
+              <div style={{ ...cs, padding: 20, marginBottom: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: tx }}>Session Components</h2>
+                <div style={{ background: inputBg, borderRadius: 8, height: 10, overflow: "hidden", marginBottom: 12 }}>
+                  <div style={{ height: "100%", background: ac, borderRadius: 8, transition: "width 0.4s ease", width: selected.length > 0 ? `${Math.min(100, (selected.length / 15) * 100)}%` : "0%" }} />
+                </div>
+                <div style={{ display: "flex", gap: 20, flexWrap: "wrap", fontSize: 13, color: mu }}>
+                  <span>{selected.length} selected</span>
+                  <span>~{totalMinutes} min</span>
+                </div>
+              </div>
+              <p style={{ fontSize: 13, color: dm, margin: "0 0 12px" }}>Check components to include. Set targets and reorder with arrows.</p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {SESSION_COMPONENTS.map(comp => {
@@ -409,7 +386,7 @@ ${comps.map((c, i) => {
                   const d = componentData[comp.id] || {};
                   const oi = selected.indexOf(comp.id);
                   return (
-                    <div key={comp.id} style={{ ...cs, borderColor: isSel ? ac : bd, borderWidth: isSel ? 2 : 1, opacity: isSel ? 1 : 0.55, transition: "all 0.15s" }}>
+                    <div key={comp.id} style={{ ...cs, borderColor: isSel ? ac : bd, opacity: isSel ? 1 : 0.55, transition: "all 0.2s", overflow: "hidden" }}>
                       <div style={{ padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
                         <input type="checkbox" checked={isSel} onChange={() => toggleSelected(comp.id)} aria-label={`Include ${comp.label}`} style={{ width: 19, height: 19, accentColor: ac, marginTop: 2, flexShrink: 0, cursor: "pointer" }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -469,20 +446,19 @@ ${comps.map((c, i) => {
                 })}
               </div>
               <div style={{ display: "flex", gap: 8, marginTop: 18, justifyContent: "center" }}>
-                <button onClick={generatePDF} style={{ ...sbtn, fontSize: 13 }}>🖨️ Print Blank</button>
-                <button onClick={() => { setView("collect"); announce("Collect view"); setExpandedInCollect(selected[0] || null); }} style={{ ...pb, fontSize: 15, padding: "13px 30px" }}>Start Session →</button>
+                <button onClick={generatePDF} style={sbtn}>Print Blank</button>
+                <button onClick={() => { setView("collect"); announce("Collect view"); setExpandedInCollect(selected[0] || null); }} style={pb}>Start Session →</button>
               </div>
             </React.Fragment>)}
 
             {/* ═══ COLLECT VIEW ═══ */}
             {view === "collect" && (<React.Fragment>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, margin: 0 }}>
-                  Live Session {studentName && <span style={{ fontWeight: 400, fontSize: 15 }}>&mdash; {studentName}</span>}
+              <div style={{ ...cs, padding: 20, marginBottom: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: tx }}>
+                  Live Session {studentName && <span style={{ fontWeight: 400 }}>&mdash; {studentName}</span>}
                 </h2>
-                <span style={{ fontSize: 11, color: mu }}>{sessionDate}</span>
+                <p style={{ fontSize: 13, color: dm }}>{sessionDate} &middot; Tap ✓ for correct, ✗ for incorrect</p>
               </div>
-              <p style={{ fontSize: 11, color: mu, margin: "0 0 14px" }}>Tap ✓ for correct, ✗ for incorrect. Percentage updates live.</p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {selected.map((id, i) => {
@@ -516,7 +492,7 @@ ${comps.map((c, i) => {
                           {/* TAPPER */}
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginBottom: 14 }}>
                             <button aria-label="Mark incorrect" onClick={() => { updateComp(id, "incorrect", (d.incorrect || 0) + 1); announce(`Incorrect. ${d.correct || 0} of ${total + 1}`); }}
-                              style={{ width: 56, height: 56, borderRadius: 16, border: "none", fontSize: 26, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: rd, boxShadow: "0 3px 10px rgba(0,0,0,0.12)", outline: "none", fontFamily: "'DM Sans', sans-serif" }}>✗</button>
+                              style={{ width: 56, height: 56, borderRadius: 14, border: "none", fontSize: 26, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: rd, boxShadow: "0 3px 10px rgba(0,0,0,0.12)", outline: "none", fontFamily: "'DM Sans', sans-serif" }}>✗</button>
                             <div style={{ textAlign: "center", minWidth: 80 }}>
                               <div style={{ fontSize: 36, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", lineHeight: 1, color: pct === null ? mu : pct >= 80 ? gn : pct >= 50 ? "#C4A020" : rd }}>
                                 {pct !== null ? pct : 0}%
@@ -524,7 +500,7 @@ ${comps.map((c, i) => {
                               <div style={{ fontSize: 11, color: mu, marginTop: 2 }}>{d.correct || 0} / {total} trials</div>
                             </div>
                             <button aria-label="Mark correct" onClick={() => { updateComp(id, "correct", (d.correct || 0) + 1); announce(`Correct. ${(d.correct || 0) + 1} of ${total + 1}`); }}
-                              style={{ width: 56, height: 56, borderRadius: 16, border: "none", fontSize: 26, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: gn, boxShadow: "0 3px 10px rgba(0,0,0,0.12)", outline: "none", fontFamily: "'DM Sans', sans-serif" }}>✓</button>
+                              style={{ width: 56, height: 56, borderRadius: 14, border: "none", fontSize: 26, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: gn, boxShadow: "0 3px 10px rgba(0,0,0,0.12)", outline: "none", fontFamily: "'DM Sans', sans-serif" }}>✓</button>
                           </div>
 
                           {/* Trial dots */}
@@ -571,20 +547,18 @@ ${comps.map((c, i) => {
               </div>
               <div style={{ display: "flex", gap: 8, marginTop: 18, justifyContent: "center" }}>
                 <button onClick={() => setView("plan")} style={sbtn}>← Edit Plan</button>
-                <button onClick={() => { setView("summary"); announce("Summary view"); }} style={{ ...pb, padding: "13px 28px" }}>View Summary →</button>
+                <button onClick={() => { setView("summary"); announce("Summary view"); }} style={pb}>View Summary →</button>
               </div>
             </React.Fragment>)}
 
             {/* ═══ SUMMARY VIEW ═══ */}
             {view === "summary" && (<React.Fragment>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-                <div>
-                  <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, margin: "0 0 2px" }}>Session Summary</h2>
-                  <p style={{ fontSize: 11, color: mu, margin: 0 }}>{studentName && `${studentName} \u00B7 `}{sessionDate}{sessionNum ? ` \u00B7 #${sessionNum}` : ""} &middot; ~{totalMinutes} min</p>
-                </div>
-                <div className="no-print" style={{ display: "flex", gap: 6 }}>
-                  <button onClick={copyText} style={sbtn}>{copyFb ? "✓ Copied" : "📋 Copy"}</button>
-                  <button onClick={generatePDF} style={pb}>🖨️ Print / PDF</button>
+              <div style={{ ...cs, padding: 20, marginBottom: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: tx }}>Session Summary</h2>
+                <p style={{ fontSize: 13, color: dm, marginBottom: 12 }}>{studentName && `${studentName} \u00B7 `}{sessionDate}{sessionNum ? ` \u00B7 #${sessionNum}` : ""} &middot; ~{totalMinutes} min</p>
+                <div className="no-print" style={{ display: "flex", gap: 8 }}>
+                  <button onClick={copyText} style={sbtn}>{copyFb ? "✓ Copied" : "Copy"}</button>
+                  <button onClick={generatePDF} style={pb}>Print / PDF</button>
                 </div>
               </div>
 
@@ -594,7 +568,7 @@ ${comps.map((c, i) => {
                 const at = ac2 + ai;
                 if (!at) return null;
                 return (
-                  <div style={{ ...cs, padding: 18, marginBottom: 14, background: darkMode ? "#142322" : "rgba(42,157,143,0.05)" }}>
+                  <div style={{ ...cs, padding: 20, marginBottom: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, flexWrap: "wrap" }}>
                       <div style={{ textAlign: "center" }}>
                         <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 34, fontWeight: 700, lineHeight: 1 }}>{Math.round((ac2 / at) * 100)}%</div>
@@ -656,7 +630,7 @@ ${comps.map((c, i) => {
           </main>
 
           <footer className="no-print" style={{ textAlign: "center", padding: "14px 16px", fontSize: 9, color: mu, borderTop: `1px solid ${bd}` }}>
-            &copy; 2026 RTN Communication &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician.
+            &copy; 2026 RTN | Speech, Language &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician.
           </footer>
         </div>
       );

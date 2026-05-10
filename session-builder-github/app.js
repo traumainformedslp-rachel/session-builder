@@ -1,5 +1,5 @@
 /*  Session Builder — app.js
-    RTN Communication & Literacy
+    RTN | Speech, Language & Literacy
     Pure vanilla JS, zero dependencies
     © 2026 Rachel Terra Norton | MIT (code) + CC BY-NC 4.0 (content) */
 
@@ -157,7 +157,7 @@ function doCopy() {
     if (d.notes) lines.push("   Notes: " + d.notes);
     lines.push("");
   });
-  lines.push("\u00A9 2026 RTN Communication & Literacy | CC BY-NC 4.0");
+  lines.push("\u00A9 2026 RTN | Speech, Language & Literacy | CC BY-NC 4.0");
   navigator.clipboard.writeText(lines.join("\n"));
   S.copyFb = true;
   render();
@@ -198,7 +198,7 @@ function doPrint() {
   h += '@media print{body{padding:14px 16px}}';
   h += '</style></head><body>';
   h += '<div class="title">Structured Literacy Session Plan</div>';
-  h += '<div class="sub">Session Builder &middot; RTN Communication &amp; Literacy</div>';
+  h += '<div class="sub">Session Builder &middot; RTN | Speech, Language &amp; Literacy</div>';
   h += '<div class="meta">';
   if (S.name) h += '<span><strong>Student:</strong>' + esc(S.name) + '</span>';
   h += '<span><strong>Date:</strong>' + S.date + '</span>';
@@ -231,7 +231,7 @@ function doPrint() {
     }
     h += '</div></div>';
   });
-  h += '<div class="ft">&copy; 2026 RTN Communication &amp; Literacy &middot; CC BY-NC 4.0</div></body></html>';
+  h += '<div class="ft">&copy; 2026 RTN | Speech, Language &amp; Literacy &middot; CC BY-NC 4.0</div></body></html>';
   var w = window.open(URL.createObjectURL(new Blob([h], {type: "text/html"})), "_blank");
   if (w) setTimeout(function() { w.print(); }, 500);
 }
@@ -245,7 +245,7 @@ function render() {
 
   // ── Header ──
   h += '<header class="header no-print">';
-  h += '<div style="display:flex;align-items:center;gap:10px"><div class="logo-mark">SB</div><div><div class="logo-text">Session Builder</div><div class="logo-sub">RTN Communication &amp; Literacy</div></div></div>';
+  h += '<div style="display:flex;align-items:center;gap:10px"><div class="logo-mark">SB</div><div><div class="logo-text">Session Builder</div><div class="logo-sub">RTN | Speech, Language &amp; Literacy</div></div></div>';
   h += '<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">';
   h += '<button class="btn-tab' + (S.view === "plan" ? " on" : "") + '" onclick="go(\'plan\')">📝 Plan</button>';
   h += '<button class="btn-tab' + (S.view === "collect" ? " on" : "") + '" onclick="go(\'collect\')">📊 Collect</button>';
@@ -440,7 +440,7 @@ function render() {
   }
 
   h += '</main>';
-  h += '<footer class="foot no-print">&copy; 2026 RTN Communication &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician.</footer>';
+  h += '<footer class="foot no-print">&copy; 2026 RTN | Speech, Language &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician.</footer>';
 
   el.innerHTML = h;
 }

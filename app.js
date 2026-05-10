@@ -1,5 +1,5 @@
 /*  Session Builder — app.js
-    RTN Communication & Literacy
+    RTN | Speech, Language & Literacy
     Pure vanilla JS, zero dependencies
     © 2026 Rachel Terra Norton | MIT (code) + CC BY-NC 4.0 (content) */
 
@@ -283,7 +283,7 @@ function doCopy() {
     });
   }
 
-  lines.push("\u00A9 2026 RTN Communication & Literacy | CC BY-NC 4.0");
+  lines.push("\u00A9 2026 RTN | Speech, Language & Literacy | CC BY-NC 4.0");
   navigator.clipboard.writeText(lines.join("\n"));
   S.copyFb = true;
   render();
@@ -330,7 +330,7 @@ function doPrint() {
   h += '</style></head><body>';
   var printIsAct = S.mode === "activity";
   h += '<div class="title">' + (printIsAct ? 'Structured Literacy Activity Plan' : 'Structured Literacy Session Plan') + '</div>';
-  h += '<div class="sub">' + (printIsAct ? 'Activity Builder' : 'Session Builder') + ' &middot; RTN Communication &amp; Literacy</div>';
+  h += '<div class="sub">' + (printIsAct ? 'Activity Builder' : 'Session Builder') + ' &middot; RTN | Speech, Language &amp; Literacy</div>';
   h += '<div class="meta">';
   if (S.name) h += '<span><strong>Student:</strong>' + esc(S.name) + '</span>';
   h += '<span><strong>Date:</strong>' + S.date + '</span>';
@@ -406,7 +406,7 @@ function doPrint() {
       h += '</div></div>';
     });
   }
-  h += '<div class="ft">&copy; 2026 RTN Communication &amp; Literacy &middot; CC BY-NC 4.0</div></body></html>';
+  h += '<div class="ft">&copy; 2026 RTN | Speech, Language &amp; Literacy &middot; CC BY-NC 4.0</div></body></html>';
   var w = window.open(URL.createObjectURL(new Blob([h], {type: "text/html"})), "_blank");
   if (w) setTimeout(function() { w.print(); }, 500);
 }
@@ -502,7 +502,7 @@ function render() {
 
   // ── Header ──
   h += '<header class="header no-print">';
-  h += '<div style="display:flex;align-items:center;gap:10px"><div class="logo-mark">' + logoMark + '</div><div><div class="logo-text">' + titleText + '</div><div class="logo-sub">RTN Communication &amp; Literacy</div></div></div>';
+  h += '<div style="display:flex;align-items:center;gap:10px"><div class="logo-mark">' + logoMark + '</div><div><div class="logo-text">' + titleText + '</div><div class="logo-sub">RTN | Speech, Language &amp; Literacy</div></div></div>';
   h += '<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">';
   h += '<button class="btn-tab' + (S.view === "plan" ? " on" : "") + '" onclick="go(\'plan\')">📝 Plan</button>';
   h += '<button class="btn-tab' + (S.view === "collect" ? " on" : "") + '" onclick="go(\'collect\')">📊 Collect</button>';
@@ -936,13 +936,13 @@ function render() {
   h += '</main>';
   h += '<footer class="foot no-print">';
   h += '<button class="about-solid" onclick="toggleAbout()" aria-label="About this resource">📖 <span class="about-solid-tx">About this resource</span></button>';
-  h += '<div class="foot-meta">&copy; 2026 RTN Communication &amp; Literacy · CC BY-NC 4.0 · Built for clinicians, by a clinician.</div>';
+  h += '<div class="foot-meta">&copy; 2026 RTN | Speech, Language &amp; Literacy · CC BY-NC 4.0 · Built for clinicians, by a clinician.</div>';
   h += '</footer>';
 
   if (S.showAbout) {
     h += '<div class="mdl-bd no-print" onclick="if(event.target===this)toggleAbout()" role="dialog" aria-modal="true" aria-labelledby="mdl-title">';
     h += '<div class="mdl">';
-    h += '<div class="mdl-h"><div class="mdl-h-l"><div class="mdl-h-ic">📖</div><div><h2 id="mdl-title">About Session Builder</h2><div class="mdl-h-sub">RTN Communication &amp; Literacy</div></div></div><button class="mdl-x" onclick="toggleAbout()" aria-label="Close">×</button></div>';
+    h += '<div class="mdl-h"><div class="mdl-h-l"><div class="mdl-h-ic">📖</div><div><h2 id="mdl-title">About Session Builder</h2><div class="mdl-h-sub">RTN | Speech, Language &amp; Literacy</div></div></div><button class="mdl-x" onclick="toggleAbout()" aria-label="Close">×</button></div>';
     h += '<div class="mdl-b">';
 
     h += '<h3><span class="h3-ic">✨</span>About this resource</h3>';
@@ -970,7 +970,7 @@ function render() {
     h += '<p>Session Builder is an independent project and is not affiliated with, endorsed by, or sponsored by any commercial literacy program, publisher, or organization. All program names, product names, and trademarks referenced belong to their respective owners.</p>';
 
     h += '<h3><span class="h3-ic">📎</span>Citation</h3>';
-    h += '<div class="cite">Norton, R. T. (2026). Session Builder: A structured literacy session planner with data collection [Web application]. RTN Communication &amp; Literacy.</div>';
+    h += '<div class="cite">Norton, R. T. (2026). Session Builder: A structured literacy session planner with data collection [Web application]. RTN | Speech, Language &amp; Literacy.</div>';
 
     h += '<div class="lic">Code licensed under MIT. Educational content licensed under CC BY-NC 4.0.</div>';
     h += '<div class="rainbow"></div>';
