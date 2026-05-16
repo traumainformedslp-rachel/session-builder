@@ -109,7 +109,7 @@
     const MODES = { decoding:"Decoding", encoding:"Encoding", both:"Both" };
 
     function SessionBuilder() {
-      const [landed, setLanded] = useState(false);
+      // Landing removed — go straight to component picker
       const [view, setView] = useState("plan");
       const [darkMode, setDarkMode] = useState(() => {
         try { return localStorage.getItem('rtn-theme') === 'dark'; } catch(e) { return false; }
@@ -266,54 +266,6 @@ ${comps.map((c, i) => {
         document.body.style.color = tx;
       }, [bg, tx]);
 
-      // ─── LANDING SCREEN ─── (matches intake landing aesthetic)
-      if (!landed) {
-        return (
-          <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", padding: "20px 20px 60px", maxWidth: 960, margin: "0 auto" }}>
-            <button onClick={() => setDarkMode(!darkMode)}
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              style={{ position: "fixed", top: 16, right: 16, zIndex: 1000, display: "flex", alignItems: "center", gap: 6,
-                background: cardBg, border: `1px solid ${bd}`, borderRadius: 40, padding: "6px 14px 6px 10px",
-                cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: mu,
-                transition: "all 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,.06)" }}>
-              <span style={{ fontSize: 16, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
-              <span style={{ lineHeight: 1 }}>{darkMode ? "Dark" : "Light"}</span>
-            </button>
-
-            <div style={{ marginBottom: 28, paddingTop: 8 }}>
-              <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4, color: tx }}>Session Builder</h1>
-              <p style={{ fontSize: 14, color: dm }}>Plan structured literacy sessions, collect data, print summaries</p>
-            </div>
-
-            <div style={{ ...cs, padding: 20, marginBottom: 24 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: tx }}>Choose a starting point</h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
-                {[
-                  { id: "new", title: "New Session", desc: "Start with no components. Pick from 15 building blocks to create a fully custom session.", action: () => { setSelected([]); setLanded(true); } },
-                  { id: "quick", title: "Quick Template", desc: "8-component starter set covering phonics through encoding and connected text. Edit anything before you start.", action: () => { setSelected(["pa","visual","auditory","blend","wordread","wordspell","sentspell","connected"]); setLanded(true); } },
-                ].map(opt => (
-                  <button key={opt.id} onClick={opt.action}
-                    style={{ padding: "16px 20px", borderRadius: 14, border: `1px solid ${bd}`, background: cardBg,
-                      cursor: "pointer", textAlign: "left", transition: "all 0.2s", fontFamily: "inherit" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = ac; e.currentTarget.style.background = acSoft; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = bd; e.currentTarget.style.background = cardBg; }}
-                  >
-                    <div style={{ fontWeight: 600, fontSize: 15, color: tx, marginBottom: 6 }}>{opt.title}</div>
-                    <div style={{ fontSize: 13, color: mu, lineHeight: 1.6 }}>{opt.desc}</div>
-                    <div style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: ac }}>Begin →</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ fontSize: 12, color: dm, lineHeight: 1.8 }}>
-              Free · Open-source · Built for SLPs<br />
-              Rachel Terra Norton, MS, CCC-SLP · rachelslp.org
-            </div>
-          </div>
-        );
-      }
-
       return (
         <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", padding: "20px 20px 60px", maxWidth: 960, margin: "0 auto" }}>
           <div ref={liveRef} role="status" aria-live="polite" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }} />
@@ -345,7 +297,6 @@ ${comps.map((c, i) => {
               >{t.label}</button>
             ))}
             <div style={{ flex: 1 }} />
-            <button onClick={() => setLanded(false)} style={{ ...sbtn, fontSize: 12 }}>← Start Over</button>
           </div>
 
           <main>
