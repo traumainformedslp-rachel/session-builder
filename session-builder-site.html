@@ -23,7 +23,7 @@
     html { -webkit-text-size-adjust: 100%; }
     html[data-theme="dark"] body { background: #0d1b1a !important; color: #e0edec !important; }
     body { font-family: 'DM Sans', system-ui, sans-serif; background: #ffffff; color: #0f1419; min-height: 100vh; line-height: 1.5; transition: background .3s, color .3s; }
-    :focus-visible { outline: 2px solid #2a9d8f !important; outline-offset: 3px; border-radius: 2px; }
+    :focus-visible { outline: 2px solid #1f9d8a !important; outline-offset: 3px; border-radius: 2px; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     @media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } body { background: #fff !important; padding: 10px !important; max-width: 100% !important; } .rainbow-bar { display: none !important; } }
 
@@ -48,7 +48,7 @@
     }
     #loading-screen .spinner {
       width: 36px; height: 36px; border-radius: 50%;
-      border: 3px solid #ebebeb; border-top-color: #2a9d8f;
+      border: 3px solid #ebebeb; border-top-color: #1f9d8a;
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -91,16 +91,16 @@
       { id:"pa", label:"Phonemic Awareness", desc:"Blending & segmenting warm-up", icon:"🔊", defaultMin:2, category:"sound", defaultMode:"decoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Phoneme blending (3-4 phonemes)","Phoneme segmentation","Phoneme deletion (initial)","Phoneme deletion (final)","Phoneme substitution","Syllable segmentation","Onset-rime blending"] },
       { id:"visual", label:"Phonogram Review: Reading", desc:"Visual drill / deck work (see grapheme, say sound)", icon:"👁️", defaultMin:3, category:"sound", defaultMode:"decoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Short vowels","Consonant digraphs (sh, ch, th, wh)","Blends","Long vowel teams","R-controlled vowels","VCe patterns","Diphthongs","Vowel teams review","Level 1 phonograms","Level 2 phonograms","Level 3 phonograms","Level 4 phonograms"] },
       { id:"auditory", label:"Phonogram Review: Spelling", desc:"Auditory drill / what says (hear sound, write grapheme)", icon:"✍️", defaultMin:3, category:"sound", defaultMode:"encoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Short vowels","Consonant digraphs","Long vowel spellings","R-controlled spellings","Spelling alternatives review"] },
-      { id:"blend", label:"Blending & Word Building", desc:"Blending board, word chains, letter tiles", icon:"🧱", defaultMin:5, category:"word", defaultMode:"decoding", color:"rgba(42,157,143,0.08)", suggestedTargets:["CVC blending","CCVC / CVCC blending","CVCe word building","Multisyllabic word building","Word chains (swap one sound)","Syllable-by-syllable blending"] },
-      { id:"wordread", label:"Word-Level Reading", desc:"Word cards, lists, sorts, flash", icon:"🔤", defaultMin:5, category:"word", defaultMode:"decoding", color:"rgba(42,157,143,0.08)", suggestedTargets:["CVC words","CVCe words","Vowel team words","R-controlled words","Multisyllabic: VC/CV","Multisyllabic: V/CV","Multisyllabic: C-le","Mixed review","Word sorts by pattern"] },
+      { id:"blend", label:"Blending & Word Building", desc:"Blending board, word chains, letter tiles", icon:"🧱", defaultMin:5, category:"word", defaultMode:"decoding", color:"rgba(31,157,138,0.08)", suggestedTargets:["CVC blending","CCVC / CVCC blending","CVCe word building","Multisyllabic word building","Word chains (swap one sound)","Syllable-by-syllable blending"] },
+      { id:"wordread", label:"Word-Level Reading", desc:"Word cards, lists, sorts, flash", icon:"🔤", defaultMin:5, category:"word", defaultMode:"decoding", color:"rgba(31,157,138,0.08)", suggestedTargets:["CVC words","CVCe words","Vowel team words","R-controlled words","Multisyllabic: VC/CV","Multisyllabic: V/CV","Multisyllabic: C-le","Mixed review","Word sorts by pattern"] },
       { id:"sentread", label:"Sentence-Level Reading", desc:"Read controlled sentences with target patterns", icon:"📝", defaultMin:3, category:"text", defaultMode:"decoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Sentences with target pattern","Phrase-scoop reading","Controlled text sentences","Mixed decodable sentences"] },
       { id:"fluency", label:"Reading Fluency", desc:"Timed reads, repeated reading, prosody", icon:"⚡", defaultMin:5, category:"text", defaultMode:"decoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Word-level fluency (flash)","Phrase-level fluency","Passage: cold read + hot read","Repeated reading (timed)","Prosody practice","WCPM progress monitoring"] },
-      { id:"newconcept", label:"New Concept / Skill Introduction", desc:"Explicitly teach a new pattern, rule, or concept", icon:"💡", defaultMin:10, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.08)", suggestedTargets:["New phonogram introduction","New syllable type","Spelling rule (doubling, e-drop, y-change)","New vowel team","New prefix/suffix","New Latin root","Syllable division pattern","Soft c / soft g"] },
+      { id:"newconcept", label:"New Concept / Skill Introduction", desc:"Explicitly teach a new pattern, rule, or concept", icon:"💡", defaultMin:10, category:"word", defaultMode:"both", color:"rgba(31,157,138,0.08)", suggestedTargets:["New phonogram introduction","New syllable type","Spelling rule (doubling, e-drop, y-change)","New vowel team","New prefix/suffix","New Latin root","Syllable division pattern","Soft c / soft g"] },
       { id:"wordspell", label:"Word-Level Spelling", desc:"SOS, dictation, encoding with tiles or writing", icon:"✏️", defaultMin:5, category:"word", defaultMode:"encoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["CVC dictation","CVCe dictation","Vowel team dictation","SOS (simultaneous oral spelling)","Spelling with letter tiles","Syllable-by-syllable encoding","Spelling rule application","Arm-tap spelling"] },
       { id:"sentspell", label:"Sentence-Level Spelling", desc:"Sentence dictation with proofreading", icon:"📋", defaultMin:5, category:"text", defaultMode:"encoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Sentence dictation (1-2 sentences)","Proofreading practice","Capitals & punctuation check","Dictation with target words","Paragraph dictation"] },
-      { id:"irregular", label:"Irregular / Heart Words", desc:"High-frequency words with irregular spellings", icon:"❤️", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.08)", suggestedTargets:["Heart word introduction (new)","Heart word review (previously taught)","Heart word reading flash","Heart word spelling practice","Mapping regular vs. irregular parts"] },
+      { id:"irregular", label:"Irregular / Heart Words", desc:"High-frequency words with irregular spellings", icon:"❤️", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(31,157,138,0.08)", suggestedTargets:["Heart word introduction (new)","Heart word review (previously taught)","Heart word reading flash","Heart word spelling practice","Mapping regular vs. irregular parts"] },
       { id:"connected", label:"Connected Text / Decodable", desc:"Apply skills in decodable passages or books", icon:"📚", defaultMin:10, category:"text", defaultMode:"decoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Decodable passage (new)","Decodable passage (reread for fluency)","Decodable book","Controlled text with target pattern","Comprehension check after reading"] },
-      { id:"morphology", label:"Morphology & Word Study", desc:"Prefixes, suffixes, roots, word analysis", icon:"🧩", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.08)", suggestedTargets:["Prefix meaning & identification","Suffix meaning & identification","Base word + suffix practice","Latin root analysis","Greek combining forms","Affix peel-off reading","Word building with morphemes","Spelling rule with suffixes"] },
+      { id:"morphology", label:"Morphology & Word Study", desc:"Prefixes, suffixes, roots, word analysis", icon:"🧩", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(31,157,138,0.08)", suggestedTargets:["Prefix meaning & identification","Suffix meaning & identification","Base word + suffix practice","Latin root analysis","Greek combining forms","Affix peel-off reading","Word building with morphemes","Spelling rule with suffixes"] },
       { id:"vocab", label:"Vocabulary", desc:"Word meaning, context clues, semantic mapping", icon:"🗂️", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.10)", suggestedTargets:["Morpheme-based word meaning","Context clue strategy","Semantic mapping","Multiple meaning words","Tier 2 vocabulary","Synonyms & antonyms"] },
       { id:"comp", label:"Comprehension", desc:"Sentence or passage-level understanding", icon:"🧠", defaultMin:5, category:"text", defaultMode:"decoding", color:"rgba(42,157,143,0.06)", suggestedTargets:["Visualize & verbalize","Who-what-where sentence check","Main idea identification","Retell / summarize","Inferencing","Text structure ID","Question generation"] },
     ];
@@ -173,9 +173,9 @@
       const mu = darkMode ? "#a3bfbd" : "#4a5560";
       const dm = darkMode ? "#6b8886" : "#9aa0a8";
       const bd = darkMode ? "#1e3332" : "#ebebeb";
-      const ac = darkMode ? "#3dbdad" : "#2a9d8f";
-      const acSoft = darkMode ? "rgba(61,189,173,0.1)" : "rgba(42,157,143,0.08)";
-      const acDeep = darkMode ? "#2a9d8f" : "#1f7a6f";
+      const ac = darkMode ? "#6cce5a" : "#1f9d8a";
+      const acSoft = darkMode ? "rgba(61,189,173,0.1)" : "rgba(31,157,138,0.08)";
+      const acDeep = darkMode ? "#1f9d8a" : "#26838f";
       const gn = "#4f9c74";
       const rd = "#c47086";
 
@@ -202,8 +202,8 @@ body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#2828
 .meta strong{color:#28283A;font-weight:600;margin-right:3px}.meta span{color:#555}
 .cmp{border:1px solid #E8E4DF;border-radius:10px;margin-bottom:8px;page-break-inside:avoid;overflow:hidden;position:relative;padding-left:6px}
 .cmp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}
-.cmp.s::before{background:#2a9d8f}
-.cmp.w::before{background:#1f7a6f}
+.cmp.s::before{background:#1f9d8a}
+.cmp.w::before{background:#26838f}
 .cmp.t::before{background:#177a6b}
 .ch{padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .ch h3{font-family:"DM Sans",sans-serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}
@@ -429,7 +429,7 @@ ${comps.map((c, i) => {
                               {comp.suggestedTargets.map(t => (
                                 <button key={t} onClick={() => { updateComp(comp.id, "target", t); setShowSuggestions(null); }}
                                   style={{ display: "inline-block", padding: "4px 12px", borderRadius: 20, fontSize: 12, cursor: "pointer", margin: 3, border: `1px solid ${bd}`, background: "transparent", color: tx, fontFamily: "'DM Sans', sans-serif", outline: "none", transition: "all 0.12s" }}
-                                  onMouseOver={e => { e.currentTarget.style.background = "rgba(42,157,143,0.08)"; e.currentTarget.style.borderColor = "#2a9d8f"; }}
+                                  onMouseOver={e => { e.currentTarget.style.background = "rgba(31,157,138,0.08)"; e.currentTarget.style.borderColor = "#1f9d8a"; }}
                                   onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = bd; }}
                                 >{t}</button>
                               ))}
