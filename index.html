@@ -1,1220 +1,597 @@
 <!DOCTYPE html>
+<!-- NOTE: This app uses in-browser Babel/JSX transpilation via CDN (unpkg).
+     For production performance, consider migrating to a Vite build step. -->
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>First 100 Sight Words · Montessori Grammar</title>
-<meta name="description" content="Interactive sight word flashcards with Montessori grammar color coding. The first 100 children's picture book sight words (Green et al., 2024).">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="RTN | Speech, Language & Literacy">
-<meta property="og:title" content="First 100 Sight Words | RTN">
-<meta property="og:description" content="Interactive sight word flashcards with Montessori grammar color coding. The first 100 children's picture book sight words (Green et al., 2024).">
-<meta property="og:url" content="https://www.rachelslp.org/sight-word-flashcards">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Session Builder — RTN | Speech, Language &amp; Literacy</title>
+  <meta name="description" content="A free, open-source structured literacy session planner with built-in data collection. Plan sessions across sound, word, and text levels in decoding and encoding formats." />
+  <meta name="author" content="Rachel Terra Norton, MS, CCC-SLP — RTN | Speech, Language & Literacy" />
+  <meta name="keywords" content="structured literacy, session planner, SLP, reading intervention, Orton-Gillingham, data collection, decoding, encoding, phonics, dyslexia" />
+  <meta property="og:title" content="Session Builder — Structured Literacy Planner" />
+  <meta property="og:description" content="Free structured literacy session planner with live data collection. Built for clinicians, by a clinician." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#A8C4E0" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    html[data-theme="dark"] body { background: #0d1b1a !important; color: #e0edec !important; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: #ffffff; color: #0f1419; min-height: 100vh; line-height: 1.5; transition: background .3s, color .3s; }
+    :focus-visible { outline: 2px solid #1f9d8a !important; outline-offset: 3px; border-radius: 2px; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    @media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } body { background: #fff !important; padding: 10px !important; max-width: 100% !important; } .rainbow-bar { display: none !important; } }
+
+    /* Subtle pastel washes — hidden */
+    body::before {
+      content: ''; position: fixed; pointer-events: none; inset: 0;
+      display: none;
+    }
+    html[data-theme="dark"] body::before { display: none; }
+
+    /* Rainbow top bar — Viridis */
+    .rainbow-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      height: 6px; width: 100%;
+      background: linear-gradient(90deg,#440154,#482777,#3f4a8a,#31678e,#26838f,#1f9d8a,#6cce5a,#b6de2b,#fee825);
+    }
+
+    /* Loading state */
+    #loading-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; font-family: 'DM Sans', sans-serif; color: #4a5560; gap: 16px;
+    }
+    #loading-screen .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid #ebebeb; border-top-color: #1f9d8a;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+
+  <!-- Theme initializer (prevents flash) -->
+  <script>
+    (function(){
+      try {
+        var saved = localStorage.getItem('rtn-theme');
+        document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+      } catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+    })();
+  </script>
+</head>
+<body>
+  <div class="rainbow-bar" aria-hidden="true"></div>
+  <div id="root">
+    <div id="loading-screen">
+      <div class="spinner"></div>
+      <div style="font-size:14px;">Loading Session Builder...</div>
+    </div>
+  </div>
+
+  <!-- React 18 via CDN (production builds) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel standalone for in-browser JSX -->
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    /* ═══════════════════════════════════════════════════════════════
+       SESSION BUILDER v2 — RTN | Speech, Language & Literacy
+       Universal Structured Literacy Session Planner + Data Collection
+       ═══════════════════════════════════════════════════════════════ */
+
+    const SESSION_COMPONENTS = [
+      { id:"pa", label:"Phonemic Awareness", desc:"Blending & segmenting warm-up", icon:"🔊", defaultMin:2, category:"sound", defaultMode:"decoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Phoneme blending (3-4 phonemes)","Phoneme segmentation","Phoneme deletion (initial)","Phoneme deletion (final)","Phoneme substitution","Syllable segmentation","Onset-rime blending"] },
+      { id:"visual", label:"Phonogram Review: Reading", desc:"Visual drill / deck work (see grapheme, say sound)", icon:"👁️", defaultMin:3, category:"sound", defaultMode:"decoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Short vowels","Consonant digraphs (sh, ch, th, wh)","Blends","Long vowel teams","R-controlled vowels","VCe patterns","Diphthongs","Vowel teams review","Level 1 phonograms","Level 2 phonograms","Level 3 phonograms","Level 4 phonograms"] },
+      { id:"auditory", label:"Phonogram Review: Spelling", desc:"Auditory drill / what says (hear sound, write grapheme)", icon:"✍️", defaultMin:3, category:"sound", defaultMode:"encoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["Short vowels","Consonant digraphs","Long vowel spellings","R-controlled spellings","Spelling alternatives review"] },
+      { id:"blend", label:"Blending & Word Building", desc:"Blending board, word chains, letter tiles", icon:"🧱", defaultMin:5, category:"word", defaultMode:"decoding", color:"rgba(31,157,138,0.08)", suggestedTargets:["CVC blending","CCVC / CVCC blending","CVCe word building","Multisyllabic word building","Word chains (swap one sound)","Syllable-by-syllable blending"] },
+      { id:"wordread", label:"Word-Level Reading", desc:"Word cards, lists, sorts, flash", icon:"🔤", defaultMin:5, category:"word", defaultMode:"decoding", color:"rgba(31,157,138,0.08)", suggestedTargets:["CVC words","CVCe words","Vowel team words","R-controlled words","Multisyllabic: VC/CV","Multisyllabic: V/CV","Multisyllabic: C-le","Mixed review","Word sorts by pattern"] },
+      { id:"sentread", label:"Sentence-Level Reading", desc:"Read controlled sentences with target patterns", icon:"📝", defaultMin:3, category:"text", defaultMode:"decoding", color:"rgba(31,157,138,0.06)", suggestedTargets:["Sentences with target pattern","Phrase-scoop reading","Controlled text sentences","Mixed decodable sentences"] },
+      { id:"fluency", label:"Reading Fluency", desc:"Timed reads, repeated reading, prosody", icon:"⚡", defaultMin:5, category:"text", defaultMode:"decoding", color:"rgba(31,157,138,0.06)", suggestedTargets:["Word-level fluency (flash)","Phrase-level fluency","Passage: cold read + hot read","Repeated reading (timed)","Prosody practice","WCPM progress monitoring"] },
+      { id:"newconcept", label:"New Concept / Skill Introduction", desc:"Explicitly teach a new pattern, rule, or concept", icon:"💡", defaultMin:10, category:"word", defaultMode:"both", color:"rgba(31,157,138,0.08)", suggestedTargets:["New phonogram introduction","New syllable type","Spelling rule (doubling, e-drop, y-change)","New vowel team","New prefix/suffix","New Latin root","Syllable division pattern","Soft c / soft g"] },
+      { id:"wordspell", label:"Word-Level Spelling", desc:"SOS, dictation, encoding with tiles or writing", icon:"✏️", defaultMin:5, category:"word", defaultMode:"encoding", color:"rgba(42,157,143,0.10)", suggestedTargets:["CVC dictation","CVCe dictation","Vowel team dictation","SOS (simultaneous oral spelling)","Spelling with letter tiles","Syllable-by-syllable encoding","Spelling rule application","Arm-tap spelling"] },
+      { id:"sentspell", label:"Sentence-Level Spelling", desc:"Sentence dictation with proofreading", icon:"📋", defaultMin:5, category:"text", defaultMode:"encoding", color:"rgba(31,157,138,0.06)", suggestedTargets:["Sentence dictation (1-2 sentences)","Proofreading practice","Capitals & punctuation check","Dictation with target words","Paragraph dictation"] },
+      { id:"irregular", label:"Irregular / Heart Words", desc:"High-frequency words with irregular spellings", icon:"❤️", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(31,157,138,0.08)", suggestedTargets:["Heart word introduction (new)","Heart word review (previously taught)","Heart word reading flash","Heart word spelling practice","Mapping regular vs. irregular parts"] },
+      { id:"connected", label:"Connected Text / Decodable", desc:"Apply skills in decodable passages or books", icon:"📚", defaultMin:10, category:"text", defaultMode:"decoding", color:"rgba(31,157,138,0.06)", suggestedTargets:["Decodable passage (new)","Decodable passage (reread for fluency)","Decodable book","Controlled text with target pattern","Comprehension check after reading"] },
+      { id:"morphology", label:"Morphology & Word Study", desc:"Prefixes, suffixes, roots, word analysis", icon:"🧩", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(31,157,138,0.08)", suggestedTargets:["Prefix meaning & identification","Suffix meaning & identification","Base word + suffix practice","Latin root analysis","Greek combining forms","Affix peel-off reading","Word building with morphemes","Spelling rule with suffixes"] },
+      { id:"vocab", label:"Vocabulary", desc:"Word meaning, context clues, semantic mapping", icon:"🗂️", defaultMin:5, category:"word", defaultMode:"both", color:"rgba(42,157,143,0.10)", suggestedTargets:["Morpheme-based word meaning","Context clue strategy","Semantic mapping","Multiple meaning words","Tier 2 vocabulary","Synonyms & antonyms"] },
+      { id:"comp", label:"Comprehension", desc:"Sentence or passage-level understanding", icon:"🧠", defaultMin:5, category:"text", defaultMode:"decoding", color:"rgba(31,157,138,0.06)", suggestedTargets:["Visualize & verbalize","Who-what-where sentence check","Main idea identification","Retell / summarize","Inferencing","Text structure ID","Question generation"] },
+    ];
+
+    const CUE_LEVELS = ["Independent","Monitoring","Verbal Cue","Visual Cue","Model","Physical Prompt"];
+    const MODES = { decoding:"Decoding", encoding:"Encoding", both:"Both" };
+
+    function SessionBuilder() {
+      // Landing removed — go straight to component picker
+      const [view, setView] = useState("plan");
+      const [darkMode, setDarkMode] = useState(() => {
+        try { return localStorage.getItem('rtn-theme') === 'dark'; } catch(e) { return false; }
+      });
+
+      // Persist theme + sync with site-wide data-theme attribute
+      useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        try { localStorage.setItem('rtn-theme', darkMode ? 'dark' : 'light'); } catch(e) {}
+      }, [darkMode]);
+      const [studentName, setStudentName] = useState("");
+      const [sessionDate, setSessionDate] = useState(new Date().toISOString().split("T")[0]);
+      const [sessionNum, setSessionNum] = useState("");
+      const [selected, setSelected] = useState([]);
+      const [componentData, setComponentData] = useState({});
+      const [showSuggestions, setShowSuggestions] = useState(null);
+      const [expandedInCollect, setExpandedInCollect] = useState(null);
+      const [copyFb, setCopyFb] = useState(false);
+      const liveRef = useRef(null);
+
+      const announce = useCallback((msg) => { if (liveRef.current) liveRef.current.textContent = msg; }, []);
+
+      useEffect(() => {
+        setComponentData(prev => {
+          const next = { ...prev };
+          selected.forEach(id => {
+            if (!next[id]) {
+              const comp = SESSION_COMPONENTS.find(c => c.id === id);
+              next[id] = { target: "", materials: "", minutes: comp?.defaultMin || 5, mode: comp?.defaultMode || "both", correct: 0, incorrect: 0, cueLevel: "", notes: "" };
+            }
+          });
+          return next;
+        });
+      }, [selected]);
+
+      const updateComp = useCallback((id, field, value) => {
+        setComponentData(prev => ({ ...prev, [id]: { ...(prev[id] || {}), [field]: value } }));
+      }, []);
+
+      const toggleSelected = useCallback((id) => {
+        setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+      }, []);
+
+      const moveComponent = useCallback((id, dir) => {
+        setSelected(prev => {
+          const idx = prev.indexOf(id);
+          const newIdx = idx + dir;
+          if (idx < 0 || newIdx < 0 || newIdx >= prev.length) return prev;
+          const arr = [...prev];
+          [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+          return arr;
+        });
+      }, []);
+
+      const totalMinutes = selected.reduce((s, id) => s + (componentData[id]?.minutes || 0), 0);
+
+      // Theme — matches RTN Eval Intake design system
+      const bg = darkMode ? "#0d1b1a" : "#ffffff";
+      const cardBg = darkMode ? "#142322" : "#ffffff";
+      const tx = darkMode ? "#e0edec" : "#0f1419";
+      const mu = darkMode ? "#a3bfbd" : "#4a5560";
+      const dm = darkMode ? "#6b8886" : "#9aa0a8";
+      const bd = darkMode ? "#1e3332" : "#ebebeb";
+      const ac = darkMode ? "#6cce5a" : "#1f9d8a";
+      const acSoft = darkMode ? "rgba(61,189,173,0.1)" : "rgba(31,157,138,0.08)";
+      const acDeep = darkMode ? "#1f9d8a" : "#26838f";
+      const gn = "#4f9c74";
+      const rd = "#c47086";
+
+      const inputBg = darkMode ? "#1a2e2d" : "#f7f8f9";
+      const inp = { width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${bd}`, background: inputBg, color: tx, fontSize: 15, fontFamily: "'DM Sans', system-ui, sans-serif", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" };
+      const bb = { border: "none", borderRadius: 10, padding: "8px 16px", fontFamily: "'DM Sans', system-ui, sans-serif", fontWeight: 500, fontSize: 13, cursor: "pointer", outline: "none", transition: "all 0.2s" };
+      const pb = { ...bb, background: ac, color: "#fff" };
+      const sbtn = { ...bb, background: cardBg, color: mu, border: `1px solid ${bd}` };
+      const cs = { background: cardBg, borderRadius: 14, border: `1px solid ${bd}` };
+
+      // PDF / Print
+      const generatePDF = useCallback(() => {
+        const comps = selected.map(id => ({ ...SESSION_COMPONENTS.find(c => c.id === id), d: componentData[id] || {} })).filter(Boolean);
+        const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Session Plan${studentName ? " - " + studentName : ""}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  .skip-link { position: absolute; top: -100%; left: 16px; background: #0f1419; color: #fff; padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; z-index: 10000; text-decoration: none; transition: top 0.2s; }
-  .skip-link:focus { top: 16px; }
-  :focus-visible { outline: 2px solid #1f9d8a; outline-offset: 3px; border-radius: 2px; }
-
-  :root{
-    --bg:#ffffff; --card:#ffffff; --tx:#0f1419; --mu:#4a5560; --bd:#ebebeb;
-    --soft:rgba(31,157,138,0.08); --pu:#1f9d8a; --pu-deep:#26838f; --pi:#26838f;
-    --ag:#1f9d8a;
-    --rainbow:#1f9d8a;
-    --ff:'DM Sans',sans-serif;
-    --fh:'DM Sans',sans-serif;
-    --fm:'DM Sans',sans-serif;
-    --fc:'DM Sans',sans-serif;
-    --radius:18px;
-    --shadow-sm:0 1px 2px rgba(40,36,32,.04),0 2px 6px rgba(40,36,32,.04);
-    --shadow:0 2px 4px rgba(40,36,32,.04),0 8px 24px rgba(40,36,32,.06);
-    --mint:#4f9c74;
-  }
-
-  /* Dark theme — teal hue */
-  [data-theme="dark"] {
-    --bg:#0d1b1a;
-    --card:#142322;
-    --tx:#e0edec;
-    --mu:#a3bfbd;
-    --bd:#1e3332;
-    --soft:rgba(108,206,90,0.12);
-    --pu:#6cce5a;
-    --pu-deep:#b6de2b;
-    --shadow-sm:0 2px 8px rgba(0,0,0,.25);
-    --shadow:0 4px 20px rgba(0,0,0,.4);
-  }
-  [data-theme="dark"] .btn-known { box-shadow: 0 3px 14px rgba(31,157,138,.3); }
-  [data-theme="dark"] .btn-known:hover { box-shadow: 0 6px 22px rgba(31,157,138,.45); }
-  [data-theme="dark"] .pill.active { box-shadow: 0 3px 10px rgba(31,157,138,.25); }
-
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    min-height: 100vh;
-    min-height: 100dvh;
-    background: var(--bg);
-    font-family: var(--ff);
-    color: var(--tx);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px 16px calc(32px + env(safe-area-inset-bottom));
-    overflow-x: hidden;
-    overscroll-behavior-y: contain;
-    -webkit-tap-highlight-color: transparent;
-    line-height: 1.55;
-  }
-  button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; font-family: var(--ff); }
-
-  /* Top rainbow strip — Viridis */
-  .rtn-rainbow {
-    height: 6px;
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 1000;
-    background: linear-gradient(90deg,#440154,#482777,#3f4a8a,#31678e,#26838f,#1f9d8a,#6cce5a,#b6de2b,#fee825);
-  }
-  .rtn-rainbow.bottom { display: none; }
-
-  .header { width: 100%; max-width: 680px; margin-bottom: 24px; }
-
-  /* Viridis header banner */
-  .viridis-banner {
-    width: 100%; max-width: 680px;
-    background: linear-gradient(135deg, #440154 0%, #3f4a8a 25%, #26838f 50%, #1f9d8a 70%, #6cce5a 90%, #b6de2b 100%);
-    border-radius: 18px 18px 0 0;
-    padding: 28px 28px 22px;
-    position: relative;
-    overflow: hidden;
-    animation: bannerReveal 0.7s ease both;
-  }
-  @keyframes bannerReveal { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
-  .viridis-banner::before {
-    content: ''; position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 80%, rgba(255,255,255,0.08) 0%, transparent 50%);
-    pointer-events: none;
-  }
-  .viridis-banner::after {
-    content: ''; position: absolute; top: 0; right: 0; width: 180px; height: 180px;
-    background: radial-gradient(circle, rgba(254,232,37,0.2) 0%, transparent 70%);
-    border-radius: 50%; transform: translate(40px, -60px);
-    pointer-events: none; animation: glowPulse 6s ease-in-out infinite;
-  }
-  @keyframes glowPulse { 0%,100% { opacity: 0.6; transform: translate(40px,-60px) scale(1); } 50% { opacity: 1; transform: translate(40px,-60px) scale(1.15); } }
-  .banner-content { position: relative; z-index: 1; }
-  .banner-eyebrow {
-    font-family: var(--fm); font-size: 10px; font-weight: 700;
-    letter-spacing: 2.5px; text-transform: uppercase;
-    color: rgba(255,255,255,0.75); margin-bottom: 6px;
-  }
-  .banner-title {
-    font-family: var(--fh); font-size: 26px; font-weight: 700;
-    color: #fff; letter-spacing: -0.01em; line-height: 1.2;
-    margin-bottom: 4px; text-shadow: 0 1px 8px rgba(0,0,0,0.15);
-  }
-  .banner-sub {
-    font-family: var(--fm); font-size: 11px; font-weight: 600;
-    color: rgba(255,255,255,0.85); letter-spacing: 0.5px;
-  }
-  .banner-stats {
-    display: flex; gap: 20px; margin-top: 14px;
-  }
-  .banner-stat-num {
-    font-family: var(--fh); font-size: 22px; font-weight: 700;
-    color: #fff; line-height: 1;
-  }
-  .banner-stat-label {
-    font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-    text-transform: uppercase; color: rgba(255,255,255,0.65);
-  }
-  [data-theme="dark"] .viridis-banner {
-    background: linear-gradient(135deg, #1a0a2e 0%, #1e2d5a 25%, #163d3f 50%, #144a42 70%, #2a6630 90%, #4a7a10 100%);
-  }
-
-  .header-card {
-    width: 100%; max-width: 680px;
-    background: var(--card);
-    border: 1px solid var(--bd);
-    border-top: none;
-    border-radius: 0 0 18px 18px;
-    padding: 14px 28px 18px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .title-row {
-    display: flex; align-items: center;
-    justify-content: space-between; margin-bottom: 10px;
-    gap: 12px; flex-wrap: wrap;
-  }
-  .title-left { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
-  .title {
-    font-family: var(--fh); font-size: 28px; font-weight: 700;
-    letter-spacing: -0.01em; color: var(--tx);
-    text-transform: none;
-    display: none;
-  }
-  .subtitle {
-    font-size: 10px; font-family: var(--fm);
-    color: var(--pu); letter-spacing: 1.5px; text-transform: uppercase;
-    font-weight: 700;
-    display: none;
-  }
-  .review-badge {
-    font-size: 10px; font-family: var(--fm);
-    letter-spacing: 1.5px; text-transform: uppercase;
-    font-weight: 700; color: var(--pu);
-    padding: 4px 10px; border-radius: 999px;
-    background: var(--soft);
-    display: none;
-  }
-  .review-badge.visible { display: inline-block; }
-
-  /* Pills (filter chips) */
-  .pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-  .pill {
-    padding: 6px 12px; border-radius: 999px;
-    border: 1px solid var(--bd);
-    background: var(--soft); color: var(--pu);
-    cursor: pointer; font-size: 10px;
-    font-family: var(--fm); font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    transition: all 0.2s; white-space: nowrap;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .pill:hover { border-color: var(--pu); color: var(--pu-deep); }
-  .pill.active {
-    background: var(--ag); color: #fff;
-    border-color: transparent;
-    box-shadow: 0 3px 10px rgba(31,157,138,.25);
-  }
-  .pill-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    display: inline-block; background: var(--pu);
-  }
-
-  /* Controls row */
-  .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
-  .legend-toggle {
-    background: var(--card);
-    border: 1.5px solid var(--bd);
-    border-radius: 999px;
-    color: var(--tx);
-    padding: 6px 14px; cursor: pointer;
-    font-family: var(--fm); font-size: 10px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    transition: all 0.2s;
-  }
-  .legend-toggle:hover { border-color: var(--pu); color: var(--pu); }
-
-  /* Legend */
-  .legend {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 18px 22px;
-    margin-bottom: 16px;
-    border: 1px solid var(--bd);
-    box-shadow: var(--shadow-sm);
-    display: none;
-  }
-  .legend.open { display: block; }
-  .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
-  .legend-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .legend-label {
-    font-family: var(--fm); font-size: 10px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-  }
-  .legend-desc {
-    font-family: var(--ff); font-size: 12px; color: var(--mu); margin-left: 8px;
-  }
-
-  /* Progress */
-  .progress-track {
-    height: 4px; background: var(--soft);
-    border-radius: 2px; overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%; border-radius: 2px;
-    transition: width 0.4s ease, background 0.4s ease;
-    background: var(--ag);
-  }
-  .progress-stats {
-    display: flex; justify-content: space-between; margin-top: 10px;
-    font-family: var(--fm); font-size: 10px; color: var(--mu);
-    letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
-  }
-  .stat-known { color: var(--mint); }
-  .stat-learning { color: var(--pu); }
-
-  /* Card */
-  .card-area { width: 100%; max-width: 560px; }
-  .card {
-    width: 100%; aspect-ratio: 16/10;
-    border-radius: var(--radius);
-    background: var(--card);
-    border: 1px solid var(--bd);
-    box-shadow: var(--shadow);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    cursor: pointer; position: relative; overflow: hidden;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    user-select: none; -webkit-user-select: none;
-    touch-action: manipulation;
-  }
-  .card:hover { border-color: var(--pu); }
-  .card-accent-bar {
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 4px;
-  }
-  .card-number {
-    position: absolute; top: 18px; left: 22px;
-    font-family: var(--fm); font-size: 10px;
-    font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--mu);
-  }
-  .card-pos {
-    position: absolute; top: 18px; right: 22px;
-    font-family: var(--fm); font-size: 10px;
-    font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-  }
-  .card-hint {
-    position: absolute; bottom: 14px; right: 22px;
-    font-family: var(--fm); font-size: 9px;
-    font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--mu); opacity: 0.65;
-  }
-  .card-brand {
-    position: absolute; bottom: 14px; left: 22px;
-    font-family: var(--fm); font-size: 9px;
-    font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--mu); opacity: 0.55;
-  }
-  .card-word {
-    font-family: var(--fc); font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--tx);
-    transition: all 0.3s ease;
-    max-width: 92%; text-align: center; line-height: 1;
-    word-break: break-word;
-  }
-  .card-word.short { font-size: clamp(56px, 16vw, 104px); }
-  .card-word.long  { font-size: clamp(40px, 12vw, 76px); }
-  .card-back { text-align: center; padding: 0 clamp(16px, 6vw, 40px); max-width: 100%; }
-  .card-back-word {
-    font-family: var(--fh); font-weight: 400; font-style: italic;
-    font-size: clamp(16px, 4.5vw, 22px); color: var(--mu); margin-bottom: 10px;
-  }
-  .card-back-pos {
-    font-family: var(--fm); font-size: 10px;
-    font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-    margin-bottom: 18px;
-  }
-  .card-back-sentence {
-    font-family: var(--fh); font-weight: 400;
-    font-size: clamp(18px, 5.2vw, 28px); line-height: 1.4;
-    color: var(--tx);
-  }
-
-  /* Done state */
-  .done-card {
-    width: 100%; aspect-ratio: 16/10;
-    background: var(--card);
-    border-radius: var(--radius);
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center;
-    border: 1px solid var(--bd);
-    box-shadow: var(--shadow);
-    position: relative; overflow: hidden;
-  }
-  .done-card::before {
-    content: ""; position: absolute; top: 0; left: 0; right: 0;
-    height: 4px; background: var(--ag);
-  }
-  .done-emoji { font-size: 48px; margin-bottom: 14px; }
-  .done-title {
-    font-family: var(--fh); font-weight: 700; font-size: 30px;
-    color: var(--tx); margin-bottom: 10px; letter-spacing: -0.01em;
-  }
-  .done-stats {
-    font-family: var(--fm); font-size: 11px; color: var(--mu);
-    margin-bottom: 24px; letter-spacing: 1.5px; text-transform: uppercase;
-    font-weight: 700;
-  }
-
-  /* Buttons */
-  .actions { display: flex; gap: 14px; margin-top: 24px; width: 100%; max-width: 560px; }
-  .btn {
-    padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer;
-    font-family: var(--ff); font-weight: 600; font-size: 14px;
-    transition: all 0.2s;
-    min-height: 48px;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .btn:hover { transform: translateY(-2px); }
-  .btn:active { transform: translateY(0); }
-  .btn-learning {
-    background: var(--card);
-    color: var(--tx);
-    border: 1.5px solid var(--bd);
-    flex: 1;
-  }
-  .btn-learning:hover {
-    border-color: var(--pu);
-    color: var(--pu);
-    box-shadow: var(--shadow-sm);
-  }
-  .btn-known {
-    background: var(--ag);
-    color: #fff;
-    flex: 1;
-    box-shadow: 0 3px 14px rgba(31,157,138,.3);
-  }
-  .btn-known:hover { box-shadow: 0 6px 22px rgba(42,157,143,.4); }
-
-  .keyboard-hints {
-    margin-top: 20px;
-    font-family: var(--fm);
-    font-size: 10px; color: var(--mu);
-    letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
-    text-align: center;
-  }
-
-  /* Control group (right-aligned buttons in the controls row) */
-  .control-group { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-
-  /* Theme toggle (sun/moon) — sits inside .control-group as a .pill */
-  #themeToggle {
-    min-width: 36px; padding: 6px 10px;
-    font-size: 14px; letter-spacing: 0;
-    line-height: 1;
-  }
-  #themeToggle .theme-icon { display: inline-block; transform: translateY(-1px); }
-
-  /* Traffic-light dot cluster on the Start Over button (kept neutral/purple) */
-  .traffic-lights { display: inline-flex; gap: 3px; margin-right: 4px; }
-  .traffic-lights .tl {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: currentColor; opacity: 0.35;
-    transition: opacity 0.25s, transform 0.25s;
-  }
-  #startOverBtn:hover .tl.r { background: #E63946; opacity: 1; }
-  #startOverBtn:hover .tl.y { background: #E8A12D; opacity: 1; transition-delay: 0.08s; }
-  #startOverBtn:hover .tl.g { background: var(--mint); opacity: 1; transition-delay: 0.16s; }
-  #startOverBtn.flash .tl.r { background: #E63946; opacity: 1; animation: tlPulse 0.6s ease; }
-  #startOverBtn.flash .tl.y { background: #E8A12D; opacity: 1; animation: tlPulse 0.6s ease 0.15s; }
-  #startOverBtn.flash .tl.g { background: var(--mint); opacity: 1; animation: tlPulse 0.6s ease 0.3s; }
-  @keyframes tlPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.6); } }
-
-  /* Animations */
-  @keyframes slideLeft { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(-120px); } }
-  @keyframes slideRight { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(120px); } }
-  @keyframes fadeIn { from { opacity:0; transform:scale(0.98); } to { opacity:1; transform:scale(1); } }
-  .anim-enter { animation: fadeIn 0.3s ease-out; }
-  .anim-exit-left { animation: slideLeft 0.3s ease-in forwards; }
-  .anim-exit-right { animation: slideRight 0.3s ease-in forwards; }
-
-  /* Footer marks */
-  .rtn-mark {
-    font-family: var(--fm);
-    font-size: 10px;
-    color: var(--mu);
-    letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
-    margin-top: 14px;
-    text-align: center;
-  }
-  .rtn-mark a { color: var(--pu); text-decoration: none; border-bottom: 1px solid var(--bd); }
-  .rtn-mark a:hover { border-color: var(--pu); }
-
-  .article-link {
-    font-family: var(--fm); font-size: 10px;
-    color: var(--mu); letter-spacing: 1.5px; text-transform: uppercase;
-    font-weight: 700;
-    text-decoration: none; border-bottom: 1px solid var(--bd);
-  }
-  .article-link:hover { color: var(--pu); border-color: var(--pu); }
-
-  /* Print sheet (hidden on screen, visible when printing) */
-  .print-sheets { display: none; }
-  .print-sheets .print-cover {
-    padding: 40px 32px; border-bottom: 2px solid #000;
-  }
-  .print-sheets .print-cover h1 {
-    font-family: var(--fh); font-weight: 700;
-    font-size: 28px; margin-bottom: 6px; color: #000;
-    letter-spacing: -0.01em;
-  }
-  .print-sheets .print-cover p {
-    font-family: var(--fm); font-size: 10px;
-    color: #444; letter-spacing: 1.5px; margin-bottom: 4px;
-    text-transform: uppercase; font-weight: 700;
-  }
-  .print-sheets .print-key {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 4px 14px; margin-top: 14px;
-  }
-  .print-sheets .print-key-item {
-    display: flex; align-items: center; gap: 8px;
-    font-family: var(--fm); font-size: 10px; color: #222;
-    font-weight: 700; letter-spacing: 1px;
-  }
-  .print-sheets .print-key-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-  }
-  .print-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px; padding: 16px;
-  }
-  .print-card {
-    border: 2px solid #000; border-radius: 10px;
-    aspect-ratio: 3/2;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    position: relative; padding: 10px;
-    page-break-inside: avoid; break-inside: avoid;
-  }
-  .print-card-bar {
-    position: absolute; top: 6px; left: 10px; right: 10px; height: 3px; border-radius: 2px;
-  }
-  .print-card-num {
-    position: absolute; top: 10px; left: 12px;
-    font-family: var(--fm); font-size: 9px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-  }
-  .print-card-pos {
-    position: absolute; top: 10px; right: 12px;
-    font-family: var(--fm); font-size: 9px;
-    font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-  }
-  .print-card-word {
-    font-family: var(--fc); font-weight: 700;
-    font-size: 54px; letter-spacing: -0.02em; text-align: center;
-  }
-  .print-card-sent {
-    position: absolute; bottom: 10px; left: 12px; right: 12px;
-    font-family: var(--fh); font-size: 11px;
-    text-align: center; font-style: italic;
-  }
-
-  @media print {
-    @page { margin: 0.4in; size: letter; }
-    body {
-      background: #fff !important; color: #000 !important;
-      padding: 0 !important; display: block !important;
-    }
-    .header, .header-card, .viridis-banner, .card-area, .actions, .keyboard-hints, .rtn-rainbow, .rtn-mark,
-    body > div:not(.print-sheets):not(.header):not(.header-card):not(.viridis-banner) { display: none !important; }
-    .print-sheets { display: block !important; }
-    .print-grid { page-break-after: always; }
-  }
-
-  /* Reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-
-  @media (max-width: 600px) {
-    body { padding: 14px 12px calc(14px + env(safe-area-inset-bottom)); }
-    .viridis-banner { padding: 22px 20px 18px; border-radius: 14px 14px 0 0; }
-    .banner-title { font-size: 22px; }
-    .banner-stats { gap: 14px; margin-top: 10px; }
-    .banner-stat-num { font-size: 18px; }
-    .header-card { padding: 10px 16px 14px; border-radius: 0 0 14px 14px; }
-    .header { margin-bottom: 10px; }
-    .title-row { margin-bottom: 8px; }
-    .title { font-size: 22px; }
-    .subtitle { display: none; }
-
-    /* Horizontally scrollable filter pills (no wrap) */
-    .pills {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x proximity;
-      margin: 0 -12px 8px;
-      padding: 2px 12px 6px;
-      scrollbar-width: none;
-      gap: 6px;
-      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
-              mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
-    }
-    .pills::-webkit-scrollbar { display: none; }
-    .pill { flex: 0 0 auto; scroll-snap-align: start; padding: 6px 11px; font-size: 10px; }
-
-    .legend-grid { grid-template-columns: 1fr; }
-    .btn { padding: 12px 14px; font-size: 13px; min-width: 0; }
-    .actions { gap: 10px; margin-top: 16px; flex-direction: row; }
-    .keyboard-hints { display: none; }
-
-    .controls {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      margin: 0 -12px 8px;
-      padding: 2px 12px 6px;
-      gap: 6px;
-      justify-content: flex-start;
-      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
-              mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
-    }
-    .controls::-webkit-scrollbar { display: none; }
-    .legend-toggle { flex: 0 0 auto; padding: 6px 11px; font-size: 10px; }
-    .control-group { flex: 0 0 auto; flex-wrap: nowrap; gap: 4px; }
-    .control-group .pill { padding: 6px 9px; font-size: 9px; }
-
-    .card-area, .actions { max-width: 480px; }
-    .card, .done-card { aspect-ratio: 4 / 3; }
-    .progress-stats { margin-top: 6px; font-size: 9px; }
-
-    .card-number { top: 12px; left: 14px; font-size: 9px; }
-    .card-pos { top: 12px; right: 14px; font-size: 9px; }
-    .card-hint { bottom: 10px; right: 14px; font-size: 8px; letter-spacing: 1.5px; }
-    .card-brand { display: none; }
-    .card-accent-bar { height: 3px; }
-
-    .done-emoji { font-size: 40px; margin-bottom: 10px; }
-    .done-title { font-size: 24px; }
-    .done-stats { font-size: 10px; margin-bottom: 18px; }
-  }
-
-  @media (max-width: 480px) {
-    .card-word.short { font-size: clamp(44px, 14vw, 72px); }
-    .card-word.long  { font-size: clamp(32px, 10vw, 56px); }
-    .actions { flex-direction: column; gap: 8px; }
-    .btn { width: 100%; }
-  }
-
-  @media (max-width: 380px) {
-    .btn { padding: 12px 10px; font-size: 12px; }
-    .card-back-word { margin-bottom: 4px; }
-    .card-back-pos { margin-bottom: 10px; }
-    .card-hint { display: none; }
-  }
-</style>
-</head>
-<body>
-
-<div class="rtn-rainbow" aria-hidden="true"></div>
-<a href="#main-content" class="skip-link">Skip to main content</a>
-
-<div class="viridis-banner" id="main-content">
-  <div class="banner-content">
-    <p class="banner-eyebrow">RTN | Speech, Language &amp; Literacy</p>
-    <h1 class="banner-title">First 100 Sight Words</h1>
-    <p class="banner-sub">Montessori Grammar Color Coding &middot; Green et al., 2024</p>
-    <div class="banner-stats">
-      <div><div class="banner-stat-num" id="bannerTotal">100</div><div class="banner-stat-label">Words</div></div>
-      <div><div class="banner-stat-num" id="bannerKnown">0</div><div class="banner-stat-label">Known</div></div>
-      <div><div class="banner-stat-num" id="bannerLeft">100</div><div class="banner-stat-label">Remaining</div></div>
-    </div>
-  </div>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#28283A;padding:22px 24px;line-height:1.5;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.title{font-family:"DM Sans",sans-serif;font-size:23px;font-weight:700;letter-spacing:-.01em;color:#28283A;line-height:1.1}
+.sub{font-family:"DM Sans",sans-serif;font-style:italic;font-size:12px;color:#7A7A8E;margin-top:2px}
+.meta{font-size:10.5px;margin:12px 0 14px;padding:9px 14px;background:rgba(31,157,138,0.06);border-radius:10px;display:flex;flex-wrap:wrap;gap:4px 18px}
+.meta strong{color:#28283A;font-weight:600;margin-right:3px}.meta span{color:#555}
+.cmp{border:1px solid #E8E4DF;border-radius:10px;margin-bottom:8px;page-break-inside:avoid;overflow:hidden;position:relative;padding-left:6px}
+.cmp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}
+.cmp.s::before{background:#1f9d8a}
+.cmp.w::before{background:#26838f}
+.cmp.t::before{background:#31678e}
+.ch{padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ch h3{font-family:"DM Sans",sans-serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}
+.ch .n{font-family:"DM Sans",sans-serif;font-weight:700;font-size:10.5px;background:#fff;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}
+.bdg{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8.5px;font-weight:600;background:rgba(255,255,255,.8);color:#28283A;margin-left:3px;letter-spacing:.2px}
+.bdg-h{background:#C8EDCF;color:#1A5A2A}.bdg-m{background:#F5EECC;color:#5A4A1A}.bdg-l{background:#F5D0D0;color:#5A1A1A}
+.cb{padding:9px 12px 10px;background:#fff}
+.tgt{font-weight:600;font-size:11px;color:#28283A;margin-bottom:2px}
+.tgt .k{color:#7A7A8E;font-weight:600;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;margin-right:6px}
+.info{font-size:9.5px;color:#444;margin-top:3px}
+.info .k{color:#7A7A8E;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-right:5px;font-size:8.5px}
+.info em{font-style:italic;color:#28283A}
+.gr{display:flex;flex-wrap:wrap;gap:2px;margin-top:6px}.gc{width:15px;height:15px;border:1px solid #C4BFB8;border-radius:3px;background:#FAFAF8}
+.nl{border-bottom:1px solid #DDD;height:15px;margin-top:3px}
+.ft{margin-top:14px;font-size:8.5px;color:#A0A0B0;text-align:center;border-top:1px solid #E8E4DF;padding-top:7px;font-family:"DM Sans",sans-serif;font-style:italic}
+@media print{body{padding:14px 16px}}
+</style></head><body>
+<div class="title">Structured Literacy Session Plan</div>
+<div class="sub">Session Builder &middot; RTN | Speech, Language &amp; Literacy</div>
+<div class="meta">
+${studentName ? `<span><strong>Student:</strong>${studentName}</span>` : ""}<span><strong>Date:</strong>${sessionDate}</span>${sessionNum ? `<span><strong>Session #</strong>${sessionNum}</span>` : ""}<span><strong>${comps.length}</strong> components</span><span><strong>~${totalMinutes}</strong> min</span>
 </div>
+${comps.map((c, i) => {
+          const total = (c.d.correct || 0) + (c.d.incorrect || 0);
+          const pct = total > 0 ? Math.round((c.d.correct / total) * 100) : null;
+          const hasData = total > 0;
+          const catShort = (c.category || "word").charAt(0);
+          const bdgCls = pct === null ? "" : pct >= 80 ? "bdg-h" : pct >= 50 ? "bdg-m" : "bdg-l";
+          return `<div class="cmp ${catShort}"><div class="ch" style="background:${c.color}"><h3><span class="n">${i + 1}</span>${c.icon} ${c.label}</h3><div><span class="bdg">${MODES[c.d.mode] || "Both"}</span><span class="bdg">~${c.d.minutes} min</span>${pct !== null ? `<span class="bdg ${bdgCls}">${pct}% (${c.d.correct}/${total})</span>` : ""}</div></div><div class="cb">${c.d.target ? `<div class="tgt"><span class="k">Target</span>${c.d.target}</div>` : '<div class="tgt"><span class="k">Target</span>___________________________________</div>'}${c.d.materials ? `<div class="info"><span class="k">Materials</span>${c.d.materials}</div>` : ""}${c.d.cueLevel ? `<div class="info"><span class="k">Cue</span>${c.d.cueLevel}</div>` : ""}${c.d.notes ? `<div class="info"><span class="k">Notes</span><em>${c.d.notes}</em></div>` : ""}${!hasData ? `<div class="gr">${Array(20).fill('<div class="gc"></div>').join("")}</div><div class="nl"></div><div class="nl"></div>` : ""}</div></div>`;
+        }).join("")}
+<div class="ft">&copy; 2026 RTN | Speech, Language &amp; Literacy &middot; CC BY-NC 4.0</div>
+</body></html>`;
+        const blob = new Blob([html], { type: "text/html" });
+        const w = window.open(URL.createObjectURL(blob), "_blank");
+        if (w) setTimeout(() => w.print(), 500);
+      }, [selected, componentData, studentName, sessionDate, sessionNum, totalMinutes]);
 
-<div class="header-card">
-  <div class="title-row">
-    <div class="title-left">
-      <span class="title">First 100 Sight Words</span>
-      <span class="subtitle">Montessori Grammar</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span class="review-badge" id="reviewBadge">Review Round</span>
-    </div>
-  </div>
+      const copyText = useCallback(() => {
+        const comps = selected.map(id => ({ ...SESSION_COMPONENTS.find(c => c.id === id), d: componentData[id] || {} })).filter(Boolean);
+        const l = [`SESSION PLAN — STRUCTURED LITERACY`, `${studentName ? "Student: " + studentName + " | " : ""}Date: ${sessionDate}${sessionNum ? " | #" + sessionNum : ""} | ~${totalMinutes} min`, "═".repeat(48), ""];
+        comps.forEach((c, i) => {
+          const total = (c.d.correct || 0) + (c.d.incorrect || 0);
+          const pct = total > 0 ? Math.round((c.d.correct / total) * 100) + "%" : "—";
+          l.push(`${i + 1}. ${c.label} [${MODES[c.d.mode] || "Both"}] ~${c.d.minutes} min`);
+          if (c.d.target) l.push(`   Target: ${c.d.target}`);
+          if (c.d.materials) l.push(`   Materials: ${c.d.materials}`);
+          l.push(`   Data: ${c.d.correct || 0}/${total} (${pct}) | Cue: ${c.d.cueLevel || "—"}`);
+          if (c.d.notes) l.push(`   Notes: ${c.d.notes}`);
+          l.push("");
+        });
+        l.push("© 2026 RTN | Speech, Language & Literacy | CC BY-NC 4.0");
+        navigator.clipboard.writeText(l.join("\n"));
+        setCopyFb(true);
+        setTimeout(() => setCopyFb(false), 2000);
+      }, [selected, componentData, studentName, sessionDate, sessionNum, totalMinutes]);
 
-  <div class="pills" id="pills"></div>
+      // ── Apply theme to body ──
+      useEffect(() => {
+        document.body.style.background = bg;
+        document.body.style.color = tx;
+      }, [bg, tx]);
 
-  <div class="controls">
-    <button class="legend-toggle" id="legendToggle">▾ Show Color Key</button>
-    <div class="control-group">
-      <button class="pill" id="startOverBtn" title="Reset the deck and clear progress">
-        <span class="traffic-lights" aria-hidden="true"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span></span>
-        Start Over
-      </button>
-      <button class="pill" id="trackBtn" title="Download a progress report (JSON)">⤓ Track</button>
-      <button class="pill" id="printBtn" title="Print free flashcards">⎙ Print</button>
-      <button class="pill" id="shuffleBtn" title="Reshuffle the current deck">↻ Shuffle</button>
-      <button class="pill" id="themeToggle" title="Toggle light / dark" aria-label="Toggle light or dark theme"><span class="theme-icon">☾</span></button>
-    </div>
-  </div>
+      return (
+        <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", padding: "20px 20px 60px", maxWidth: 960, margin: "0 auto" }}>
+          <div ref={liveRef} role="status" aria-live="polite" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }} />
 
-  <div class="legend" id="legend">
-    <div class="legend-grid" id="legendGrid"></div>
-  </div>
+          {/* THEME TOGGLE — fixed, matching literacy tracker */}
+          <button className="no-print" onClick={() => setDarkMode(!darkMode)}
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            style={{ position: "fixed", top: 16, right: 16, zIndex: 1000, display: "flex", alignItems: "center", gap: 6,
+              background: cardBg, border: `1px solid ${bd}`, borderRadius: 40, padding: "6px 14px 6px 10px",
+              cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: mu,
+              transition: "all 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,.06)" }}>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>{darkMode ? "☾" : "☀"}</span>
+            <span style={{ lineHeight: 1 }}>{darkMode ? "Dark" : "Light"}</span>
+          </button>
 
-  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="progress-stats">
-    <span id="countLabel">1 / 100</span>
-    <span class="stat-known" id="knownLabel">✓ 0 known</span>
-    <span class="stat-learning" id="learningLabel">↻ 0 learning</span>
-  </div>
-</div>
-
-<div class="card-area" id="cardArea"></div>
-<div class="actions" id="actions">
-  <button class="btn btn-learning" id="btnLearning">← Still Learning</button>
-  <button class="btn btn-known" id="btnKnown">Got It →</button>
-</div>
-
-<div class="print-sheets" id="printSheets" aria-hidden="true"></div>
-
-<div class="keyboard-hints">Space to flip · ← / → to sort · K = know · S = still learning</div>
-<div style="margin-top:16px;text-align:center;">
-  <a href="https://ila.onlinelibrary.wiley.com/doi/epdf/10.1002/trtr.2309" target="_blank" rel="noopener" class="article-link">
-    Based on Green et al., 2024 · Read the article →
-  </a>
-</div>
-<div class="rtn-mark">RTN | Speech, Language &amp; Literacy · <a href="https://rachelslp.org" target="_blank" rel="noopener">rachelslp.org</a></div>
-
-<div class="rtn-rainbow bottom" aria-hidden="true"></div>
-
-<script>
-// ===== DATA =====
-const WORDS = [
-  "the","and","a","to","I","you","in","of","it","he","is","was","for","on","that",
-  "with","but","his","all","they","my","so","be","she","up","at","are","one","said",
-  "what","this","when","we","me","have","as","do","like","out","can","her","not",
-  "then","your","no","there","day","just","it's","see","little","time","from","had",
-  "now","will","I'm","go","were","too","them","him","some","big","get","if","good",
-  "don't","down","by","how","know","an","oh","more","their","could","about","back",
-  "who","or","make","into","look","very","would","right","here","love","way","night",
-  "did","new","come","our","two","want","made","over","around"
-];
-
-const WORD_POS = {
-  "the":"article","and":"conjunction","a":"article","to":"preposition",
-  "I":"pronoun","you":"pronoun","in":"preposition","of":"preposition",
-  "it":"pronoun","he":"pronoun","is":"verb","was":"verb",
-  "for":"preposition","on":"preposition","that":"pronoun",
-  "with":"preposition","but":"conjunction","his":"pronoun",
-  "all":"adjective","they":"pronoun","my":"pronoun","so":"adverb",
-  "be":"verb","she":"pronoun","up":"adverb","at":"preposition",
-  "are":"verb","one":"adjective","said":"verb","what":"pronoun",
-  "this":"pronoun","when":"adverb","we":"pronoun","me":"pronoun",
-  "have":"verb","as":"conjunction","do":"verb","like":"verb",
-  "out":"adverb","can":"verb","her":"pronoun","not":"adverb",
-  "then":"adverb","your":"pronoun","no":"adverb","there":"adverb",
-  "day":"noun","just":"adverb","it's":"pronoun","see":"verb",
-  "little":"adjective","time":"noun","from":"preposition","had":"verb",
-  "now":"adverb","will":"verb","I'm":"pronoun","go":"verb",
-  "were":"verb","too":"adverb","them":"pronoun","him":"pronoun",
-  "some":"adjective","big":"adjective","get":"verb","if":"conjunction",
-  "good":"adjective","don't":"verb","down":"adverb","by":"preposition",
-  "how":"adverb","know":"verb","an":"article","oh":"interjection",
-  "more":"adjective","their":"pronoun","could":"verb","about":"preposition",
-  "back":"adverb","who":"pronoun","or":"conjunction","make":"verb",
-  "into":"preposition","look":"verb","very":"adverb","would":"verb",
-  "right":"adjective","here":"adverb","love":"verb","way":"noun",
-  "night":"noun","did":"verb","new":"adjective","come":"verb",
-  "our":"pronoun","two":"adjective","want":"verb","made":"verb",
-  "over":"preposition","around":"preposition"
-};
-
-// Montessori grammar accent palette (used only as subtle accent bar on the card
-// and as legend dots — the card body itself stays clean var(--card) white).
-const M_PALETTE = {
-  verb:         { accent:"#C62828" },
-  noun:         { accent:"#555555" },
-  adjective:    { accent:"#2A56B0" },
-  article:      { accent:"#4A90B8" },
-  pronoun:      { accent:"#7B3F9B" },
-  preposition:  { accent:"#1E8A4A" },
-  conjunction:  { accent:"#C07080" },
-  adverb:       { accent:"#C07A10" },
-  interjection: { accent:"#B8960A" }
-};
-const M_META = {
-  verb:         { label:"VERB",         symbol:"●", desc:"Action word" },
-  noun:         { label:"NOUN",         symbol:"▲", desc:"Person, place, or thing" },
-  adjective:    { label:"ADJECTIVE",    symbol:"▲", desc:"Describing word" },
-  article:      { label:"ARTICLE",      symbol:"△", desc:"Noun introducer" },
-  pronoun:      { label:"PRONOUN",      symbol:"▲", desc:"Stand-in word" },
-  preposition:  { label:"PREPOSITION",  symbol:"☽", desc:"Position & relation" },
-  conjunction:  { label:"CONJUNCTION",  symbol:"▬", desc:"Connecting word" },
-  adverb:       { label:"ADVERB",       symbol:"●", desc:"Modifier (how/when/where)" },
-  interjection: { label:"INTERJECTION", symbol:"!", desc:"Exclamation" }
-};
-
-function getM() {
-  const m = {};
-  for (const k of Object.keys(M_META)) {
-    m[k] = { ...M_META[k], ...M_PALETTE[k] };
-  }
-  return m;
-}
-let M = getM();
-
-const SENTENCES = {
-  "the":"Pass me the book.","and":"You and I can go.","a":"I saw a bird.",
-  "to":"We need to leave.","I":"I will be there.","you":"Can you help?",
-  "in":"She is in the room.","of":"A cup of water.","it":"Give it to me.",
-  "he":"He ran fast.","is":"The sky is blue.","was":"She was happy.",
-  "for":"This is for you.","on":"The cat is on the bed.","that":"Look at that!",
-  "with":"Come with me.","but":"Small but strong.","his":"That is his coat.",
-  "all":"We ate all of it.","they":"They went home.","my":"This is my turn.",
-  "so":"I was so tired.","be":"Just be yourself.","she":"She left early.",
-  "up":"Stand up now.","at":"Meet me at noon.","are":"You are kind.",
-  "one":"Pick one color.","said":"He said hello.","what":"What happened?",
-  "this":"Read this page.","when":"Call me when ready.","we":"We did it together.",
-  "me":"Tell me more.","have":"I have time.","as":"Fast as lightning.",
-  "do":"What do you think?","like":"I like this song.","out":"Go out and play.",
-  "can":"You can do it.","her":"Give her the note.","not":"I am not sure.",
-  "then":"Eat first, then go.","your":"Bring your bag.","no":"There is no rush.",
-  "there":"Look over there.","day":"What a great day.","just":"Just keep going.",
-  "it's":"It's almost done.","see":"I can see it now.","little":"A little more time.",
-  "time":"It takes time.","from":"A note from home.","had":"She had a plan.",
-  "now":"Start now.","will":"I will try again.","I'm":"I'm on my way.",
-  "go":"Let's go outside.","were":"They were ready.","too":"Me too!",
-  "them":"Help them out.","him":"Ask him first.","some":"Have some water.",
-  "big":"That's a big step.","get":"Go get your coat.","if":"Tell me if you can.",
-  "good":"Good job today.","don't":"I don't mind.","down":"Sit down here.",
-  "by":"Stand by the door.","how":"How does this work?","know":"I know the answer.",
-  "an":"Grab an apple.","oh":"Oh, I see now!","more":"Tell me more.",
-  "their":"That's their choice.","could":"You could try.","about":"Think about it.",
-  "back":"I'll be right back.","who":"Who said that?","or":"Now or later?",
-  "make":"Let's make a plan.","into":"Walk into the room.","look":"Look at this!",
-  "very":"That's very cool.","would":"I would like that.","right":"You're right.",
-  "here":"Come over here.","love":"I love this place.","way":"Find a better way.",
-  "night":"Good night.","did":"You did great.","new":"Try something new.",
-  "come":"Come with us.","our":"This is our spot.","two":"Pick two options.",
-  "want":"What do you want?","made":"She made it work.","over":"Start over fresh.",
-  "around":"Look around you."
-};
-
-const FILTERS = [
-  { name:"All Words", pos:null },
-  { name:"Verbs", pos:"verb" },
-  { name:"Pronouns", pos:"pronoun" },
-  { name:"Adverbs", pos:"adverb" },
-  { name:"Prepositions", pos:"preposition" },
-  { name:"Adjectives", pos:"adjective" },
-  { name:"Conjunctions", pos:"conjunction" },
-  { name:"Articles", pos:"article" },
-  { name:"Nouns", pos:"noun" }
-];
-
-// ===== STATE =====
-let currentFilter = "All Words";
-let deck = [];
-let idx = 0;
-let flipped = false;
-let known = new Set();
-let learning = new Set();
-let mode = "study";
-let animating = false;
-
-// ===== HELPERS =====
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function getFiltered(posKey) {
-  if (!posKey) return [...WORDS];
-  return WORDS.filter(w => WORD_POS[w] === posKey);
-}
-
-// ===== DOM REFS =====
-const $pills = document.getElementById("pills");
-const $legendToggle = document.getElementById("legendToggle");
-const $legend = document.getElementById("legend");
-const $legendGrid = document.getElementById("legendGrid");
-const $shuffleBtn = document.getElementById("shuffleBtn");
-const $progressFill = document.getElementById("progressFill");
-const $countLabel = document.getElementById("countLabel");
-const $knownLabel = document.getElementById("knownLabel");
-const $learningLabel = document.getElementById("learningLabel");
-const $cardArea = document.getElementById("cardArea");
-const $actions = document.getElementById("actions");
-const $btnLearning = document.getElementById("btnLearning");
-const $btnKnown = document.getElementById("btnKnown");
-const $reviewBadge = document.getElementById("reviewBadge");
-
-// ===== BUILD UI =====
-function buildPills() {
-  $pills.innerHTML = "";
-  FILTERS.forEach(f => {
-    const btn = document.createElement("button");
-    btn.className = "pill" + (currentFilter === f.name ? " active" : "");
-    const pal = f.pos ? M[f.pos] : null;
-
-    // Dot shows POS accent on inactive pills; active pill uses --ag gradient bg.
-    if (pal && currentFilter !== f.name) {
-      const dot = document.createElement("span");
-      dot.className = "pill-dot";
-      dot.style.background = pal.accent;
-      btn.appendChild(dot);
-    }
-
-    btn.appendChild(document.createTextNode(f.name));
-    btn.addEventListener("click", () => { currentFilter = f.name; initDeck(); });
-    $pills.appendChild(btn);
-  });
-}
-
-function buildLegend() {
-  $legendGrid.innerHTML = "";
-  Object.entries(M).forEach(([key, m]) => {
-    const item = document.createElement("div");
-    item.className = "legend-item";
-    item.innerHTML = `
-      <div class="legend-dot" style="background:${m.accent}"></div>
-      <div>
-        <span class="legend-label" style="color:${m.accent}">${m.symbol} ${m.label}</span>
-        <span class="legend-desc">${m.desc}</span>
-      </div>`;
-    $legendGrid.appendChild(item);
-  });
-}
-
-// ===== RENDER =====
-function render() {
-  const word = deck[idx];
-  const pos = word ? WORD_POS[word] : "verb";
-  const pal = M[pos];
-  const total = deck.length;
-  const progress = total > 0 ? (idx / total) * 100 : 0;
-  const wordNum = word ? WORDS.indexOf(word) + 1 : 0;
-  const done = total > 0 && idx >= total - 1 && learning.size === 0 && flipped;
-
-  // Progress — bar uses --ag gradient globally (set in CSS), but we keep the POS
-  // accent tint as a subtle override when a word is active.
-  $progressFill.style.width = progress + "%";
-  $countLabel.textContent = `${idx + 1} / ${total}`;
-  $knownLabel.textContent = `✓ ${known.size} known`;
-  $learningLabel.textContent = `↻ ${learning.size} learning`;
-
-  const bK = document.getElementById("bannerKnown");
-  const bL = document.getElementById("bannerLeft");
-  if (bK) bK.textContent = known.size;
-  if (bL) bL.textContent = Math.max(0, WORDS.length - known.size);
-
-  // Review badge
-  $reviewBadge.className = "review-badge" + (mode === "review" ? " visible" : "");
-
-  // Card
-  if (done) {
-    $cardArea.innerHTML = `
-      <div class="done-card">
-        <div class="done-emoji">🎯</div>
-        <div class="done-title">Deck Complete</div>
-        <div class="done-stats">${known.size} mastered · ${learning.size} to review</div>
-        <button class="btn btn-known" id="btnAgain">Go Again</button>
-      </div>`;
-    document.getElementById("btnAgain").addEventListener("click", initDeck);
-    $actions.style.display = "none";
-  } else if (word) {
-    const sizeClass = word.length > 5 ? "long" : "short";
-    if (!flipped) {
-      $cardArea.innerHTML = `
-        <div class="card anim-enter" id="theCard">
-          <div class="card-accent-bar" style="background:${pal.accent}"></div>
-          <span class="card-number">#${String(wordNum).padStart(3,"0")}</span>
-          <span class="card-pos" style="color:${pal.accent}">${pal.symbol} ${pal.label}</span>
-          <span class="card-hint">Tap to flip</span>
-          <span class="card-brand">Montessori Grammar</span>
-          <span class="card-word ${sizeClass}">${word}</span>
-        </div>`;
-    } else {
-      $cardArea.innerHTML = `
-        <div class="card anim-enter" id="theCard">
-          <div class="card-accent-bar" style="background:${pal.accent}"></div>
-          <span class="card-number">#${String(wordNum).padStart(3,"0")}</span>
-          <span class="card-pos" style="color:${pal.accent}">${pal.symbol} ${pal.label}</span>
-          <span class="card-hint">Example</span>
-          <span class="card-brand">Montessori Grammar</span>
-          <div class="card-back">
-            <div class="card-back-word">${word}</div>
-            <div class="card-back-pos" style="color:${pal.accent}">${pal.desc}</div>
-            <div class="card-back-sentence">${SENTENCES[word]}</div>
+          {/* HEADER — matching literacy tracker */}
+          <div className="no-print" style={{ marginBottom: 28, paddingTop: 8 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4, color: tx }}>Session Builder</h1>
+            <p style={{ fontSize: 14, color: dm }}>Plan structured literacy sessions, collect data, print summaries</p>
           </div>
-        </div>`;
+
+          {/* VIEW TABS + TOOLBAR — matching literacy tracker toolbar style */}
+          <div className="no-print" style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+            {[{ id: "plan", label: "Plan" }, { id: "collect", label: "Collect" }, { id: "summary", label: "Summary" }].map(t => (
+              <button key={t.id} onClick={() => { setView(t.id); announce(t.label + " view"); if (t.id === "collect" && !expandedInCollect) setExpandedInCollect(selected[0] || null); }}
+                aria-current={view === t.id ? "page" : undefined}
+                style={{ padding: "8px 16px", border: `1px solid ${view === t.id ? ac : bd}`, borderRadius: 10, background: view === t.id ? ac : cardBg,
+                  color: view === t.id ? "#fff" : mu, fontFamily: "inherit", fontSize: 13, fontWeight: view === t.id ? 600 : 500, cursor: "pointer", transition: "all 0.2s" }}
+              >{t.label}</button>
+            ))}
+            <div style={{ flex: 1 }} />
+          </div>
+
+          <main>
+
+            {/* ═══ PLAN VIEW ═══ */}
+            {view === "plan" && (<React.Fragment>
+              <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".5px", color: dm, marginBottom: 4 }}>Student Name</label>
+                  <input value={studentName} onChange={e => setStudentName(e.target.value)} placeholder="Enter student name" style={inp} aria-label="Student name" />
+                </div>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".5px", color: dm, marginBottom: 4 }}>Date</label>
+                  <input type="date" value={sessionDate} onChange={e => setSessionDate(e.target.value)} style={inp} aria-label="Session date" />
+                </div>
+                <div style={{ flex: 1, minWidth: 120 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".5px", color: dm, marginBottom: 4 }}>Session #</label>
+                  <input value={sessionNum} onChange={e => setSessionNum(e.target.value)} placeholder="e.g. 12" style={inp} aria-label="Session number" />
+                </div>
+              </div>
+
+              {/* Progress summary */}
+              <div style={{ ...cs, padding: 20, marginBottom: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: tx }}>Session Components</h2>
+                <div style={{ background: inputBg, borderRadius: 8, height: 10, overflow: "hidden", marginBottom: 12 }}>
+                  <div style={{ height: "100%", background: ac, borderRadius: 8, transition: "width 0.4s ease", width: selected.length > 0 ? `${Math.min(100, (selected.length / 15) * 100)}%` : "0%" }} />
+                </div>
+                <div style={{ display: "flex", gap: 20, flexWrap: "wrap", fontSize: 13, color: mu }}>
+                  <span>{selected.length} selected</span>
+                  <span>~{totalMinutes} min</span>
+                </div>
+              </div>
+              <p style={{ fontSize: 13, color: dm, margin: "0 0 12px" }}>Check components to include. Set targets and reorder with arrows.</p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {SESSION_COMPONENTS.map(comp => {
+                  const isSel = selected.includes(comp.id);
+                  const d = componentData[comp.id] || {};
+                  const oi = selected.indexOf(comp.id);
+                  return (
+                    <div key={comp.id} style={{ ...cs, borderColor: isSel ? ac : bd, opacity: isSel ? 1 : 0.55, transition: "all 0.2s", overflow: "hidden" }}>
+                      <div style={{ padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        <input type="checkbox" checked={isSel} onChange={() => toggleSelected(comp.id)} aria-label={`Include ${comp.label}`} style={{ width: 19, height: 19, accentColor: ac, marginTop: 2, flexShrink: 0, cursor: "pointer" }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                            {isSel && <span style={{ fontSize: 11, fontWeight: 700, color: ac, fontFamily: "'DM Sans', sans-serif", background: darkMode ? "rgba(42,157,143,0.15)" : "rgba(42,157,143,0.1)", width: 22, height: 22, borderRadius: 6, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{oi + 1}</span>}
+                            <span style={{ fontSize: 17 }}>{comp.icon}</span>
+                            <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14 }}>{comp.label}</span>
+                            <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 7, fontWeight: 600, background: acSoft, color: ac }}>{comp.category}</span>
+                          </div>
+                          <div style={{ fontSize: 11, color: mu, marginTop: 1 }}>{comp.desc}</div>
+                        </div>
+                        {isSel && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
+                            <button onClick={() => moveComponent(comp.id, -1)} disabled={oi === 0} aria-label={`Move ${comp.label} up`} style={{ ...bb, padding: "1px 7px", fontSize: 11, opacity: oi === 0 ? .25 : 1, background: "transparent", color: mu }}>&#9650;</button>
+                            <button onClick={() => moveComponent(comp.id, 1)} disabled={oi === selected.length - 1} aria-label={`Move ${comp.label} down`} style={{ ...bb, padding: "1px 7px", fontSize: 11, opacity: oi === selected.length - 1 ? .25 : 1, background: "transparent", color: mu }}>&#9660;</button>
+                          </div>
+                        )}
+                      </div>
+                      {isSel && (
+                        <div style={{ padding: "0 14px 12px", borderTop: `1px solid ${bd}`, paddingTop: 10 }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 8, marginBottom: 6 }}>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>TARGET / CONCEPT</label>
+                              <input value={d.target || ""} onChange={e => updateComp(comp.id, "target", e.target.value)} placeholder="What are you targeting?" style={inp} aria-label={`Target for ${comp.label}`} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>MODE</label>
+                              <select value={d.mode || comp.defaultMode} onChange={e => updateComp(comp.id, "mode", e.target.value)} style={{ ...inp, width: 105, appearance: "auto" }} aria-label={`Mode for ${comp.label}`}>
+                                <option value="decoding">Decoding</option><option value="encoding">Encoding</option><option value="both">Both</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>MIN</label>
+                              <input type="number" min={1} max={30} value={d.minutes || comp.defaultMin} onChange={e => updateComp(comp.id, "minutes", Number(e.target.value))} style={{ ...inp, width: 55, textAlign: "center" }} aria-label={`Minutes for ${comp.label}`} />
+                            </div>
+                          </div>
+                          <button onClick={() => setShowSuggestions(showSuggestions === comp.id ? null : comp.id)} style={{ background: "none", border: "none", fontSize: 11, color: ac, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, padding: 0 }} aria-expanded={showSuggestions === comp.id}>{showSuggestions === comp.id ? "▾ Hide suggestions" : "▸ Suggested targets"}</button>
+                          {showSuggestions === comp.id && (
+                            <div style={{ marginTop: 5, display: "flex", flexWrap: "wrap" }}>
+                              {comp.suggestedTargets.map(t => (
+                                <button key={t} onClick={() => { updateComp(comp.id, "target", t); setShowSuggestions(null); }}
+                                  style={{ display: "inline-block", padding: "4px 12px", borderRadius: 20, fontSize: 12, cursor: "pointer", margin: 3, border: `1px solid ${bd}`, background: "transparent", color: tx, fontFamily: "'DM Sans', sans-serif", outline: "none", transition: "all 0.12s" }}
+                                  onMouseOver={e => { e.currentTarget.style.background = "rgba(31,157,138,0.08)"; e.currentTarget.style.borderColor = "#1f9d8a"; }}
+                                  onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = bd; }}
+                                >{t}</button>
+                              ))}
+                            </div>
+                          )}
+                          <div style={{ marginTop: 6 }}>
+                            <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>MATERIALS / TOOLS (optional)</label>
+                            <input value={d.materials || ""} onChange={e => updateComp(comp.id, "materials", e.target.value)} placeholder="e.g., phonogram cards, whiteboard, letter tiles..." style={inp} aria-label={`Materials for ${comp.label}`} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 18, justifyContent: "center" }}>
+                <button onClick={generatePDF} style={sbtn}>Print Blank</button>
+                <button onClick={() => { setView("collect"); announce("Collect view"); setExpandedInCollect(selected[0] || null); }} style={pb}>Start Session →</button>
+              </div>
+            </React.Fragment>)}
+
+            {/* ═══ COLLECT VIEW ═══ */}
+            {view === "collect" && (<React.Fragment>
+              <div style={{ ...cs, padding: 20, marginBottom: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: tx }}>
+                  Live Session {studentName && <span style={{ fontWeight: 400 }}>&mdash; {studentName}</span>}
+                </h2>
+                <p style={{ fontSize: 13, color: dm }}>{sessionDate} &middot; Tap ✓ for correct, ✗ for incorrect</p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {selected.map((id, i) => {
+                  const comp = SESSION_COMPONENTS.find(c => c.id === id);
+                  if (!comp) return null;
+                  const d = componentData[id] || {};
+                  const total = (d.correct || 0) + (d.incorrect || 0);
+                  const pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
+                  const isExp = expandedInCollect === id;
+
+                  return (
+                    <div key={id} style={{ ...cs, overflow: "hidden" }}>
+                      <button onClick={() => setExpandedInCollect(isExp ? null : id)} aria-expanded={isExp} aria-label={`${comp.label} - tap to ${isExp ? "collapse" : "expand"}`}
+                        style={{ width: "100%", background: "none", border: "none", cursor: "pointer", color: tx, padding: "12px 14px", display: "flex", alignItems: "center", gap: 8, textAlign: "left", fontFamily: "'DM Sans', sans-serif", outline: "none" }}>
+                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 11, background: ac, color: "#fff", width: 24, height: 24, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                        <span style={{ fontSize: 15 }}>{comp.icon}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13 }}>{comp.label}</div>
+                          {d.target && <div style={{ fontSize: 10, color: mu, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.target}</div>}
+                        </div>
+                        {pct !== null && (
+                          <span style={{ padding: "3px 10px", borderRadius: 16, fontSize: 14, fontWeight: 700, background: pct >= 80 ? "#c8edcf" : pct >= 50 ? "#f5eecc" : "#f5d0d0", color: pct >= 80 ? "#1a5a2a" : pct >= 50 ? "#5a4a1a" : "#5a1a1a" }}>
+                            {pct}%<span style={{ fontSize: 10, fontWeight: 500, opacity: 0.7, marginLeft: 3 }}>({d.correct || 0}/{total})</span>
+                          </span>
+                        )}
+                        <span style={{ fontSize: 11, color: mu, marginLeft: 2 }}>{isExp ? "▾" : "▸"}</span>
+                      </button>
+
+                      {isExp && (
+                        <div style={{ padding: "0 14px 16px", borderTop: `1px solid ${bd}`, paddingTop: 14 }}>
+                          {/* TAPPER */}
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginBottom: 14 }}>
+                            <button aria-label="Mark incorrect" onClick={() => { updateComp(id, "incorrect", (d.incorrect || 0) + 1); announce(`Incorrect. ${d.correct || 0} of ${total + 1}`); }}
+                              style={{ width: 56, height: 56, borderRadius: 14, border: "none", fontSize: 26, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: rd, boxShadow: "0 3px 10px rgba(0,0,0,0.12)", outline: "none", fontFamily: "'DM Sans', sans-serif" }}>✗</button>
+                            <div style={{ textAlign: "center", minWidth: 80 }}>
+                              <div style={{ fontSize: 36, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", lineHeight: 1, color: pct === null ? mu : pct >= 80 ? gn : pct >= 50 ? "#C4A020" : rd }}>
+                                {pct !== null ? pct : 0}%
+                              </div>
+                              <div style={{ fontSize: 11, color: mu, marginTop: 2 }}>{d.correct || 0} / {total} trials</div>
+                            </div>
+                            <button aria-label="Mark correct" onClick={() => { updateComp(id, "correct", (d.correct || 0) + 1); announce(`Correct. ${(d.correct || 0) + 1} of ${total + 1}`); }}
+                              style={{ width: 56, height: 56, borderRadius: 14, border: "none", fontSize: 26, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: gn, boxShadow: "0 3px 10px rgba(0,0,0,0.12)", outline: "none", fontFamily: "'DM Sans', sans-serif" }}>✓</button>
+                          </div>
+
+                          {/* Trial dots */}
+                          {total > 0 && total <= 50 && (
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 3, justifyContent: "center", marginBottom: 12 }} aria-hidden="true">
+                              {Array.from({ length: d.correct || 0 }).map((_, j) => <div key={"c" + j} style={{ width: 10, height: 10, borderRadius: "50%", background: gn }} />)}
+                              {Array.from({ length: d.incorrect || 0 }).map((_, j) => <div key={"i" + j} style={{ width: 10, height: 10, borderRadius: "50%", background: rd }} />)}
+                            </div>
+                          )}
+
+                          {total > 0 && (
+                            <div style={{ textAlign: "center", marginBottom: 12 }}>
+                              <button onClick={() => { updateComp(id, "correct", 0); updateComp(id, "incorrect", 0); }}
+                                style={{ ...bb, padding: "3px 12px", fontSize: 10, background: "transparent", color: mu, textDecoration: "underline" }} aria-label="Reset data for this component">Reset</button>
+                            </div>
+                          )}
+
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>CUE LEVEL</label>
+                              <select value={d.cueLevel || ""} onChange={e => updateComp(id, "cueLevel", e.target.value)} style={{ ...inp, appearance: "auto" }} aria-label={`Cue level for ${comp.label}`}>
+                                <option value="">Select...</option>
+                                {CUE_LEVELS.map(c => <option key={c} value={c}>{c}</option>)}
+                              </select>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "flex-end", fontSize: 12, color: mu, paddingBottom: 10 }}>
+                              {MODES[d.mode] || "Both"} &middot; ~{d.minutes} min
+                            </div>
+                          </div>
+                          <div style={{ marginTop: 8 }}>
+                            <label style={{ fontSize: 10, fontWeight: 600, color: mu, display: "block", marginBottom: 2 }}>SESSION NOTES</label>
+                            <textarea value={d.notes || ""} onChange={e => updateComp(id, "notes", e.target.value)} placeholder="Error patterns, observations, next steps..." rows={2} style={{ ...inp, resize: "vertical" }} aria-label={`Notes for ${comp.label}`} />
+                          </div>
+                          {i < selected.length - 1 && (
+                            <div style={{ textAlign: "center", marginTop: 12 }}>
+                              <button onClick={() => setExpandedInCollect(selected[i + 1])} style={{ ...pb, fontSize: 12, padding: "8px 20px" }}>Next: {SESSION_COMPONENTS.find(c => c.id === selected[i + 1])?.label} →</button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 18, justifyContent: "center" }}>
+                <button onClick={() => setView("plan")} style={sbtn}>← Edit Plan</button>
+                <button onClick={() => { setView("summary"); announce("Summary view"); }} style={pb}>View Summary →</button>
+              </div>
+            </React.Fragment>)}
+
+            {/* ═══ SUMMARY VIEW ═══ */}
+            {view === "summary" && (<React.Fragment>
+              <div style={{ ...cs, padding: 20, marginBottom: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: tx }}>Session Summary</h2>
+                <p style={{ fontSize: 13, color: dm, marginBottom: 12 }}>{studentName && `${studentName} \u00B7 `}{sessionDate}{sessionNum ? ` \u00B7 #${sessionNum}` : ""} &middot; ~{totalMinutes} min</p>
+                <div className="no-print" style={{ display: "flex", gap: 8 }}>
+                  <button onClick={copyText} style={sbtn}>{copyFb ? "✓ Copied" : "Copy"}</button>
+                  <button onClick={generatePDF} style={pb}>Print / PDF</button>
+                </div>
+              </div>
+
+              {(() => {
+                const ac2 = selected.reduce((s, id) => s + (componentData[id]?.correct || 0), 0);
+                const ai = selected.reduce((s, id) => s + (componentData[id]?.incorrect || 0), 0);
+                const at = ac2 + ai;
+                if (!at) return null;
+                return (
+                  <div style={{ ...cs, padding: 20, marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, flexWrap: "wrap" }}>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 34, fontWeight: 700, lineHeight: 1 }}>{Math.round((ac2 / at) * 100)}%</div>
+                        <div style={{ fontSize: 10, color: mu, marginTop: 1 }}>Overall</div>
+                      </div>
+                      <div style={{ width: 1, height: 36, background: bd }} />
+                      <div style={{ textAlign: "center" }}><div style={{ fontSize: 18, fontWeight: 700, color: gn }}>{ac2}</div><div style={{ fontSize: 10, color: mu }}>Correct</div></div>
+                      <div style={{ textAlign: "center" }}><div style={{ fontSize: 18, fontWeight: 700, color: rd }}>{ai}</div><div style={{ fontSize: 10, color: mu }}>Incorrect</div></div>
+                      <div style={{ textAlign: "center" }}><div style={{ fontSize: 18, fontWeight: 700 }}>{at}</div><div style={{ fontSize: 10, color: mu }}>Total</div></div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {selected.map((id, i) => {
+                  const comp = SESSION_COMPONENTS.find(c => c.id === id);
+                  if (!comp) return null;
+                  const d = componentData[id] || {};
+                  const total = (d.correct || 0) + (d.incorrect || 0);
+                  const pct = total > 0 ? Math.round(((d.correct || 0) / total) * 100) : null;
+                  return (
+                    <div key={id} style={{ ...cs, padding: "12px 16px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                            <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 11, background: ac, color: "#fff", width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                            <span style={{ fontSize: 14 }}>{comp.icon}</span>
+                            <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13 }}>{comp.label}</span>
+                            <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 6, background: acSoft, color: ac, fontWeight: 600 }}>{MODES[d.mode] || "Both"} &middot; ~{d.minutes}m</span>
+                          </div>
+                          {d.target && <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 1 }}>Target: {d.target}</div>}
+                          {d.materials && <div style={{ fontSize: 11, color: mu }}>Materials: {d.materials}</div>}
+                          {d.cueLevel && <div style={{ fontSize: 11, color: mu }}>Cue: {d.cueLevel}</div>}
+                          {d.notes && <div style={{ fontSize: 11, color: mu, fontStyle: "italic", marginTop: 2 }}>Notes: {d.notes}</div>}
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          {pct !== null ? (<React.Fragment>
+                            <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", color: pct >= 80 ? gn : pct >= 50 ? "#C4A020" : rd }}>{pct}%</div>
+                            <div style={{ fontSize: 10, color: mu }}>{d.correct}/{total}</div>
+                          </React.Fragment>) : <div style={{ fontSize: 10, color: mu }}>No data</div>}
+                        </div>
+                      </div>
+                      {total > 0 && (
+                        <div style={{ marginTop: 6, height: 5, borderRadius: 3, background: darkMode ? "#1e3332" : "#ebebeb", overflow: "hidden" }} aria-hidden="true">
+                          <div style={{ height: "100%", borderRadius: 3, width: `${pct}%`, background: pct >= 80 ? gn : pct >= 50 ? "#E8C840" : rd, transition: "width 0.3s" }} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="no-print" style={{ display: "flex", gap: 8, marginTop: 18, justifyContent: "center" }}>
+                <button onClick={() => setView("collect")} style={sbtn}>← Collect</button>
+                <button onClick={copyText} style={sbtn}>{copyFb ? "✓ Copied" : "📋 Copy"}</button>
+                <button onClick={generatePDF} style={pb}>🖨️ Print / PDF</button>
+              </div>
+            </React.Fragment>)}
+          </main>
+
+          <footer className="no-print" style={{ textAlign: "center", padding: "14px 16px", fontSize: 9, color: mu, borderTop: `1px solid ${bd}` }}>
+            &copy; 2026 RTN | Speech, Language &amp; Literacy | CC BY-NC 4.0 | Built for clinicians, by a clinician.
+          </footer>
+        </div>
+      );
     }
-    document.getElementById("theCard").addEventListener("click", flipCard);
-    $actions.style.display = "flex";
-  }
-}
 
-// ===== ACTIONS =====
-function initDeck() {
-  const f = FILTERS.find(f => f.name === currentFilter);
-  deck = shuffle(getFiltered(f ? f.pos : null));
-  idx = 0; flipped = false;
-  known = new Set(); learning = new Set();
-  mode = "study";
-  buildPills();
-  render();
-}
-
-function flipCard() {
-  if (animating) return;
-  flipped = !flipped;
-  render();
-}
-
-function advance(dir) {
-  if (animating) return;
-  animating = true;
-  const card = document.getElementById("theCard");
-  if (card) card.className = "card " + (dir === "left" ? "anim-exit-left" : "anim-exit-right");
-
-  setTimeout(() => {
-    flipped = false;
-    animating = false;
-    if (idx < deck.length - 1) {
-      idx++;
-    } else if (learning.size > 0 && mode === "study") {
-      deck = shuffle([...learning]);
-      idx = 0;
-      learning = new Set();
-      mode = "review";
-    }
-    render();
-  }, 300);
-}
-
-function markKnown() {
-  if (!deck[idx] || animating) return;
-  known.add(deck[idx]);
-  advance("right");
-}
-
-function markLearning() {
-  if (!deck[idx] || animating) return;
-  learning.add(deck[idx]);
-  advance("left");
-}
-
-// ===== EVENTS =====
-$btnKnown.addEventListener("click", markKnown);
-$btnLearning.addEventListener("click", markLearning);
-$shuffleBtn.addEventListener("click", initDeck);
-
-// Start Over — full reset with a traffic-light pulse
-const $startOverBtn = document.getElementById("startOverBtn");
-$startOverBtn.addEventListener("click", () => {
-  $startOverBtn.classList.add("flash");
-  setTimeout(() => $startOverBtn.classList.remove("flash"), 900);
-  initDeck();
-});
-
-// Track — download a JSON progress report (mirrors the planner app)
-const $trackBtn = document.getElementById("trackBtn");
-$trackBtn.addEventListener("click", () => {
-  const f = FILTERS.find(f => f.name === currentFilter);
-  const total = getFiltered(f ? f.pos : null).length;
-  const report = {
-    app: "Sight Word Flashcards",
-    date: new Date().toISOString().split("T")[0],
-    timestamp: new Date().toISOString(),
-    filter: currentFilter,
-    mode,
-    progress: {
-      position: Math.min(idx + 1, deck.length),
-      deckSize: deck.length,
-      totalInFilter: total,
-      knownCount: known.size,
-      learningCount: learning.size,
-      percentKnown: total ? Math.round((known.size / total) * 100) : 0
-    },
-    known: [...known],
-    learning: [...learning]
-  };
-  const stamp = report.date;
-  const safeFilter = currentFilter.toLowerCase().replace(/\s+/g, "-");
-  const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `sight-words-progress-${safeFilter}-${stamp}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
-
-// Print — build a print-friendly sheet of every card in the current filter
-const $printBtn = document.getElementById("printBtn");
-const $printSheets = document.getElementById("printSheets");
-function buildPrintSheets() {
-  const f = FILTERS.find(f => f.name === currentFilter);
-  const words = getFiltered(f ? f.pos : null);
-  const keyItems = Object.entries(M_META).map(([key, meta]) => {
-    const color = M_PALETTE[key].accent;
-    return `<div class="print-key-item">
-      <span class="print-key-dot" style="background:${color}"></span>
-      <span><strong>${meta.symbol} ${meta.label}</strong> — ${meta.desc}</span>
-    </div>`;
-  }).join("");
-
-  const cards = words.map(w => {
-    const pos = WORD_POS[w];
-    const pal = M_PALETTE[pos];
-    const meta = M_META[pos];
-    const num = WORDS.indexOf(w) + 1;
-    return `<div class="print-card" style="border-color:${pal.accent}">
-      <div class="print-card-bar" style="background:${pal.accent}"></div>
-      <span class="print-card-num" style="color:${pal.accent}">#${String(num).padStart(3,"0")}</span>
-      <span class="print-card-pos" style="color:${pal.accent}">${meta.symbol} ${meta.label}</span>
-      <div class="print-card-word">${w}</div>
-      <div class="print-card-sent" style="color:${pal.accent}">${SENTENCES[w]}</div>
-    </div>`;
-  });
-
-  const pages = [];
-  const perPage = 6;
-  for (let i = 0; i < cards.length; i += perPage) {
-    pages.push(`<div class="print-grid">${cards.slice(i, i + perPage).join("")}</div>`);
-  }
-
-  $printSheets.innerHTML = `
-    <div class="print-cover">
-      <h1>Sight Word Flashcards</h1>
-      <p>Montessori Grammar · ${currentFilter} · ${words.length} cards</p>
-      <p>Print on cardstock · 6 cards per sheet · Cut along borders</p>
-      <div class="print-key">${keyItems}</div>
-    </div>
-    ${pages.join("")}
-  `;
-}
-$printBtn.addEventListener("click", () => {
-  buildPrintSheets();
-  setTimeout(() => window.print(), 50);
-});
-
-let legendOpen = false;
-$legendToggle.addEventListener("click", () => {
-  legendOpen = !legendOpen;
-  $legend.className = "legend" + (legendOpen ? " open" : "");
-  $legendToggle.textContent = (legendOpen ? "▴ Hide" : "▾ Show") + " Color Key";
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === " " || e.key === "Enter") { e.preventDefault(); flipCard(); }
-  if (e.key === "ArrowRight" || e.key === "k") markKnown();
-  if (e.key === "ArrowLeft" || e.key === "s") markLearning();
-});
-
-// ===== SWIPE GESTURES (mobile) =====
-// Tap to flip, swipe right = known, swipe left = still learning.
-(function attachSwipe() {
-  let sx = 0, sy = 0, moved = false, tracking = false;
-  const SWIPE_THRESHOLD = 60;   // px to commit a swipe
-  const DRAG_MAX = 140;         // px where opacity reaches 0
-
-  function activeCard() { return document.getElementById("theCard"); }
-
-  $cardArea.addEventListener("touchstart", (e) => {
-    const card = activeCard();
-    if (!card || animating) return;
-    const t = e.touches[0];
-    sx = t.clientX; sy = t.clientY;
-    moved = false; tracking = true;
-    card.style.transition = "none";
-  }, { passive: true });
-
-  $cardArea.addEventListener("touchmove", (e) => {
-    if (!tracking) return;
-    const t = e.touches[0];
-    const dx = t.clientX - sx, dy = t.clientY - sy;
-    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) moved = true;
-    const card = activeCard();
-    if (!card) return;
-    // Only hijack horizontal drags — let vertical scroll pass through.
-    if (Math.abs(dx) > Math.abs(dy)) {
-      const o = Math.max(0.35, 1 - Math.abs(dx) / DRAG_MAX);
-      const rot = dx / 30;
-      card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
-      card.style.opacity = o;
-    }
-  }, { passive: true });
-
-  $cardArea.addEventListener("touchend", (e) => {
-    if (!tracking) return;
-    tracking = false;
-    const card = activeCard();
-    const t = e.changedTouches[0];
-    const dx = t.clientX - sx, dy = t.clientY - sy;
-    const horizontal = Math.abs(dx) > Math.abs(dy);
-
-    if (card) {
-      card.style.transition = "transform 0.2s ease, opacity 0.2s ease";
-      card.style.transform = "";
-      card.style.opacity = "";
-    }
-
-    if (moved && horizontal && Math.abs(dx) > SWIPE_THRESHOLD) {
-      if (dx > 0) markKnown(); else markLearning();
-    } else if (!moved) {
-      // Treat as a tap → flip. The click handler will also fire; guard it.
-      swipeTapHandled = true;
-      flipCard();
-    }
-  });
-
-  $cardArea.addEventListener("touchcancel", () => {
-    tracking = false;
-    const card = activeCard();
-    if (card) {
-      card.style.transition = "transform 0.2s ease, opacity 0.2s ease";
-      card.style.transform = "";
-      card.style.opacity = "";
-    }
-  });
-})();
-
-// Suppress the synthetic click after a touch-tap so we don't double-flip.
-let swipeTapHandled = false;
-document.addEventListener("click", (e) => {
-  if (swipeTapHandled && e.target.closest("#theCard")) {
-    swipeTapHandled = false;
-    e.stopPropagation();
-    e.preventDefault();
-  }
-}, true);
-
-// ===== THEME TOGGLE — site-wide via 'rtn-theme' key =====
-(function initTheme(){
-  const KEY = 'rtn-theme';
-  const root = document.documentElement;
-  const btn = document.getElementById('themeToggle');
-  const icon = btn ? btn.querySelector('.theme-icon') : null;
-  // Default to light; only switch to dark if the user has explicitly chosen it.
-  let saved = null;
-  try { saved = localStorage.getItem(KEY); } catch(e) {}
-  const initial = saved === 'dark' ? 'dark' : 'light';
-  root.setAttribute('data-theme', initial);
-  const render = () => {
-    const t = root.getAttribute('data-theme');
-    if (icon) icon.textContent = t === 'dark' ? '☀' : '☾';
-    if (btn) btn.title = t === 'dark' ? 'Switch to light' : 'Switch to dark';
-  };
-  render();
-  if (btn) btn.addEventListener('click', () => {
-    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    try { localStorage.setItem(KEY, next); } catch(e) {}
-    render();
-  });
-})();
-
-// ===== INIT =====
-buildLegend();
-initDeck();
-</script>
+    // Mount
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<SessionBuilder />);
+  </script>
 </body>
 </html>
