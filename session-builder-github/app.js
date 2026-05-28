@@ -178,9 +178,9 @@ function doPrint() {
   h += '.meta strong{color:#28283A;font-weight:600;margin-right:3px}.meta span{color:#555}';
   h += '.cmp{border:1px solid #E8E4DF;border-radius:10px;margin-bottom:8px;page-break-inside:avoid;overflow:hidden;position:relative;padding-left:6px}';
   h += '.cmp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}';
-  h += '.cmp.s::before{background:#8B6FBF}';
-  h += '.cmp.w::before{background:#C28460}';
-  h += '.cmp.t::before{background:#4E7FB8}';
+  h += '.cmp.s::before{background:#1A6490}';
+  h += '.cmp.w::before{background:#2B8C7E}';
+  h += '.cmp.t::before{background:#0E3B7E}';
   h += '.ch{padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}';
   h += '.ch h3{font-family:"Fraunces",Georgia,serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}';
   h += '.ch .n{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:10.5px;background:#fff;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}';
@@ -392,7 +392,7 @@ function render() {
     S.sel.forEach(function(id) { allC += (S.data[id] && S.data[id].correct) || 0; allI += (S.data[id] && S.data[id].incorrect) || 0; });
     var allT = allC + allI;
     if (allT > 0) {
-      h += '<div class="card" style="padding:18px;margin-bottom:14px;background:linear-gradient(135deg,#f8f6ff,#f0f8f6)">';
+      h += '<div class="card" style="padding:18px;margin-bottom:14px;background:linear-gradient(135deg,rgba(14,59,126,0.06),rgba(93,174,94,0.06))">';
       h += '<div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap">';
       h += '<div style="text-align:center"><div class="fh" style="font-size:34px;font-weight:700;line-height:1">' + Math.round((allC / allT) * 100) + '%</div><div style="font-size:10px;color:var(--mu);margin-top:1px">Overall</div></div>';
       h += '<div style="width:1px;height:36px;background:var(--bd)"></div>';

@@ -63,7 +63,7 @@ var LEVELS = [
   { id: "text",  label: "Text Level",  icon: "📖", desc: "Sentences, passages, fluency, comprehension" }
 ];
 var ACT_MODES = [
-  { id: "decoding", label: "Decoding", icon: "🔊", desc: "Read / say / blend", color: "#8a6cb8", soft: "rgba(138,108,184,0.10)" },
+  { id: "decoding", label: "Decoding", icon: "🔊", desc: "Read / say / blend", color: "#0E3B7E", soft: "rgba(26,100,144,0.10)" },
   { id: "encoding", label: "Encoding", icon: "✍️", desc: "Spell / write / segment", color: "#c28460", soft: "rgba(194,132,96,0.10)" }
 ];
 
@@ -305,13 +305,13 @@ function doPrint() {
   h += 'body{font-family:"DM Sans",Helvetica,Arial,sans-serif;font-size:11px;color:#28283A;padding:22px 24px;line-height:1.5;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}';
   h += '.title{font-family:"DM Sans",system-ui,sans-serif;font-size:23px;font-weight:700;letter-spacing:-.01em;color:#28283A;line-height:1.1}';
   h += '.sub{font-family:"DM Sans",system-ui,sans-serif;font-style:italic;font-size:12px;color:#7A7A8E;margin-top:2px}';
-  h += '.meta{font-size:10.5px;margin:12px 0 14px;padding:9px 14px;background:linear-gradient(135deg,#efe8f6,#e8f6ed);border-radius:10px;display:flex;flex-wrap:wrap;gap:4px 18px}';
+  h += '.meta{font-size:10.5px;margin:12px 0 14px;padding:9px 14px;background:linear-gradient(135deg,rgba(14,59,126,0.06),rgba(93,174,94,0.06));border-radius:10px;display:flex;flex-wrap:wrap;gap:4px 18px}';
   h += '.meta strong{color:#28283A;font-weight:600;margin-right:3px}.meta span{color:#555}';
   h += '.cmp{border:1px solid #E8E4DF;border-radius:10px;margin-bottom:8px;page-break-inside:avoid;overflow:hidden;position:relative;padding-left:6px}';
   h += '.cmp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}';
-  h += '.cmp.s::before{background:#b8a0d8}';
-  h += '.cmp.w::before{background:#8dd4b0}';
-  h += '.cmp.t::before{background:#f4b5c5}';
+  h += '.cmp.s::before{background:#1A6490}';
+  h += '.cmp.w::before{background:#2B8C7E}';
+  h += '.cmp.t::before{background:#0E3B7E}';
   h += '.ch{padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}';
   h += '.ch h3{font-family:"DM Sans",system-ui,sans-serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:#28283A}';
   h += '.ch .n{font-family:"DM Sans",system-ui,sans-serif;font-weight:700;font-size:10.5px;background:#fff;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}';
@@ -366,9 +366,9 @@ function doPrint() {
     if (A.materials) h += '<div class="info"><span class="k">Materials</span>' + esc(A.materials) + '</div>';
 
     // GRR blocks — always print them (blank if empty), since this is the whole point of Activity mode
-    h += '<div class="info" style="margin-top:8px;padding:7px 10px;background:#efe8f6;border-left:4px solid #b8a0d8;border-radius:0 6px 6px 0"><span class="k" style="color:#7a5ea8">' + '🧑‍🏫' + ' I Do</span>' + ((A.iDo || '').trim() ? esc(A.iDo) : '___________________________________') + '</div>';
-    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#e8f6ed;border-left:4px solid #8dd4b0;border-radius:0 6px 6px 0"><span class="k" style="color:#3a8a60">🤝 We Do</span>' + ((A.weDo || '').trim() ? esc(A.weDo) : '___________________________________') + '</div>';
-    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#faeaee;border-left:4px solid #f4b5c5;border-radius:0 6px 6px 0"><span class="k" style="color:#a05068">🎓 You Do</span>' + ((A.youDo || '').trim() ? esc(A.youDo) : '___________________________________') + '</div>';
+    h += '<div class="info" style="margin-top:8px;padding:7px 10px;background:#efe8f6;border-left:4px solid #0E3B7E;border-radius:0 6px 6px 0"><span class="k" style="color:#0E3B7E">' + '🧑‍🏫' + ' I Do</span>' + ((A.iDo || '').trim() ? esc(A.iDo) : '___________________________________') + '</div>';
+    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#e8f6ed;border-left:4px solid #2B8C7E;border-radius:0 6px 6px 0"><span class="k" style="color:#2B8C7E">🤝 We Do</span>' + ((A.weDo || '').trim() ? esc(A.weDo) : '___________________________________') + '</div>';
+    h += '<div class="info" style="margin-top:5px;padding:7px 10px;background:#faeaee;border-left:4px solid #FACCFA;border-radius:0 6px 6px 0"><span class="k" style="color:#5DAE5E">🎓 You Do</span>' + ((A.youDo || '').trim() ? esc(A.youDo) : '___________________________________') + '</div>';
 
     if (A.cue) h += '<div class="info" style="margin-top:6px"><span class="k">Cue</span>' + esc(A.cue) + '</div>';
     if (A.notes) h += '<div class="info"><span class="k">Notes</span><em>' + esc(A.notes) + '</em></div>';
@@ -435,7 +435,7 @@ function render() {
     // Big Fraunces heading with rainbow underline
     h += '<h1 style="font-family:\'DM Sans\',system-ui,sans-serif;font-size:clamp(34px,5.5vw,48px);font-weight:500;letter-spacing:-0.015em;line-height:1.08;color:var(--tx);margin-bottom:14px;position:relative;display:inline-block;padding-bottom:10px">';
     h += 'Session Builder';
-    h += '<span style="position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:2px;background:linear-gradient(90deg, #8dd4b0 0%, #b8a0d8 50%, #f4b5c5 100%);opacity:0.78"></span>';
+    h += '<span style="position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:2px;background:linear-gradient(90deg, #1A6490 0%, #5DAE5E 50%, #FACCFA 100%);opacity:0.78"></span>';
     h += '</h1>';
 
     // Lede
@@ -448,40 +448,40 @@ function render() {
 
     // Card 1: Activity (mint)
     h += '<button onclick="setMode(\'activity\')" style="padding:24px 22px;border-radius:18px;border:1px solid var(--bd);background:var(--card);cursor:pointer;text-align:left;transition:transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;font-family:inherit"';
-    h += ' onmouseenter="this.style.borderColor=\'#8dd4b0\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)\'"';
+    h += ' onmouseenter="this.style.borderColor=\'#5DAE5E\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)\'"';
     h += ' onmouseleave="this.style.borderColor=\'var(--bd)\';this.style.transform=\'translateY(0)\';this.style.boxShadow=\'none\'">';
     h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#1e2b22' : '#e8f6ed') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'DM Sans\',system-ui,sans-serif;font-weight:600;font-size:14px;color:#4f9c74">A</span>';
+    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#1e2b22' : 'rgba(93,174,94,0.10)') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'DM Sans\',system-ui,sans-serif;font-weight:600;font-size:14px;color:#5DAE5E">A</span>';
     h += '<span style="font-family:\'DM Sans\',system-ui,sans-serif;font-weight:500;font-size:19px;color:var(--tx);letter-spacing:-0.005em">Plan an Activity</span>';
     h += '</div>';
     h += '<ul style="list-style:none;margin:0;padding:0;color:var(--mu);font-size:13.5px;line-height:1.7">';
     ['Focus on one skill','I Do → We Do → You Do','Single-target data collection'].forEach(function(line){
       h += '<li style="padding-left:14px;position:relative">';
-      h += '<span style="position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:#8dd4b0"></span>';
+      h += '<span style="position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:#5DAE5E"></span>';
       h += line;
       h += '</li>';
     });
     h += '</ul>';
-    h += '<div style="margin-top:14px;font-family:\'DM Sans\',system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#4f9c74">Begin →</div>';
+    h += '<div style="margin-top:14px;font-family:\'DM Sans\',system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#5DAE5E">Begin →</div>';
     h += '</button>';
 
     // Card 2: Session (lavender)
     h += '<button onclick="setMode(\'session\')" style="padding:24px 22px;border-radius:18px;border:1px solid var(--bd);background:var(--card);cursor:pointer;text-align:left;transition:transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;font-family:inherit"';
-    h += ' onmouseenter="this.style.borderColor=\'#b8a0d8\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)\'"';
+    h += ' onmouseenter="this.style.borderColor=\'#1A6490\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 2px 4px rgba(40,36,32,0.04), 0 8px 24px rgba(40,36,32,0.06)\'"';
     h += ' onmouseleave="this.style.borderColor=\'var(--bd)\';this.style.transform=\'translateY(0)\';this.style.boxShadow=\'none\'">';
     h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#261e30' : '#efe8f6') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'DM Sans\',system-ui,sans-serif;font-weight:600;font-size:14px;color:#7a5ea8">S</span>';
+    h += '<span style="width:28px;height:28px;border-radius:8px;background:' + (S.dark ? '#1a2530' : 'rgba(26,100,144,0.10)') + ';display:inline-flex;align-items:center;justify-content:center;font-family:\'DM Sans\',system-ui,sans-serif;font-weight:600;font-size:14px;color:#1A6490">S</span>';
     h += '<span style="font-family:\'DM Sans\',system-ui,sans-serif;font-weight:500;font-size:19px;color:var(--tx);letter-spacing:-0.005em">Plan a Full Session</span>';
     h += '</div>';
     h += '<ul style="list-style:none;margin:0;padding:0;color:var(--mu);font-size:13.5px;line-height:1.7">';
     ['Multiple components','Full structured literacy','Multi-skill data collection'].forEach(function(line){
       h += '<li style="padding-left:14px;position:relative">';
-      h += '<span style="position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:#b8a0d8"></span>';
+      h += '<span style="position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:#1A6490"></span>';
       h += line;
       h += '</li>';
     });
     h += '</ul>';
-    h += '<div style="margin-top:14px;font-family:\'DM Sans\',system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#7a5ea8">Begin →</div>';
+    h += '<div style="margin-top:14px;font-family:\'DM Sans\',system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#0E3B7E">Begin →</div>';
     h += '</button>';
 
     h += '</div>';
@@ -552,7 +552,7 @@ function render() {
       h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
       LEVELS.forEach(function(l) {
         var sel = A.level === l.id;
-        h += '<button onclick="actUpdR(\'level\',\'' + l.id + '\')" style="padding:18px 12px;border-radius:14px;border:' + (sel ? '3px solid var(--ac)' : '2px solid var(--bd)') + ';background:' + (sel ? 'rgba(138,108,184,0.10)' : 'var(--card)') + ';cursor:pointer;text-align:center;font-family:var(--ff);transition:all 0.15s">';
+        h += '<button onclick="actUpdR(\'level\',\'' + l.id + '\')" style="padding:18px 12px;border-radius:14px;border:' + (sel ? '3px solid var(--ac)' : '2px solid var(--bd)') + ';background:' + (sel ? 'rgba(26,100,144,0.10)' : 'var(--card)') + ';cursor:pointer;text-align:center;font-family:var(--ff);transition:all 0.15s">';
         h += '<div style="font-size:32px;margin-bottom:4px">' + l.icon + '</div>';
         h += '<div class="fh" style="font-weight:700;font-size:14px;color:' + (sel ? 'var(--ac)' : 'var(--tx)') + '">' + l.label + '</div>';
         h += '<div style="font-size:10px;color:var(--mu);margin-top:3px;line-height:1.4">' + l.desc + '</div>';
@@ -595,28 +595,28 @@ function render() {
       h += '<div style="display:flex;flex-direction:column;gap:14px">';
 
       // I DO (bigger, more visual)
-      h += '<div style="border-radius:14px;border:2px solid #8a6cb8;background:rgba(138,108,184,0.06);padding:14px 16px">';
+      h += '<div style="border-radius:14px;border:2px solid #0E3B7E;background:rgba(14,59,126,0.06);padding:14px 16px">';
       h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
-      h += '<div style="width:44px;height:44px;border-radius:12px;background:#8a6cb8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🧑‍🏫</div>';
-      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#7a5ea8">I DO</div>';
+      h += '<div style="width:44px;height:44px;border-radius:12px;background:#0E3B7E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🧑‍🏫</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#0E3B7E">I DO</div>';
       h += '<div style="font-size:11px;color:var(--mu)">Teacher models, thinks aloud, demonstrates</div></div></div>';
       h += '<textarea class="ta" rows="4" oninput="actUpd(\'iDo\',this.value)" placeholder="How will you explicitly model this skill? Script your teacher talk. Narrate your thinking. Example: \'Watch me. I see the letters s-a-t. I know /s/, /a/, /t/. I blend: sss-aaa-ttt → sat.\'" style="font-size:14px;background:var(--bg)">' + esc(A.iDo || '') + '</textarea>';
       h += '</div>';
 
       // WE DO
-      h += '<div style="border-radius:14px;border:2px solid #4e7fb8;background:rgba(78,127,184,0.06);padding:14px 16px">';
+      h += '<div style="border-radius:14px;border:2px solid #2B8C7E;background:rgba(43,140,126,0.06);padding:14px 16px">';
       h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
-      h += '<div style="width:44px;height:44px;border-radius:12px;background:#4e7fb8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🤝</div>';
-      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#3a8a60">WE DO</div>';
+      h += '<div style="width:44px;height:44px;border-radius:12px;background:#2B8C7E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🤝</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#2B8C7E">WE DO</div>';
       h += '<div style="font-size:11px;color:var(--mu)">Guided practice together — you scaffold with cues</div></div></div>';
       h += '<textarea class="ta" rows="4" oninput="actUpd(\'weDo\',this.value)" placeholder="How will you practice together? What scaffolds/cues will you use? Example: \'We try the next three words together. I\'ll point to each letter — you tell me the sound. If stuck, I\'ll give a verbal prompt, then a model.\'" style="font-size:14px;background:var(--bg)">' + esc(A.weDo || '') + '</textarea>';
       h += '</div>';
 
       // YOU DO
-      h += '<div style="border-radius:14px;border:2px solid #27ae60;background:rgba(39,174,96,0.06);padding:14px 16px">';
+      h += '<div style="border-radius:14px;border:2px solid #5DAE5E;background:rgba(93,174,94,0.06);padding:14px 16px">';
       h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
-      h += '<div style="width:44px;height:44px;border-radius:12px;background:#27ae60;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎓</div>';
-      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#a05068">YOU DO</div>';
+      h += '<div style="width:44px;height:44px;border-radius:12px;background:#5DAE5E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎓</div>';
+      h += '<div><div class="fh" style="font-weight:700;font-size:15px;color:#5DAE5E">YOU DO</div>';
       h += '<div style="font-size:11px;color:var(--mu)">Independent application — where you collect data</div></div></div>';
       h += '<textarea class="ta" rows="4" oninput="actUpd(\'youDo\',this.value)" placeholder="How will the student apply this independently? What will you watch for? Example: \'Student reads 10 unseen CVC words aloud. I mark correct/incorrect per word. Target ≥ 80% accuracy before next step.\'" style="font-size:14px;background:var(--bg)">' + esc(A.youDo || '') + '</textarea>';
       h += '</div>';
@@ -717,9 +717,9 @@ function render() {
         h += '<section class="card" style="padding:12px 14px;margin-bottom:12px">';
         h += '<div style="font-size:10px;color:var(--mu);font-family:\'DM Sans\',system-ui,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Activity Flow · Gradual Release</div>';
         h += '<div style="display:flex;flex-direction:column;gap:6px">';
-        if ((A.iDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #b8a0d8;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#7a5ea8;font-size:10px;letter-spacing:1px">🧑‍🏫 I DO</span> · ' + esc(A.iDo) + '</div>';
-        if ((A.weDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #8dd4b0;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#3a8a60;font-size:10px;letter-spacing:1px">🤝 WE DO</span> · ' + esc(A.weDo) + '</div>';
-        if ((A.youDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #f4b5c5;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#a05068;font-size:10px;letter-spacing:1px">🎓 YOU DO</span> · ' + esc(A.youDo) + '</div>';
+        if ((A.iDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #0E3B7E;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#0E3B7E;font-size:10px;letter-spacing:1px">🧑‍🏫 I DO</span> · ' + esc(A.iDo) + '</div>';
+        if ((A.weDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #2B8C7E;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#2B8C7E;font-size:10px;letter-spacing:1px">🤝 WE DO</span> · ' + esc(A.weDo) + '</div>';
+        if ((A.youDo || '').trim()) h += '<div style="font-size:12px;border-left:3px solid #FACCFA;padding:3px 10px;line-height:1.45"><span style="font-weight:700;color:#5DAE5E;font-size:10px;letter-spacing:1px">🎓 YOU DO</span> · ' + esc(A.youDo) + '</div>';
         h += '</div></section>';
       }
 
@@ -831,7 +831,7 @@ function render() {
     }
     var allT = allC + allI;
     if (allT > 0) {
-      h += '<div class="card" style="padding:18px;margin-bottom:14px;background:linear-gradient(135deg,#f8f6ff,#f0f8f6)">';
+      h += '<div class="card" style="padding:18px;margin-bottom:14px;background:linear-gradient(135deg,rgba(14,59,126,0.06),rgba(93,174,94,0.06))">';
       h += '<div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap">';
       h += '<div style="text-align:center"><div class="fh" style="font-size:34px;font-weight:700;line-height:1">' + Math.round((allC / allT) * 100) + '%</div><div style="font-size:10px;color:var(--mu);margin-top:1px">Overall</div></div>';
       h += '<div style="width:1px;height:36px;background:var(--bd)"></div>';
@@ -875,18 +875,18 @@ function render() {
         h += '</div>';
         h += '<div style="display:flex;flex-direction:column;gap:8px">';
         if ((sA.iDo || '').trim()) {
-          h += '<div style="border-left:4px solid #8a6cb8;padding:8px 12px;background:rgba(138,108,184,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#7a5ea8;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🧑‍🏫 I DO</div>';
+          h += '<div style="border-left:4px solid #0E3B7E;padding:8px 12px;background:rgba(14,59,126,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#0E3B7E;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🧑‍🏫 I DO</div>';
           h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.iDo) + '</div></div>';
         }
         if ((sA.weDo || '').trim()) {
-          h += '<div style="border-left:4px solid #4e7fb8;padding:8px 12px;background:rgba(78,127,184,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#3a8a60;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🤝 WE DO</div>';
+          h += '<div style="border-left:4px solid #2B8C7E;padding:8px 12px;background:rgba(43,140,126,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#2B8C7E;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🤝 WE DO</div>';
           h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.weDo) + '</div></div>';
         }
         if ((sA.youDo || '').trim()) {
-          h += '<div style="border-left:4px solid #27ae60;padding:8px 12px;background:rgba(39,174,96,0.06);border-radius:0 8px 8px 0">';
-          h += '<div style="font-weight:700;color:#a05068;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🎓 YOU DO</div>';
+          h += '<div style="border-left:4px solid #5DAE5E;padding:8px 12px;background:rgba(93,174,94,0.06);border-radius:0 8px 8px 0">';
+          h += '<div style="font-weight:700;color:#5DAE5E;font-size:10px;letter-spacing:1.5px;margin-bottom:3px">🎓 YOU DO</div>';
           h += '<div style="font-size:12px;line-height:1.5;color:var(--tx)">' + esc(sA.youDo) + '</div></div>';
         }
         h += '</div>';
